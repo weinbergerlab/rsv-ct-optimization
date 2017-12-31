@@ -1,2 +1,6 @@
 **/.texpadtmp
 /ct rsv time series.csv
+.RData
+.Rhistory
+*.nb.html
+
