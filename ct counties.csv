@@ -1,0 +1,428 @@
+zip,county
+06001,Hartford
+06002,Hartford
+06006,Hartford
+06010,Hartford
+06011,Hartford
+06013,Hartford
+06016,Hartford
+06018,Litchfield
+06019,Hartford
+06020,Hartford
+06021,Litchfield
+06022,Hartford
+06023,Hartford
+06024,Litchfield
+06025,Hartford
+06026,Hartford
+06027,Hartford
+06028,Hartford
+06029,Tolland
+06030,Hartford
+06031,Litchfield
+06032,Hartford
+06033,Hartford
+06034,Hartford
+06035,Hartford
+06037,Hartford
+06039,Litchfield
+06040,Hartford
+06041,Hartford
+06042,Hartford
+06043,Tolland
+06045,Hartford
+06050,Hartford
+06051,Hartford
+06052,Hartford
+06053,Hartford
+06057,Litchfield
+06058,Litchfield
+06059,Hartford
+06060,Hartford
+06061,Litchfield
+06062,Hartford
+06063,Litchfield
+06064,Hartford
+06065,Litchfield
+06066,Tolland
+06067,Hartford
+06068,Litchfield
+06069,Litchfield
+06070,Hartford
+06071,Tolland
+06072,Tolland
+06073,Hartford
+06074,Hartford
+06075,Tolland
+06076,Tolland
+06077,Tolland
+06078,Hartford
+06079,Litchfield
+06080,Hartford
+06081,Hartford
+06082,Hartford
+06083,Hartford
+06084,Tolland
+06085,Hartford
+06087,Hartford
+06088,Hartford
+06089,Hartford
+06090,Hartford
+06091,Hartford
+06092,Hartford
+06093,Hartford
+06094,Litchfield
+06095,Hartford
+06096,Hartford
+06098,Litchfield
+06101,Hartford
+06102,Hartford
+06103,Hartford
+06104,Hartford
+06105,Hartford
+06106,Hartford
+06107,Hartford
+06108,Hartford
+06109,Hartford
+06110,Hartford
+06111,Hartford
+06112,Hartford
+06114,Hartford
+06115,Hartford
+06117,Hartford
+06118,Hartford
+06119,Hartford
+06120,Hartford
+06123,Hartford
+06126,Hartford
+06127,Hartford
+06128,Hartford
+06129,Hartford
+06131,Hartford
+06132,Hartford
+06133,Hartford
+06134,Hartford
+06137,Hartford
+06138,Hartford
+06140,Hartford
+06141,Hartford
+06142,Hartford
+06143,Hartford
+06144,Hartford
+06145,Hartford
+06146,Hartford
+06147,Hartford
+06150,Hartford
+06151,Hartford
+06152,Hartford
+06153,Hartford
+06154,Hartford
+06155,Hartford
+06156,Hartford
+06160,Hartford
+06161,Hartford
+06167,Hartford
+06176,Hartford
+06180,Hartford
+06183,Hartford
+06199,Hartford
+06226,Windham
+06230,Windham
+06231,Tolland
+06232,Tolland
+06233,Windham
+06234,Windham
+06235,Windham
+06237,Tolland
+06238,Tolland
+06239,Windham
+06241,Windham
+06242,Windham
+06243,Windham
+06244,Windham
+06245,Windham
+06246,Windham
+06247,Windham
+06248,Tolland
+06249,New London
+06250,Tolland
+06251,Tolland
+06254,New London
+06255,Windham
+06256,Windham
+06258,Windham
+06259,Windham
+06260,Windham
+06262,Windham
+06263,Windham
+06264,Windham
+06265,Tolland
+06266,Windham
+06267,Windham
+06268,Tolland
+06269,Tolland
+06277,Windham
+06278,Windham
+06279,Tolland
+06280,Windham
+06281,Windham
+06282,Windham
+06320,New London
+06330,New London
+06331,Windham
+06332,Windham
+06333,New London
+06334,New London
+06335,New London
+06336,New London
+06338,New London
+06339,New London
+06340,New London
+06349,New London
+06350,New London
+06351,New London
+06353,New London
+06354,Windham
+06355,New London
+06357,New London
+06359,New London
+06360,New London
+06365,New London
+06370,New London
+06371,New London
+06372,New London
+06373,Windham
+06374,Windham
+06375,New London
+06376,New London
+06377,Windham
+06378,New London
+06379,New London
+06380,New London
+06382,New London
+06383,New London
+06384,New London
+06385,New London
+06387,Windham
+06388,New London
+06389,New London
+06401,New Haven
+06403,New Haven
+06404,Fairfield
+06405,New Haven
+06408,New Haven
+06409,Middlesex
+06410,New Haven
+06411,New Haven
+06412,Middlesex
+06413,Middlesex
+06414,Middlesex
+06415,New London
+06416,Middlesex
+06417,Middlesex
+06418,New Haven
+06419,Middlesex
+06420,New London
+06422,Middlesex
+06423,Middlesex
+06424,Middlesex
+06426,Middlesex
+06437,New Haven
+06438,Middlesex
+06439,New London
+06440,Fairfield
+06441,Middlesex
+06442,Middlesex
+06443,New Haven
+06444,Hartford
+06447,Hartford
+06450,New Haven
+06451,New Haven
+06455,Middlesex
+06456,Middlesex
+06457,Middlesex
+06459,Middlesex
+06460,New Haven
+06461,New Haven
+06467,Hartford
+06468,Fairfield
+06469,Middlesex
+06470,Fairfield
+06471,New Haven
+06472,New Haven
+06473,New Haven
+06474,New London
+06475,Middlesex
+06477,New Haven
+06478,New Haven
+06479,Hartford
+06480,Middlesex
+06481,Middlesex
+06482,Fairfield
+06483,New Haven
+06484,Fairfield
+06487,New Haven
+06488,New Haven
+06489,Hartford
+06491,Fairfield
+06492,New Haven
+06493,New Haven
+06494,New Haven
+06495,New Haven
+06498,Middlesex
+06501,New Haven
+06502,New Haven
+06503,New Haven
+06504,New Haven
+06505,New Haven
+06506,New Haven
+06507,New Haven
+06508,New Haven
+06509,New Haven
+06510,New Haven
+06511,New Haven
+06512,New Haven
+06513,New Haven
+06514,New Haven
+06515,New Haven
+06516,New Haven
+06517,New Haven
+06518,New Haven
+06519,New Haven
+06520,New Haven
+06521,New Haven
+06524,New Haven
+06525,New Haven
+06530,New Haven
+06531,New Haven
+06532,New Haven
+06533,New Haven
+06534,New Haven
+06535,New Haven
+06536,New Haven
+06537,New Haven
+06538,New Haven
+06540,New Haven
+06601,Fairfield
+06602,Fairfield
+06604,Fairfield
+06605,Fairfield
+06606,Fairfield
+06607,Fairfield
+06608,Fairfield
+06610,Fairfield
+06611,Fairfield
+06612,Fairfield
+06614,Fairfield
+06615,Fairfield
+06673,Fairfield
+06699,Fairfield
+06701,New Haven
+06702,New Haven
+06703,New Haven
+06704,New Haven
+06705,New Haven
+06706,New Haven
+06708,New Haven
+06710,New Haven
+06712,New Haven
+06716,New Haven
+06720,New Haven
+06721,New Haven
+06722,New Haven
+06723,New Haven
+06724,New Haven
+06725,New Haven
+06726,New Haven
+06749,New Haven
+06750,Litchfield
+06751,Litchfield
+06752,Litchfield
+06753,Litchfield
+06754,Litchfield
+06755,Litchfield
+06756,Litchfield
+06757,Litchfield
+06758,Litchfield
+06759,Litchfield
+06762,New Haven
+06763,Litchfield
+06770,New Haven
+06776,Litchfield
+06777,Litchfield
+06778,Litchfield
+06779,Litchfield
+06781,Litchfield
+06782,Litchfield
+06783,Litchfield
+06784,Fairfield
+06785,Litchfield
+06786,Litchfield
+06787,Litchfield
+06790,Litchfield
+06791,Litchfield
+06792,Litchfield
+06793,Litchfield
+06794,Litchfield
+06795,Litchfield
+06796,Litchfield
+06798,Litchfield
+06801,Fairfield
+06804,Fairfield
+06807,Fairfield
+06810,Fairfield
+06811,Fairfield
+06812,Fairfield
+06813,Fairfield
+06814,Fairfield
+06816,Fairfield
+06817,Fairfield
+06820,Fairfield
+06824,Fairfield
+06825,Fairfield
+06828,Fairfield
+06829,Fairfield
+06830,Fairfield
+06831,Fairfield
+06836,Fairfield
+06838,Fairfield
+06840,Fairfield
+06850,Fairfield
+06851,Fairfield
+06852,Fairfield
+06853,Fairfield
+06854,Fairfield
+06855,Fairfield
+06856,Fairfield
+06857,Fairfield
+06858,Fairfield
+06860,Fairfield
+06870,Fairfield
+06875,Fairfield
+06876,Fairfield
+06877,Fairfield
+06878,Fairfield
+06879,Fairfield
+06880,Fairfield
+06881,Fairfield
+06883,Fairfield
+06888,Fairfield
+06889,Fairfield
+06890,Fairfield
+06896,Fairfield
+06897,Fairfield
+06901,Fairfield
+06902,Fairfield
+06903,Fairfield
+06904,Fairfield
+06905,Fairfield
+06906,Fairfield
+06907,Fairfield
+06910,Fairfield
+06911,Fairfield
+06912,Fairfield
+06913,Fairfield
+06914,Fairfield
+06921,Fairfield
+06926,Fairfield
+06927,Fairfield
