@@ -1,0 +1,3 @@
+[submodule "Analysis/outbreakpredict"]
+	path = Analysis/outbreakpredict
+	url = https://airbornemint@gitlab.com/airbornemint/outbreak-predict.git
