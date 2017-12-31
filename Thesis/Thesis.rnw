@@ -1,0 +1,145 @@
+\documentclass{article}
+
+\usepackage{multicol}
+
+\begin{document}
+
+\begin{abstract}
+    
+\end{abstract}    
+
+\begin{multicols}{2}
+
+\section{Introduction}
+
+\section{Methods}
+
+\subsection{Case definition}
+
+We identified ? cases of RSV in Connecticut between ? and ?, grouped by week. 
+
+The cases were identified from the hospitalization database maintained by the Office of Health Care Access (OHCA) of the Department of Public Health of the state of Connecticut, which records all hospitalizations in non-federal short-stay acute-care general hospitals in Connecticut. Hospitalizations reported to us by the OHCA were grouped by week.
+
+We defined a case of RSV to be a hospital discharge recorded in the OHCA hospitalization database meeting the following criteria:
+
+\begin{itemize}
+    \item admission (TODO: or discharge?) date was between ? and ? (inclusive)
+    \item postal code of residence listed in patient's medical record was in Connecticut\footnote{According to the R \texttt{zipcode} package version 1.0}
+    \item admission was associated with an RSV billing code\footnote{Which codes?}
+\end{itemize}
+
+\subsection{Modeling all-years RSV incidence}
+
+Under the assumption that RSV incidence follows an annual cycle, we aggregated RSV incidence by week of year from 19?? to 20?? (inclusive).
+
+Our goal was to generate a model that would allow us to sample from the distribution of (potential) RSV seasons, which in turn would enable us to estimate arbitrary characteristics of RSV seasons. 
+
+We accomplished this using a generalized additive model (GAM) with cyclic penalized cubic splines with 20 knots\footnote{Using the R \texttt{mgcv} package version 1.8-22}, via Poisson (log) link function.
+
+This type of model produces normal distribution estimates of all spline parameters. By sampling spline parameters from those normal distributions, we, in effect, sample from the distribution of splines fitting the data.
+
+As a result, we were able to estimate various characteristics of RSV seasons simply by sampling from distribution of splines fitting our data, and then --- with each sample spline corresponding to a putative RSV season --- calculating the desired characteristic of each spline. 
+
+For this, we developed a custom R package for estimation of different characteristics of infectious disease outbreaks, which we published at ?.
+
+\subsection{Spatial aggregation of RSV incidence}
+
+All-years RSV incidence was aggregated by county, as well as statewide. 
+
+Furthermore, some individual counties, with low incidence of RSV, yielded results with unimpressive statistical power. We aggregated those counties (which ones?) into a single non-contiguous region, and included that region as a separate spatial entity in our analysis.
+
+\subsection{Estimating all-years characteristics of RSV seasons}
+
+Having aggregated RSV incidence by week of year and by region, we estimated two characteristics of all-years RSV incidence in each region: season onset, defined as the time when cumulative incidence rises beyond 5\% of the total cumulative incidence; and season offset, defined as the time when cumulative incidence rises beyond 95\% of the total cumulative incidence. 
+
+To arrive at this estimate, we sampled from the RSV season distribution given by the model, and calculated onset and offset for each sampled RSV season.
+
+\subsection{Estimating coverage of prophylaxis following current guidelines}
+
+We then turned our attention to the current guidelines for RSV prophylaxis, published by the American Academy of Pediatricians, most recently revised in ???. These guidelines recommend RSV prophylaxis 6 monthly doses of ?, starting in November, for all infants below 2 (?) years of age who are at high risk of ?. 
+
+Given that high-risk infants are a small subgroup of the general population, we assumed that our model for RSV incidence based on hospitalization data is a good approximation of RSV incidence among high-risk infants. We then estimated the fraction of high-risk infants who elude protection from RSV because they are infected before receiving prophylaxis, or after protection from prophylaxis wanes.
+
+To estimate this, we began by sampling from the RSV season distribution given by the model. For each sampled RSV season, we counted every case of RSV prior to November 15th or after May 15th as having eluded protection, and calculated the fraction of those cases among all cases. 
+
+\subsection{Devising alternate all-years prophylaxis guidelines}
+
+Following this analysis, we devised four alternative prophylaxis guidelines. In all our alternative guidelines, prophylaxis consists of 6 doses of ?, and protection is assumed to last 6 months from the first dose.
+
+\begin{itemize}
+    \item \textbf{Statewide onset}: Under this strategy, prophylaxis administration begins on the date of the median RSV season onset, calculated from statewide all-years data. 
+    \item \textbf{Statewide offset}: Under this strategy, prophylaxis administration ends on the date of the median RSV season offset, calculated from statewide all-years data. 
+    \item \textbf{Regional onset}: Under this strategy, prophylaxis administration begins on the date of the median RSV season onset, calculated from regional\footnote{county-wide, or --- in the case of low-incidence counties --- low-incidence-region-wide} all-years data. 
+    \item \textbf{Regional offset}: Under this strategy, prophylaxis administration ends on the date of the median RSV season offset, calculated from regional all-years data. 
+\end{itemize}
+
+\subsection{Evaluating alternate prophylaxis guidelines}
+
+We evaluated each of those guidelines in the same way we evaluated the current AAP guidelines, described above. 
+
+For the two statewide alternative strategies, we estimated the number of cases eluding prophylaxis statewide, as well as in each region.
+
+For the two regional alternative strategies, we estimated the number of cases eluding prophylaxis in each region.
+
+(Should we also do a statewide analysis of regional strategies?)
+
+\subsection{Evaluating temporal variation of RSV seasonality}
+
+Our analysis thus far assumed that RSV seasons are similar year-to-year. To evaluate this assumption, we ?
+
+\subsection{Estimating sliding-window characteristics of RSV seasons}
+
+In order to reduce the potential impact of long-term variation in RSV seasons, we repeated our analysis of RSV season characteristics using a three-year sliding window. Instead of aggregating RSV incidence data across all years, we separately analyzed every series of three consecutive years.\footnote{Including overlaps.}
+
+This analysis used the same penalized spline GAM as all-year analysis, and also produced statewide and regional estimates of RSV season 5\% onset and 95\% offset.
+
+\subsection{Devising alternate sliding-window prophylaxis guidelines}
+
+This analysis naturally leads to another approach to prophylaxis guidelines, in which every year prophylaxis recommendation is based on the timing of the RSV season onset and offset from the previous years:
+
+\begin{itemize}
+    \item \textbf{Statewide sliding window onset}: Under this strategy, prophylaxis administration in a given year begins on the date of the median RSV season onset calculated from statewide data for the previous three years. 
+    \item \textbf{Statewide sliding window offset}: Under this strategy, prophylaxis administration in a given year ends on the date of the median RSV season offset, calculated from statewide data for the previous three years. 
+\end{itemize}
+
+As before, both alternate guidelines involve six monthly doses of ?. Although regional sliding-window guidelines would also be a natural extension, this analysis was not performed.
+
+\section{Results}
+
+\subsection{RSV season in Fairfield county is earlier and longer}
+
+In Fairfield county, RSV season begins ? weeks earlier (CI) and ends ? weeks later (CI) than the statewide average; overall, it lasts ? weeks longer (CI) than the statewide average. (Figure)
+
+\subsection{RSV season in low-incidence region is later and shorter}
+
+In the low-incidence region, RSV season begins ? weeks later (CI), but doesn't end later than the statewide average; overall, it lasts ? weeks shorter (CI) than the statewide average. (Figure)
+
+\subsection{AAP guidelines perform best in low-incidence region and worst in Fairfield county}
+
+Statewide, ? cases (CI) elude protection under the AAP guidelines. The AAP guidelines perform better in the low-incidence region, where only ? cases (CI) elude protection, but worse in Fairfield county, where as many as ? cases (CI) elude protection. (Figure)
+
+The cause of this is that the timing of the RSV season in the low-incidence region is better aligned with the AAP guidelines; the RSV season is centered on the prophylaxis time window, which minimizes the number of cases eluding prophylaxis. (Figure)
+
+Meanwhile, Fairfield county --- with its unusually long RSV season --- has a higher fraction of cases outside of the prophylaxis window. (Figure)
+
+\subsection{All-years alternate guidelines are superior to AAP in Hartford county, and non-inferior otherwise}
+
+The four alternate prophylaxis guidelines based on all-years data (in which prophylaxis time window is determined by statewide or regional RSV season onset or offset), when compared to the AAP guidelines, yield non-inferior results in all regions except for Hartford county.  (Figure.)
+
+In Hartford county, they yield superior results; whereas the AAP guidelines have ? cases (CI) eluding prophylaxis, alternate guidelines have fewer. (Table.)
+
+In all cases, the four different alternate guidelines are comparable to each other. 
+
+\subsection{Sliding window alternate guidelines are inferior to AAP guidelines in low-incidence region, and non-superior otherwise.}
+
+Contrariwise, the two strategies based on statewide data produced non-superior results in all regions except for the low-incidence region, where they produced inferior results. (Figure.)
+
+Due to the non-superiority of statewide sliding-window strategies, regional sliding-window strategies were not evaluated. 
+
+\section{Discussion}
+
+
+
+\end{multicols}
+
+\end{document}
