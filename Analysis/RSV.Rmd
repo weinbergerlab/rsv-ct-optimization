@@ -1,0 +1,940 @@
+---
+title: "RSV"
+output: html_notebook
+---
+
+```{r setup, include=FALSE, error=FALSE, warning=FALSE, message=FALSE}
+install.packages(c("dplyr", "zipcode", "reshape", "mgcv", "ggplot2", "gridExtra", "devtools"))
+library(devtools)
+install_github("gavinsimpson/tsgam")
+install_github("kassambara/easyGgplot2")
+install_github("airbornemint/outbreak-predict")
+
+library(reshape)
+library(plyr)
+library(dplyr)
+library(zipcode)
+library(mgcv)
+library(tsgam)
+library(ggplot2)
+library(easyGgplot2)
+library(utils)
+library(outbreakpredict)
+data(zipcode)
+set.seed(0)
+```
+
+```{r}
+rsvWeek = function(weeki) {
+  (weeki + 26) %% 52 - 26
+}
+
+dataset = read.csv("../ct rsv time series.csv", header=TRUE, colClasses=c("patzip"="character"))
+# Add week-of-year, with zero = end of June, drop first 5.5 years because of coding differences
+dataset = dataset %>%
+  mutate(weekiadj=round(dataset$weeki * 364 / 365.25), weekofyear=rsvWeek(weekiadj), year=1990 + (weekiadj + 26) %/% 52) %>%
+  filter(weeki > 5.5*52) %>%
+  filter(weeki < 22.5*52)
+# Add state based on zipcode and drop everything not in CT
+zipState = zipcode %>% select(zip, state)
+dataset = dataset %>% 
+  left_join(zipcode %>% select(zip, state), by=c("patzip"="zip")) %>% 
+  filter(state=="CT")
+# Add county based on zipcode
+countyByZip = read.csv("../ct counties.csv", header=TRUE, colClasses=c("zip"="character"))
+counties = countyByZip %>% select(county) %>% distinct()
+dataset = dataset %>% inner_join(countyByZip, by=c("patzip"="zip"))
+
+# Sort counties by total RSV
+totalRSVByCounty = dataset %>%
+  group_by(county) %>% 
+  summarize(total_rsv=sum(rsv)) %>%
+  arrange(total_rsv) %>%
+  mutate(county=factor(county, county))
+
+rsvCounties = totalRSVByCounty$county
+rsvYears = sort(unique(dataset$year))
+rsvWeekRange = sort(unique(dataset$weeki))
+rsvWeekOfYearRange = sort(unique(dataset$weekofyear))
+
+dataset = dataset %>%
+  mutate(county=factor(county, levels=levels(rsvCounties)))
+
+```
+
+```{r}
+ggplot(dataset %>% 
+         group_by(weeki) %>%
+         summarize(rsv=sum(rsv)), 
+       aes(x=weeki, y=rsv)) +
+  geom_hline(aes(yintercept = 0)) +
+  geom_line() +
+  labs(y="RSV cases/week", x="Time", title="All counties")
+
+plots = lapply(rsvCounties, function(c) {
+  ggplot(dataset %>% 
+           filter(county==c) %>%
+           group_by(weeki) %>%
+           summarize(rsv=sum(rsv)), 
+         aes(x=weeki, y=rsv)) +
+    geom_hline(aes(yintercept = 0)) +
+    geom_line() +
+    labs(y="RSV cases/week", x="Time", title=c)
+})
+
+ggplot2.multiplot(plotlist=plots, cols=4)
+
+```
+
+```{r include=FALSE}
+# Reshape counties into columns and add column for total
+rsvByCountyAndWeekOfYear = dataset %>%
+  group_by(county, weekofyear) %>%
+  summarize(rsv=sum(rsv)) %>%
+  group_by(weekofyear) %>%
+  do(rbind(., as.data.frame(.) %>%
+             summarize(county="total", weekofyear=max(weekofyear), rsv=sum(rsv))
+           ))
+
+rsvForAllCountiesByWeekOfYear = rsvByCountyAndWeekOfYear %>%
+  melt(id=c("weekofyear", "county"), measured=c("rsv")) %>%
+  cast(weekofyear ~ county + variable) %>%
+  rename_all(funs(gsub("_rsv", "", .)))
+
+maxRSVByCounty = rsvByCountyAndWeekOfYear %>%
+  group_by(county) %>% 
+  summarize(max_rsv=max(rsv))
+
+rsvRelForAllCountiesByWeekOfYear = rsvByCountyAndWeekOfYear %>%
+  inner_join(maxRSVByCounty, by="county") %>%
+  mutate(rsv_rel=rsv/max_rsv) %>%
+  select(-max_rsv, -rsv) %>%
+  melt(id=c("weekofyear", "county"), measured=c("rsv_rel")) %>%
+  cast(weekofyear ~ county + variable)
+
+allCountiesTS = rsvForAllCountiesByWeekOfYear %>%
+  arrange(weekofyear) %>%
+  select(-weekofyear) %>%
+  ts(frequency=1, start=c(-26, 1))
+
+allCountiesRelTS = rsvRelForAllCountiesByWeekOfYear %>%
+  arrange(weekofyear) %>%
+  select(-weekofyear) %>%
+  ts(frequency=1, start=c(-26, 1))
+
+plot.ts(allCountiesTS, nc=1)
+plot.ts(allCountiesRelTS, nc=1, plot.type="single", col=rainbow(8), lwd=2)
+```
+
+```{r include=FALSE}
+# Drop counties in which max # of RSV cases in a week is <100
+maxRSVByInterestingCounty = maxRSVByCounty %>% filter(max_rsv > 50)
+
+rsvForInterestingCountiesByWeekOfYear = rsvByCountyAndWeekOfYear %>%
+  inner_join(maxRSVByInterestingCounty, by="county") %>%
+  select(-max_rsv) %>%
+  melt(id=c("weekofyear", "county"), measured=c("rsv", "rsv_rel")) %>%
+  cast(weekofyear ~ county + variable)
+
+rsvRelForInterestingCountiesByWeekOfYear = rsvByCountyAndWeekOfYear %>%
+  inner_join(maxRSVByInterestingCounty, by="county") %>%
+  mutate(rsv_rel=rsv/max_rsv) %>%
+  select(-max_rsv, -rsv) %>%
+  melt(id=c("weekofyear", "county"), measured=c("rsv_rel")) %>%
+  cast(weekofyear ~ county + variable)
+
+interestingCountiesTS = rsvForInterestingCountiesByWeekOfYear %>%
+  arrange(weekofyear) %>%
+  select(-weekofyear) %>%
+  ts(frequency=1, start=c(-26, 1))
+
+interestingCountiesRelTS = rsvRelForInterestingCountiesByWeekOfYear %>%
+  arrange(weekofyear) %>%
+  select(-weekofyear) %>%
+  ts(frequency=1, start=c(-26, 1))
+
+plot.ts(interestingCountiesTS, nc=1)
+plot.ts(interestingCountiesRelTS, nc=1, plot.type="single", col=rainbow(5), lwd=2)
+```
+
+```{r}
+outbreak.calc.unprotected = function(model, params, time, strategies) {
+  # Get model predictions for given (randomized) param values
+  time = time + 0.5
+  predictors = model %>% predict(data.frame(time=time), type="lpmatrix")
+  fit = predictors %*% params
+
+  # Map spline fit back to data
+  fit = fit %>% model$family$linkinv()
+  
+  # Calculate total # of unprotected cases for each strategy
+  unprotected = as.data.frame(lapply(strategies, function(strat) {
+    sum(fit * (1 - sapply(time, strat)))
+  }))
+  
+  # Calculate total # of cases 
+  total = sum(fit)
+  
+  unprotected %>% 
+    rename_all(funs(
+      sprintf("%s.count", .)
+    )) %>%
+    cbind(
+      (unprotected / total) %>%
+        rename_all(funs(
+          sprintf("%s.frac", .)
+        ))
+    ) %>% 
+    mutate(total=total)
+}
+```
+
+```{r}
+eps = .05
+seasonThreshold = 0.025
+rsvTime = dataset$weekofyear
+modelTime = data.frame(time=seq(min(rsvTime) - 1 + eps, max(rsvTime), eps))
+
+rsvCountyGroups = data.frame(county=rsvCounties) %>%
+  mutate(
+    group.all=TRUE,
+    group.lowIncidence=county %in% c("Tolland", "Windham", "Middlesex", "Litchfield")
+  )
+
+ppxDuration = 24 # weeks
+
+evalStrategy = function(start, end, time) {
+  as.numeric((time > rsvWeek(start)) && (time < rsvWeek(end)))
+}
+
+evalOnsetStrategy = function(start, time) {
+  as.numeric((time > rsvWeek(start)) && (time < rsvWeek(start + ppxDuration)))
+}
+
+evalOffsetStrategy = function(end, time) {
+  as.numeric((time > rsvWeek(end - ppxDuration)) && (time < rsvWeek(end)))
+}
+
+
+ppxFixedStrategies = function(c=NULL) {
+  stateOnset = stateThresholds$onset.median
+  stateOffset = stateThresholds$offset.median
+  
+  if (!is.null(c)) {
+    countyOnset = (thresholdsByCounty %>% filter(county==c))$onset.median
+    countyOffset = (thresholdsByCounty %>% filter(county==c))$offset.median
+  }
+
+  list(
+    # never=function(time) { 0 },
+    # always=function(time) { 1 },
+    aap=function(time) {
+      evalOnsetStrategy(strptime("11-15", format="%m-%d")$yday / 7, time)
+    },
+    stateOnset=function(time) {
+      evalOnsetStrategy(stateOnset, time)
+    },
+    stateOffset=function(time) {
+      evalOffsetStrategy(stateOffset, time)
+    },
+    countyOnset=function(time) {
+      evalOnsetStrategy(countyOnset, time)
+    },
+    countyOffset=function(time) {
+      evalOffsetStrategy(countyOffset, time)
+    }
+  )
+}
+
+ppxSlidingStrategies = function(c=NULL, y=NULL) {
+  if (!is.null(y) && !is.null(c)) {
+    stateSlidingOnset = (stateThresholdsByWindow %>% filter(year==y))$onset.median
+    stateSlidingOffset = (stateThresholdsByWindow %>% filter(year==y))$offset.median
+  }
+
+  list(
+    stateSlidingOnset=function(time) {
+      evalOnsetStrategy(stateSlidingOnset, time)
+    },
+    stateSlidingOffset=function(time) {
+      evalOffsetStrategy(stateSlidingOffset, time)
+    }
+  )
+}
+
+slidingWindowDuration = 3 # Years
+
+```
+
+```{r}
+stateObs = dataset %>% 
+  rename(time=weekofyear) %>% 
+  group_by(time) %>% 
+  summarize(rsv=sum(rsv)) %>% 
+  mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / sum(rsv)) %>% 
+  as.data.frame() 
+
+stateModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=stateObs)
+
+statePred = stateModel %>% 
+  predict(type="response", newdata=modelTime, se.fit=TRUE)
+
+statePred = modelTime %>% 
+  cbind(data.frame(rsv.fit=statePred$fit, rsv.fit.se=statePred$se.fit)) %>%
+  cbind(stateModel %>% outbreak.predict.timeseries(modelTime, function(model, params, newdata) { outbreak.calc.cum(model, params, newdata) })) %>%
+  rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median)
+
+stateThresholds = stateModel %>%
+  outbreak.predict.scalars(
+    modelTime,
+    function(model, params, newdata) { 
+      outbreak.calc.thresholds(model, params, newdata$time, onset=seasonThreshold, offset=1 - seasonThreshold)
+    }
+  )
+
+summarizeCountyGroups = function(data) {
+  rbind(
+      as.data.frame(data) %>%
+        select(county, time, rsv), 
+      as.data.frame(data) %>%
+        filter(group.all==TRUE) %>%
+        summarize(county="all", time=max(time), rsv=sum(rsv)),
+      as.data.frame(data) %>%
+        filter(group.lowIncidence==TRUE) %>%
+        summarize(county="lowIncidence", time=max(time), rsv=sum(rsv))
+    )  
+}
+```
+
+```{r}
+stateObsByWindow = dataset %>% 
+  mutate(time=weeki) %>% 
+  group_by(time, year, weekofyear) %>% 
+  summarize(rsv=sum(rsv)) %>%
+  as.data.frame()
+
+total = data.frame(time=stateObsByWindow$time, rsv=0)
+
+for (idx in seq(1, slidingWindowDuration)) {
+  total = total %>%
+    inner_join(stateObsByWindow %>%
+                 mutate(time=time + 52 * idx) %>%
+                 select(time, rsv),
+               by="time"
+               ) %>%
+    mutate(rsv=rsv.x + rsv.y) %>%
+    select(time, rsv)
+}
+
+stateObsByWindow = stateObsByWindow %>%
+  select(-rsv) %>%
+  inner_join(total, by="time") %>%
+  group_by(year) %>%
+  mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / sum(rsv)) %>% 
+  select(-time) %>%
+  rename(time=weekofyear) %>%
+  filter(year >= min(rsvYears) + slidingWindowDuration) %>%
+  as.data.frame()
+
+rsvWindowYears = unique(stateObsByWindow$year)
+
+statePredByWindow = data.frame()
+stateThresholdsByWindow = data.frame()
+
+progress = txtProgressBar(max=length(rsvWindowYears), style=3)
+idx = 0
+
+for (y in rsvWindowYears) {
+
+  stateYearObs = stateObsByWindow %>% filter(year==y)
+  stateYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=stateYearObs)
+  
+  stateYearPred = stateYearModel %>% 
+    predict(type="response", newdata=modelTime, se.fit=TRUE)
+
+  stateYearPred = modelTime %>% 
+    cbind(data.frame(rsv.fit=stateYearPred$fit, rsv.fit.se=stateYearPred$se.fit)) %>%
+    cbind(stateYearModel %>% outbreak.predict.timeseries(modelTime, function(model, params, newdata) { outbreak.calc.cum(model, params, newdata) })) %>%
+    rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
+    mutate(year=y)
+
+  statePredByWindow = statePredByWindow %>% rbind(stateYearPred)
+
+  stateYearThresholds = stateYearModel %>%
+    outbreak.predict.scalars(
+      modelTime,
+      function(model, params, newdata) { outbreak.calc.thresholds(model, params, newdata$time, onset=seasonThreshold, offset=1 - seasonThreshold) }
+    ) %>%
+    mutate(year=y)
+
+  stateThresholdsByWindow = stateThresholdsByWindow %>% rbind(stateYearThresholds)
+
+  idx = idx + 1
+  setTxtProgressBar(progress, idx)
+}
+```
+
+```{r}
+makeStateWindowPlots = function(c, plotter) {
+  lapply(rsvWindowYears, function(y) {
+    stateYearObs = stateObsByWindow %>% filter(year==y)
+    stateYearPred = statePredByWindow %>% filter(year==y)
+    stateYearThresholds = stateThresholdsByWindow %>% filter(year==y)
+    plotter(y, stateYearObs, stateYearPred, stateYearThresholds)
+  })
+}
+
+# Plot RSV cases with model prediction 
+ggplot2.multiplot(plotlist=makeStateWindowPlots(rsvWindowYears, function(y, stateYearObs, stateYearPred, stateYearThresholds) {
+  ggplot(stateYearObs, aes(x=time)) +
+    geom_ribbon(data=stateYearPred, aes(ymin = rsv.fit - rsv.fit.se, ymax = rsv.fit + rsv.fit.se), alpha = 0.2) +
+    geom_line(data=stateYearPred, aes(y=rsv.fit)) +
+    geom_hline(aes(yintercept = 0)) +
+    geom_point(aes(y=rsv), shape=20) +
+    annotate("rect",
+             xmin=stateYearThresholds$onset.lower,
+             xmax=stateYearThresholds$onset.upper,
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect",
+             xmin=stateYearThresholds$offset.lower,
+             xmax=stateYearThresholds$offset.upper,
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV", x="Time", title=y)
+}), cols=4)
+
+# Plot RSV cumulative cases with model prediction 
+ggplot2.multiplot(plotlist=makeStateWindowPlots(rsvWindowYears, function(y, stateYearObs, stateYearPred, stateYearThresholds) {
+  ggplot(stateYearObs, aes(x=time)) +
+    geom_hline(aes(yintercept = 0)) +
+    geom_point(shape=20, aes(y=rsv.cum)) +
+    annotate("rect", 
+             xmin=stateYearThresholds$onset.lower, 
+             xmax=stateYearThresholds$onset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect", 
+             xmin=stateYearThresholds$offset.lower, 
+             xmax=stateYearThresholds$offset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV", x="Time", title=y)
+}), cols=4)
+
+# Plot RSV cumulative case % with model prediction 
+ggplot2.multiplot(plotlist=makeStateWindowPlots(rsvWindowYears, function(y, stateYearObs, stateYearPred, stateYearThresholds) {
+  ggplot(stateYearObs, aes(x=time)) +
+    geom_hline(aes(yintercept = 0)) +
+    geom_hline(aes(yintercept=seasonThreshold), color=gray(.5)) +
+    geom_hline(aes(yintercept=1 - seasonThreshold), color=gray(.5)) +
+    geom_ribbon(data=stateYearPred, aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper), alpha=0.2) +
+    geom_line(data=stateYearPred, aes(y=rsv.cum.fit)) +
+    geom_point(shape=20, aes(y=rsv.cum.frac)) +
+    annotate("rect", 
+             xmin=stateYearThresholds$onset.lower, 
+             xmax=stateYearThresholds$onset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect", 
+             xmin=stateYearThresholds$offset.lower, 
+             xmax=stateYearThresholds$offset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV", x="Time", title=y)
+}), cols=4)
+
+# Zoom in on onsets
+ggplot2.multiplot(plotlist=makeStateWindowPlots(rsvWindowYears, function(y, stateYearObs, stateYearPred, stateYearThresholds) {
+  ggplot(stateYearObs, aes(x=time)) +
+    coord_cartesian(
+      xlim=c(min(stateYearThresholds$onset.lower) - 1, max(stateYearThresholds$onset.upper) + 1),
+      ylim=c(0, 0.2)
+    ) +
+    geom_hline(aes(yintercept=0)) +
+    geom_hline(aes(yintercept=seasonThreshold), color=gray(.5)) +
+    geom_hline(aes(yintercept=1 - seasonThreshold), color=gray(.5)) +
+    geom_ribbon(data=stateYearPred, aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper), alpha=0.2) +
+    geom_line(data=stateYearPred, aes(y=rsv.cum.fit)) +
+    geom_point(shape=20, aes(y=rsv.cum.frac)) +
+    annotate("rect", 
+             xmin=stateYearThresholds$onset.lower, 
+             xmax=stateYearThresholds$onset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect", 
+             xmin=stateYearThresholds$offset.lower, 
+             xmax=stateYearThresholds$offset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV", x="Time", title=y)
+}), cols=4)
+
+# Zoom in on offsets
+ggplot2.multiplot(plotlist=makeStateWindowPlots(rsvWindowYears, function(y, stateYearObs, stateYearPred, stateYearThresholds) {
+  ggplot(stateYearObs, aes(x=time)) +
+    coord_cartesian(
+      xlim=c(min(stateYearThresholds$offset.lower) - 1, max(stateYearThresholds$offset.upper) + 1),
+      ylim=c(0.8, 1)
+    ) +
+    geom_hline(aes(yintercept=0)) +
+    geom_hline(aes(yintercept=seasonThreshold), color=gray(.5)) +
+    geom_hline(aes(yintercept=1 - seasonThreshold), color=gray(.5)) +
+    geom_ribbon(data=stateYearPred, aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper), alpha=0.2) +
+    geom_line(data=stateYearPred, aes(y=rsv.cum.fit)) +
+    geom_point(shape=20, aes(y=rsv.cum.frac)) +
+    annotate("rect", 
+             xmin=stateYearThresholds$onset.lower, 
+             xmax=stateYearThresholds$onset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect", 
+             xmin=stateYearThresholds$offset.lower, 
+             xmax=stateYearThresholds$offset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV", x="Time", title=y)
+}), cols=4)
+
+```
+
+```{r}
+onset = ggplot(stateThresholdsByWindow) +
+  geom_errorbar(aes(ymin=onset.lower, ymax=onset.upper, x=year), width=.25) + 
+  labs(x="RSV Season Onset")
+offset = ggplot(stateThresholdsByWindow) +
+  geom_errorbar(aes(ymin=offset.lower, ymax=offset.upper, x=year), width=.25) + 
+  labs(x="RSV Season Offset")
+
+ggplot2.multiplot(plotlist=list(onset, offset), cols=2)
+
+```
+
+```{r}
+obsByCounty = dataset %>% 
+  rename(time=weekofyear) %>% 
+  group_by(county, time) %>% 
+  summarize(rsv=sum(rsv)) %>% 
+  left_join(rsvCountyGroups, by="county") %>%
+  group_by(time) %>%
+  do(summarizeCountyGroups(.)) %>%
+  group_by(county) %>% 
+  mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / sum(rsv)) %>% 
+  as.data.frame() 
+
+predByCounty = data.frame()
+thresholdsByCounty = data.frame()
+fixedStratUnprotectedByCounty = data.frame()
+
+progress = txtProgressBar(max=length(levels(obsByCounty$county)), style=3)
+idx = 0
+
+for (c in levels(obsByCounty$county)) {
+  countyObs = obsByCounty %>% filter(county==c)
+  countyModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=countyObs)
+  
+  countyPred = countyModel %>% 
+    predict(type="response", newdata=modelTime, se.fit=TRUE)
+  
+  countyPred = modelTime %>% 
+    cbind(data.frame(rsv.fit=countyPred$fit, rsv.fit.se=countyPred$se.fit)) %>%
+    cbind(countyModel %>% outbreak.predict.timeseries(modelTime, function(model, params, newdata) { outbreak.calc.cum(model, params, newdata) })) %>%
+    rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
+    mutate(county=factor(c, levels=levels(obsByCounty$county)))
+  
+  predByCounty = predByCounty %>% rbind(countyPred)
+  
+  countyThresholds = countyModel %>%
+    outbreak.predict.scalars(
+      modelTime,
+      function(model, params, newdata) { 
+        outbreak.calc.thresholds(model, params, newdata$time, onset=seasonThreshold, offset=1 - seasonThreshold)
+      }
+    ) %>%
+    mutate(county=factor(c, levels=levels(obsByCounty$county)))
+  
+  thresholdsByCounty = thresholdsByCounty %>% rbind(countyThresholds)
+  
+  countyUnprotected = countyModel %>%
+    outbreak.predict.scalars(
+      modelTime,
+      function(model, params, newdata) { 
+        outbreak.calc.unprotected(model, params, newdata$time, ppxFixedStrategies(c))
+      }
+    ) %>%
+    mutate(county=factor(c, levels=levels(obsByCounty$county)))
+  
+  fixedStratUnprotectedByCounty = fixedStratUnprotectedByCounty %>% rbind(countyUnprotected)
+
+  idx = idx + 1
+  setTxtProgressBar(progress, idx)
+}
+
+```
+
+```{r}
+makeCountyPlots = function(counties, plotter) {
+  lapply(counties, function(c) {
+    countyObs = obsByCounty %>% filter(county==c)
+    countyPred = predByCounty %>% filter(county==c)
+    countyThresholds = thresholdsByCounty %>% filter(county==c)
+    plotter(c, countyObs, countyPred, countyThresholds)
+  })
+}
+
+makeCountyYearPlots = function(c, plotter) {
+  lapply(rsvYears, function(y) {
+    countyYearObs = obsByCountyYear %>% filter(county==c, year==y)
+    countyYearPred = predByCountyYear %>% filter(county==c, year==y)
+    countyYearThresholds = thresholdsByCountyYear %>% filter(county==c, year==y)
+    plotter(c, y, countyYearObs, countyYearPred, countyYearThresholds)
+  })
+}
+
+# Plot RSV cases with model prediction 
+ggplot_cases = function(obs, pred, thresholds, title) {
+  ggplot(obs, aes(x=time)) +
+    geom_ribbon(data=pred, aes(ymin = rsv.fit - rsv.fit.se, ymax = rsv.fit + rsv.fit.se), alpha = 0.2) +
+    geom_line(data=pred, aes(y=rsv.fit)) +
+    geom_hline(aes(yintercept = 0)) +
+    geom_point(aes(y=rsv), shape=20) +
+    annotate("rect",
+             xmin=thresholds$onset.lower,
+             xmax=thresholds$onset.upper,
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect",
+             xmin=thresholds$offset.lower,
+             xmax=thresholds$offset.upper,
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV cases, #", x="Week of year", title=title)
+}
+
+# Plot RSV cumulative cases (no model prediction)
+ggplot_cum_cases = function(obs, pred, thresholds, title) {
+  ggplot(obs, aes(x=time)) +
+    geom_hline(aes(yintercept = 0)) +
+    geom_point(shape=20, aes(y=rsv.cum)) +
+    annotate("rect", 
+             xmin=thresholds$onset.lower, 
+             xmax=thresholds$onset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect", 
+             xmin=thresholds$offset.lower, 
+             xmax=thresholds$offset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV cumulative cases, #", x="Week of year", title=title)
+
+}
+
+# Plot RSV cumulative case percentage with model prediction
+ggplot_cum_cases_pct = function(obs, pred, thresholds, title) {
+  ggplot(obs, aes(x=time)) +
+    geom_hline(aes(yintercept = 0)) +
+    geom_hline(aes(yintercept=seasonThreshold), color=gray(.5)) +
+    geom_hline(aes(yintercept=1 - seasonThreshold), color=gray(.5)) +
+    geom_ribbon(data=pred, aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper), alpha=0.2) +
+    geom_line(data=pred, aes(y=rsv.cum.fit)) +
+    geom_point(shape=20, aes(y=rsv.cum.frac)) +
+    annotate("rect", 
+             xmin=thresholds$onset.lower, 
+             xmax=thresholds$onset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect", 
+             xmin=thresholds$offset.lower, 
+             xmax=thresholds$offset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV cumulative cases, %", x="Week of year", title=title)
+}
+
+# Plot RSV cumulative case % with model prediction, zoomed in on onset
+ggplot_cum_cases_pct_zoom = function(obs, pred, thresholds, xmin, xmax, ymin, ymax, title) {
+  ggplot(obs, aes(x=time)) +
+    coord_cartesian(
+      xlim=c(xmin, xmax),
+      ylim=c(ymin, ymax)
+    ) +
+    geom_hline(aes(yintercept = 0)) +
+    geom_hline(aes(yintercept=seasonThreshold), color=gray(.5)) +
+    geom_hline(aes(yintercept=1 - seasonThreshold), color=gray(.5)) +
+    geom_ribbon(data=pred, aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper), alpha=0.2) +
+    geom_line(data=pred, aes(y=rsv.cum.fit)) +
+    geom_point(shape=20, aes(y=rsv.cum.frac)) +
+    annotate("rect", 
+             xmin=thresholds$onset.lower, 
+             xmax=thresholds$onset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    annotate("rect", 
+             xmin=thresholds$offset.lower, 
+             xmax=thresholds$offset.upper, 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    labs(y="RSV cumulative cases, %", x="Week of year", title=title)
+}
+
+ggplot_thresholds_over_time = function(thresholds, title) {
+  onset = ggplot(thresholds) +
+    geom_errorbar(aes(ymin=onset.lower, ymax=onset.upper, x=year), width=.25) + 
+    labs(x="Year", y="RSV season onset week", title=title)
+  offset = ggplot(thresholds) +
+    geom_errorbar(aes(ymin=offset.lower, ymax=offset.upper, x=year), width=.25) + 
+    labs(x="Year", y="RSV season offset week", title=title)
+  
+  ggplot2.multiplot(plotlist=list(onset, offset), cols=2)
+}
+
+ggplot_prophylaxis_strategy = function(obs, pred, protected, title) {
+  ggplot(obs, aes(x=time)) +
+    geom_ribbon(data=pred, aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper), alpha=0.2) +
+    geom_line(data=pred, aes(y=rsv.cum.fit)) +
+    geom_point(shape=20, aes(y=rsv.cum.frac)) +
+    annotate("rect", 
+             xmin=min(protected, na.rm=TRUE), xmax=max(protected, na.rm=TRUE), 
+             ymin=-Inf, ymax=Inf, alpha=.25) +
+    geom_hline(aes(yintercept=0)) +
+    labs(y="RSV", x="Time", title=title)
+}
+  
+```
+
+
+```{r}
+ggplot2.multiplot(plotlist=makeCountyPlots(levels(obsByCounty$county), function(c, countyObs, countyPred, countyThresholds) {
+  ggplot_cases(countyObs, countyPred, countyThresholds, c)
+}), cols=4)
+
+# Plot RSV cumulative cases with model prediction 
+ggplot2.multiplot(plotlist=makeCountyPlots(levels(obsByCounty$county), function(c, countyObs, countyPred, countyThresholds) {
+  ggplot_cum_cases(countyObs, countyPred, countyThresholds, c)
+}), cols=4)
+
+# Plot RSV cumulative case % with model prediction 
+ggplot2.multiplot(plotlist=makeCountyPlots(levels(obsByCounty$county), function(c, countyObs, countyPred, countyThresholds) {
+  ggplot_cum_cases_pct(countyObs, countyPred, countyThresholds, c)
+}), cols=4)
+
+# Zoom in on onsets
+ggplot2.multiplot(plotlist=makeCountyPlots(levels(obsByCounty$county), function(c, countyObs, countyPred, countyThresholds) {
+  ggplot_cum_cases_pct_zoom(countyObs, countyPred, countyThresholds, xmin=min(countyThresholds$onset.lower) - 1, xmax=max(countyThresholds$onset.upper) + 1, ymin=0, ymax=0.2, c)
+}), cols=4)
+
+# Zoom in on offsets
+ggplot2.multiplot(plotlist=makeCountyPlots(levels(obsByCounty$county), function(c, countyObs, countyPred, countyThresholds) {
+  ggplot_cum_cases_pct_zoom(countyObs, countyPred, countyThresholds, xmin=min(countyThresholds$offset.lower) - 1, xmax=max(countyThresholds$offset.upper) + 1, ymin=0.8, ymax=1, c)
+}), cols=4)
+```
+
+
+```{r}
+onset = ggplot(thresholdsByCounty) +
+  geom_errorbarh(aes(x=onset.median, xmin=onset.lower, xmax=onset.upper, y=county), height=.25) + 
+  labs(x="RSV Season Onset")
+offset = ggplot(thresholdsByCounty) +
+  geom_errorbarh(aes(x=offset.median, xmin=offset.lower, xmax=offset.upper, y=county), height=.25) + 
+  labs(x="RSV Season Offset")
+
+ggplot2.multiplot(plotlist=list(onset, offset), cols=2)
+
+```
+
+
+```{r warning=FALSE}
+obsByCountyYear = dataset %>% 
+  rename(time=weekofyear) %>% 
+  group_by(county, weeki, year, time) %>% 
+  summarize(rsv=sum(rsv)) %>% 
+  left_join(rsvCountyGroups, by="county") %>%
+  group_by(weeki, year, time) %>%
+  do(summarizeCountyGroups(.)) %>%
+  group_by(county, year) %>%
+  mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / if_else(sum(rsv) > 0, sum(rsv), as.integer(1))) %>% 
+  select(-weeki) %>%
+  as.data.frame() 
+
+predByCountyYear = data.frame()
+thresholdsByCountyYear = data.frame()
+slidingStratUnprotectedSimByCountyYear = data.frame()
+
+progress = txtProgressBar(max=length(levels(obsByCounty$county)) * length(rsvYears) * 2, style=3)
+idx = 0
+
+for (c in levels(obsByCountyYear$county)) {
+  for (y in rsvYears) {
+    countyYearObs = obsByCountyYear %>% filter(county==c, year==y)
+    countyYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=countyYearObs)
+    
+    countyYearPred = countyYearModel %>% 
+      predict(type="response", newdata=modelTime, se.fit=TRUE)
+
+    countyYearPred = modelTime %>% 
+      cbind(data.frame(rsv.fit=countyYearPred$fit, rsv.fit.se=countyYearPred$se.fit)) %>%
+      cbind(countyYearModel %>% outbreak.predict.timeseries(modelTime, function(model, params, newdata) { outbreak.calc.cum(model, params, newdata) })) %>%
+      rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
+      mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
+  
+    predByCountyYear = predByCountyYear %>% rbind(countyYearPred)
+
+    countyYearThresholds = countyYearModel %>%
+      outbreak.predict.scalars(
+        modelTime,
+        function(model, params, newdata) { outbreak.calc.thresholds(model, params, newdata$time, onset=seasonThreshold, offset=1 - seasonThreshold) }
+      ) %>%
+      mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
+
+    thresholdsByCountyYear = thresholdsByCountyYear %>% rbind(countyYearThresholds)
+    
+    if (y %in% rsvWindowYears) {
+      countyYearUnprotectedSim = countyYearModel %>%
+        outbreak.predict.scalars.sim(
+          modelTime,
+          function(model, params, newdata) { 
+            outbreak.calc.unprotected(model, params, newdata$time, ppxSlidingStrategies(c, y))
+          }
+        ) %>%
+        mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
+      
+      slidingStratUnprotectedSimByCountyYear = slidingStratUnprotectedSimByCountyYear %>% rbind(countyYearUnprotectedSim)
+    }
+
+    idx = idx + 1
+    setTxtProgressBar(progress, idx)
+  }
+}
+
+# Aggregate sliding strategies over the entire time span
+
+unprotectedByCounty = slidingStratUnprotectedSimByCountyYear %>% 
+  group_by(county, outbreak.sim) %>%
+  summarize_at(vars(contains("total"), contains("count")), sum) %>%
+  group_by(county, outbreak.sim) %>%
+  do((function(df) {
+    stratNames = names(ppxSlidingStrategies())
+    for (stratName in stratNames) {
+      countName = sprintf("%s.count", stratName)
+      fracName = sprintf("%s.frac", stratName)
+      df = df %>% 
+        mutate_at(fracName, function(.) { df[[countName]] / df$total })
+    }
+    df
+  }) (.)) %>%
+  group_by(county) %>%
+  do((function(df) {
+    df %>%
+      select(-county, -total, -matches(".count")) %>%
+      outbreak.predict.scalars.confints () %>%
+      mutate(county=unique(df$county))
+  })(.)) %>%
+  inner_join(fixedStratUnprotectedByCounty, by="county")
+```
+
+```{r}
+for (c in levels(obsByCountyYear$county)) {
+  countyThresholdsByYear = thresholdsByCountyYear %>% filter(county==c)
+  
+  ggplot_thresholds_over_time(countyThresholdsByYear, title=c)
+}
+
+```
+
+```{r}
+# Plot fixed propxylaxis strategies
+for (c in levels(obsByCounty$county)) {
+  d = "plots/by county"
+  if (!dir.exists(d)) {
+    dir.create(d, showWarnings=FALSE, recursive=TRUE)
+  }
+  
+  countyObs = obsByCounty %>% filter(county==c)
+  countyPred = predByCounty %>% filter(county==c)
+
+  ggsave(sprintf("%s/%s prophylaxis strategies.pdf", d, c), ggplot2.multiplot(plotlist=lapply(names(ppxFixedStrategies(c)), function(stratName) {
+    strat = ppxFixedStrategies(c)[[stratName]]
+    protected = modelTime$time %>% sapply(function(t) { if (strat(t) == 0) NA else t })
+    
+    ggplot_prophylaxis_strategy(countyObs, countyPred, protected, sprintf("%s w/ %s", c, stratName)) + labs(x=NULL)
+  }), cols=1), width=4, height=6, units="in")
+}
+
+# Plot sliding propxylaxis strategies
+for (c in levels(obsByCounty$county)) {
+  for (y in rsvWindowYears) {
+    d = sprintf("plots/by county and year/%s", c)
+    if (!dir.exists(d)) {
+      dir.create(d, showWarnings=FALSE, recursive=TRUE)
+    }
+    
+    countyYearObs = obsByCountyYear %>% filter(county==c, year==y)
+    countyYearPred = predByCountyYear %>% filter(county==c, year==y)
+  
+    ggsave(sprintf("%s/%s prophylaxis strategies.pdf", d, y), ggplot2.multiplot(plotlist=lapply(names(ppxSlidingStrategies(c, y)), function(stratName) {
+      strat = ppxSlidingStrategies(c, y)[[stratName]]
+      protected = modelTime$time %>% sapply(function(t) { if (strat(t) == 0) NA else t })
+      
+      ggplot_prophylaxis_strategy(countyYearObs, countyYearPred, protected, sprintf("%s w/ %s", c, stratName)) + labs(x=NULL)
+    }), cols=1), width=4, height=6, units="in")
+  }
+}
+```
+
+```{r}
+stratNames = c(names(ppxFixedStrategies()), names(ppxSlidingStrategies()))
+plot = ggplot(unprotectedByCounty) +
+  scale_linetype_manual(breaks=stratNames, values=seq_along(stratNames)) + 
+  coord_cartesian(
+    xlim=c(0, 0.1)
+  ) +
+  labs(x="Unprotected cases", y=NULL) +
+  theme(aspect.ratio=2, panel.grid.major.y=element_blank())
+
+for (idx in seq_along(stratNames)) {
+  stratName = stratNames[idx]
+  median = sprintf("%s.frac.median", stratName)
+  lower = sprintf("%s.frac.lower", stratName)
+  upper = sprintf("%s.frac.upper", stratName)
+  linetype = sprintf('"%s"', stratName)
+  
+  delta = 0.1
+  nudge = (idx - (length(stratNames) + 1) / 2) * -delta
+
+  plot = plot + 
+    geom_errorbarh(aes_string(x=median, xmin=lower, xmax=upper, y="county", linetype=linetype), height=0, position=position_nudge(y=nudge)) + 
+    geom_point(aes_string(x=lower, y="county"), shape=20, position=position_nudge(y=nudge)) +
+    geom_point(aes_string(x=upper, y="county"), shape=20, position=position_nudge(y=nudge))
+}
+
+plot
+ggsave("plots/prophylaxis strategy comparison.pdf", plot, height=8, width=12, units="in")
+```
+
+```{r}
+ignore_ = lapply(levels(obsByCountyYear$county), function(c) {
+  d = sprintf("plots/by county and year/%s", c)
+  if (!dir.exists(d)) {
+    dir.create(d, showWarnings=FALSE, recursive=TRUE)
+  }
+  
+  multiplot = ggplot2.multiplot(plotlist=makeCountyYearPlots(c, function(c, y, countyYearObs, countyYearPred, countyYearThresholds) {
+    plot = ggplot_cases(countyYearObs, countyYearPred, countyYearThresholds, NULL)
+    ggsave(sprintf("%s/%s cases.pdf", d, y), height=4, width=6, units="in")
+    plot
+  }), cols=4)
+
+  # Plot RSV cumulative cases with model prediction 
+  ggplot2.multiplot(plotlist=makeCountyYearPlots(c, function(c, y, countyYearObs, countyYearPred, countyYearThresholds) {
+    plot = ggplot_cum_cases(countyYearObs, countyYearPred, countyYearThresholds, NULL)
+    ggsave(sprintf("%s/%s cum cases.pdf", d, y), height=4, width=6, units="in")
+    plot
+  }), cols=4)
+
+  # Plot RSV cumulative case % with model prediction 
+  ggplot2.multiplot(plotlist=makeCountyYearPlots(c, function(c, y, countyYearObs, countyYearPred, countyYearThresholds) {
+    plot = ggplot_cum_cases_pct(countyYearObs, countyYearPred, countyYearThresholds, NULL)
+    ggsave(sprintf("%s/%s model.pdf", d, y), height=4, width=6, units="in")
+    plot
+  }), cols=4)
+
+  # Zoom in on onsets
+  ggplot2.multiplot(plotlist=makeCountyYearPlots(c, function(c, y, countyYearObs, countyYearPred, countyYearThresholds) {
+    plot = ggplot_cum_cases_pct_zoom(countyYearObs, countyYearPred, countyYearThresholds, xmin=min(countyYearThresholds$onset.lower) - 1, xmax=max(countyYearThresholds$onset.upper) + 1, ymin=0, ymax=0.2, NULL)
+    ggsave(sprintf("%s/%s onset.pdf", d, y), height=4, width=6, units="in")
+    plot
+  }), cols=4)
+
+  # Zoom in on offsets
+  ggplot2.multiplot(plotlist=makeCountyYearPlots(c, function(c, y, countyYearObs, countyYearPred, countyYearThresholds) {
+    plot = ggplot_cum_cases_pct_zoom(countyYearObs, countyYearPred, countyYearThresholds, xmin=min(countyYearThresholds$offset.lower) - 1, xmax=max(countyYearThresholds$offset.upper) + 1, ymin=0.8, ymax=1, c)
+    ggsave(sprintf("%s/%s offset.pdf", d, y), height=4, width=6, units="in")
+    plot
+  }), cols=4)
+})
+```
+
+
