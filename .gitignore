@@ -3,4 +3,5 @@
 .RData
 .Rhistory
 *.nb.html
+Analysis/plots/**/*.pdf
 
