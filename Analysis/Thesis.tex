@@ -1,0 +1,248 @@
+
+
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+\usepackage{multicol,float}
+\usepackage{hyperref}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+
+
+
+
+
+
+\begin{abstract}
+    
+\end{abstract}    
+
+\begin{multicols}{2}
+
+\section{Introduction}
+
+\section{Methods}
+
+\subsection{Case definition}
+
+We identified 299676 cases of RSV in Connecticut between June, 30, 1996 and June, 02, 2013.
+
+The cases were identified from the hospitalization database maintained by the Office of Health Care Access (OHCA) of the Department of Public Health of the state of Connecticut, which records all hospitalizations in non-federal short-stay acute-care general hospitals in Connecticut. OHCA provided us with weekly hospitalization statistics. 
+
+We defined a case of RSV to be a hospital stay recorded in the OHCA hospitalization database meeting the following criteria:
+
+\begin{itemize}
+    \item date of hospital admission was between June, 30, 1996 and June, 02, 2013 (inclusive),
+    \item postal code of residence listed in patient's medical record was in Connecticut\footnote{According to the zipcode $\rightarrow$ state mapping in R \texttt{zipcode} package version 1.0}, and
+    \item hospital stay was associated with an RSV billing code\footnote{Which codes?}
+\end{itemize}
+
+\subsection{Modeling all-years RSV incidence}
+
+Under the assumption that RSV incidence follows an annual cycle peaking during the winter, we aggregated RSV incidence by week of year.
+
+Our goal was to generate a model that would allow us to sample from the distribution of (potential) RSV seasons, which in turn would enable us to estimate arbitrary characteristics of RSV seasons. 
+
+We accomplished this using a generalized additive model (GAM) with cyclic penalized cubic splines with 20 knots\footnote{Using the R \texttt{mgcv} package version 1.8-22}, via Poisson (log) link function.
+
+This type of model produces normal distribution estimates of all spline parameters. By sampling spline parameters from those normal distributions, we, in effect, sample from the distribution of splines fitting the data.
+
+As a result, we were able to estimate various characteristics of RSV seasons simply by sampling from distribution of splines fitting our data, and then --- with each sample spline corresponding to a putative RSV season --- calculating the desired characteristic of each spline. 
+
+For this, we developed a custom R package for estimation of different characteristics of infectious disease outbreaks, which is available at \href{https://github.com/airbornemint/outbreakpredict}{\nolinkurl{github.com/airbornemint/outbreakpredict}}.
+
+\subsection{Spatial aggregation of RSV incidence}
+
+All-years RSV incidence was aggregated by county, as well as statewide. 
+
+Furthermore, some individual counties, with low incidence of RSV, yielded results with unimpressive statistical power. We aggregated those counties --- Tolland, Windham, Middlesex, Litchfield, and New London --- into a single non-contiguous region, and included that region as a separate spatial entity in our analysis.
+
+\subsection{Estimating all-years characteristics of RSV seasons}
+
+Having aggregated RSV incidence by week of year and by region, we estimated two characteristics of all-years RSV incidence in each region: season onset, defined as the time when cumulative incidence rises beyond 2.5\% of the total cumulative incidence; and season offset, defined as the time when cumulative incidence rises beyond 97.5\% of the total cumulative incidence. 
+
+To arrive at this estimate, we sampled from the RSV season distribution given by the model, and calculated onset and offset for each sampled RSV season.
+
+\subsection{Estimating coverage of prophylaxis following current guidelines}
+
+We then turned our attention to the current guidelines for RSV prophylaxis, published by the American Academy of Pediatricians, most recently revised in ???. These guidelines recommend RSV prophylaxis with 6 monthly doses of palivizumab, starting in November, for all infants below 2 (?) years of age who are at high risk of ?. 
+
+Given that high-risk infants are a small subgroup of the general population (?), we assumed that our model for RSV incidence based on hospitalization data is a good approximation of RSV incidence among high-risk infants. We then estimated the fraction of high-risk infants who elude protection from RSV because they are infected before receiving prophylaxis, or after protection from prophylaxis wanes.
+
+To estimate this, we began by sampling from the RSV season distribution given by the model. For each sampled RSV season, we counted every case of RSV prior to November 15th or after May 15th as having eluded protection, and calculated the fraction of those cases among all cases. 
+
+\subsection{Devising alternate all-years prophylaxis guidelines}
+
+Following this analysis, we devised four alternative prophylaxis guidelines. In all our alternative guidelines, prophylaxis consists of six monthly doses of palivizumab, and protection is assumed to last 24 weeks from the first dose.
+
+\begin{itemize}
+    \item \textbf{By statewide all-years onset}: prophylaxis administration begins on the date of the statewide all-years median RSV season onset. 
+    \item \textbf{By statewide all-years midpoint}: prophylaxis administration begins 12 weeks before the average of the statewide all-years median RSV season onset and offset. 
+    \item \textbf{By statewide all-years offset}: prophylaxis administration begins 24 weeks before the statewide all-years median RSV season offset. 
+    \item \textbf{By regional all-years onset}: prophylaxis administration begins on the date of the regional\footnote{county-wide, or --- in the case of low-incidence counties --- low-incidence-region-wide} all-years median RSV season onset.
+    \item \textbf{By regional all-years midpoint}: prophylaxis administration begins 12 weeks before the average of the regional all-years median RSV season onset and offset. 
+    \item \textbf{By regional all-years offset}: prophylaxis administration ends on the date of the regional all-years median RSV season offset. 
+\end{itemize}
+
+\subsection{Evaluating alternate prophylaxis guidelines}
+
+We evaluated each of those alternate guidelines in the same way we evaluated the current AAP guidelines, described above. 
+
+For the two statewide alternate guidelines, we estimated the number of cases eluding prophylaxis statewide, as well as in each region.
+
+For the two regional alternate guidelines, we estimated the number of cases eluding prophylaxis in each region.
+
+(Should we also do a statewide analysis of regional strategies?)
+
+\subsection{Evaluating temporal variation of RSV seasonality}
+
+Our analysis thus far assumed that RSV seasons are similar year-to-year. To evaluate this assumption, we ?
+
+\subsection{Estimating three-year characteristics of RSV seasons}
+
+In order to reduce the potential impact on our model of long-term variation in RSV season onset and offset, we repeated our analysis of RSV season characteristics using a three-year sliding window. Rather that aggregating RSV incidence data across all years, as before, for sliding-window analysis we separately analyzed every three-year period starting on July 1st.
+
+This analysis used the same penalized spline GAM as all-years analysis, and also produced statewide and regional estimates of RSV season 5\% onset and 95\% offset.
+
+\subsection{Devising alternate recent-years prophylaxis guidelines}
+
+This analysis naturally leads to another approach to prophylaxis guidelines, in which prophylaxis recommendation is adjusted every year based on the timing of the RSV season onset and offset from the recent years. We evaluated two such alternate guidelines:
+
+\begin{itemize}
+    \item \textbf{By statewide recent-years onset}: prophylaxis administration in a given year begins on the date of the statewide median RSV season onset over the previous three years. 
+    \item \textbf{Statewide sliding window offset}: prophylaxis administration in a given year ends on the date of the statewide median RSV season offset over the previous three years.
+\end{itemize}
+
+As before, both alternate guidelines involve six monthly doses of palivizumab. 
+
+\section{Results}
+
+\subsection{RSV season in Fairfield county begins early and ends late}
+
+Compared to the statewide median onset of RSV season of 42.38 weeks (95\% CI: 42.15 -- 42.76) and offset of 14.58 weeks (95\% CI: 14.35 -- 14.97), RSV season in Fairfield county has earlier median onset of 41.33 weeks (95\% CI: 40.44 -- 41.91) and later median offset of 15.73 weeks (95\% CI: 15.09 -- 16.27). (Figure \ref{fig:seasonByRegion}.)
+
+\begin{figure*}[t]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/seasonByRegion-1} 
+
+\end{knitrout}
+\caption{Onset and offset of RSV season in Connecticut by region}
+\label{fig:seasonByRegion}
+\end{figure*}
+
+\begin{figure*}[t]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error: <text>:1:75: unexpected 'in'\\\#\# 1:\ \ \ \  ggplot(unprotectedByCounty \%>\% filter(strat=="{}aap"{}) \%> filter(county \%in\\\#\#\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  \textasciicircum{}}}\end{kframe}
+\end{knitrout}
+\caption{Fraction of RSV cases occurring in Connecticut during the protection window of palivizumab prophylaxis administered according to AAP guidelines, by region.}
+\label{fig:coverageByRegionAAP}
+\end{figure*}
+
+\begin{figure*}[t]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/coverageByRegionAAPInsight-1} 
+
+\end{knitrout}
+\caption{RSV relative cumulative incidence by region}
+\label{fig:coverageByRegionAAPInsight}
+\end{figure*}
+
+\begin{figure*}[t]
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+\includegraphics[width=\maxwidth]{figure/coverageByRegion-1} 
+
+\end{knitrout}
+
+\caption{Fraction of RSV cases occurring in Connecticut during the protection window of palivizumab prophylaxis, by region and prophylaxis guidelines.}
+\label{fig:coverageByRegion}
+\end{figure*}
+
+\subsection{RSV season in low-incidence region begins late}
+
+Meanwhile, in comparison with the statewide RSV season onset and offset, the low-incidence region has RSV season with later onset of 44.95 weeks (95\% CI: 42.15 -- 42.76); however, season offset shows no change from the statewide median. (Figure \ref{fig:seasonByRegion}.)
+
+\subsection{AAP guidelines perform best in low-incidence region and worst in Fairfield county}
+
+Statewide, our model shows that 94.15\% of RSV cases (95\% CI: 93.86 -- 94.40\%) occur during the time when palivizumab is administered according to the AAP guidelines. The AAP guidelines perform better in the low-incidence region, where as many as 96.55\% cases (95\% CI: 96.11 -- 96.98\%) occur during the prophylaxis time window, but worse in Fairfield county, where as few as 91.90\% cases ((95\% CI: 91.12 -- 92.75\%)) occur during this time. (Table \ref{table:coverageByRegionAAP}.)
+
+The cause of this is evident in Figure \ref{fig:coverageByRegionAAPInsight}, which shows temporal misalignment between the time window of the RSV season (delineated by median 2.5\% onset and 97.5\% offset by region), and the time window of AAP prophylaxis guidelines. Fairfield county, owing to its early season onset has disproportionately many cases before prophylaxis administration begins; on the other hand, the low-incidence region, owing to its late season onset, has its RSV seasons almost entirely contained within the prophylaxis window.
+
+\subsection{All-years alternate guidelines are superior to AAP statewide and in Hartford county, and non-inferior otherwise}
+
+The six alternate prophylaxis guidelines based on all-years data (in which prophylaxis time window is determined by statewide or regional all-years RSV season onset or offset), when compared to the AAP guidelines, yield non-inferior results in all regions, and superior results both statewide and in Hartford county. (Figure \ref{fig:coverageByRegion}.)
+
+Statewide, the AAP guidelines produce prophylaxis coverage for 94.15\% cases (95\% CI: 93.86 -- 94.40\%); meanwhile, the guidelines based on all-years onset yield the weakest improvement at 94.76\% coverage (95\% CI: 94.53 -- 95.16\%), and other alternate guidelines yield similar results.
+
+In Hartford county, the improvement is more noteworthy. Here, the AAP guidelines cover 93.56\% of cases (95\% CI: 92.82 -- 93.94\%); the guidelines based on all-years regional offset generate the weakest improvement to 94.99\% coverage (), and other alternate guidelines are comparable.
+
+In all cases, all alternate guidelines based on all-years analysis are non-inferior to AAP guidelines and non-superior to each other. 
+
+\subsection{Sliding window alternate guidelines are inferior to AAP guidelines in low-incidence region, and non-superior otherwise.}
+
+Contrariwise, the two strategies based on statewide data produced non-superior results in all regions except for the low-incidence region, where they produced inferior results. (Figure.)
+
+Due to the non-superiority of statewide sliding-window strategies, regional sliding-window strategies were not evaluated. 
+
+\section{Discussion}
+
+
+
+\end{multicols}
+
+\end{document}
