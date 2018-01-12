@@ -1,16 +1,17 @@
+% Agenda
+%  * Is coverage the right word
+%  * Round time periods pre-coverage analysis in order to make conclusion make sense
+%  * Added guidelines based on season midpoint
+%  * Nothing in linear regression of onset/offset
+%  * What level of feedback am I looking for
+%  * Publication-quality not a goal for Jan 26
+% 
+% Todo
+%  * Change how mod 52-1/7 is done
+
 <<options, echo=FALSE>>=
     opts_chunk$set(echo=FALSE, message=FALSE)
 @
-
-\documentclass{article}
-
-\usepackage{multicol,float}
-\usepackage{hyperref}
-\usepackage{draftwatermark}
-\SetWatermarkText{DRAFT}
-\SetWatermarkScale{4}
-
-\begin{document}
 
 <<load>>=
 read_chunk("../Analysis/RSV.R")
@@ -20,9 +21,15 @@ read_chunk("../Analysis/RSV.R")
 @
 
 <<util>>=
+library(grid)
+
 # Formatting utilities
 formatDate = function(date) {
     format(date, "%B, %d, %Y")
+}
+
+formatYear = function(date) {
+    format(date, "%Y")
 }
 
 formatThreshold = function(threshold) {
@@ -77,17 +84,123 @@ regionStrategyCoverageCI = function(c, s, level) {
     )
 }
 
+driftYearToWeek = function(year, negate) {
+    drift = 365 / 7 * year
+    if (negate) {
+        -drift
+    } else {
+        drift
+    }
+}
+
+formatDrift = function(lm, negate=FALSE) {
+    sprintf("%.2f weeks", driftYearToWeek(summary(lm)$coefficients['year', 1], negate))
+}
+
+formatDriftCI = function(lm, level, negate=TRUE) {
+    ci = confint(lm, "year", level=level)
+    sprintf(
+        "%d\\%% CI: %.2f -- %.2f weeks", level * 100, 
+        driftYearToWeek(min(ci), negate), 
+        driftYearToWeek(max(ci), negate)
+    )
+}
+
 # Counties which we plot (so, not individual low-incidence counties)
 countiesForPlots = thresholdsByCounty$county[!thresholdsByCounty$county %in% lowIncidenceCounties]
 @
+    
+\documentclass{article}
+
+\usepackage{multicol,float}
+\usepackage{hyperref}
+\usepackage{draftwatermark}
+\SetWatermarkText{DRAFT}
+\SetWatermarkScale{4}
+
+\usepackage{titling}
+\newcommand{\subtitle}[1]{%
+  \posttitle{%
+    \par\end{center}
+    \begin{center}\large#1\end{center}
+    \vskip0.5em}%
+}
+
+\newcommand{\abstractsection}[1]{\section*{#1}}
+
+\title{Assessment and optimization of respiratory syncytial virus immunoprophylaxis regimens using Monte Carlo sampling of a penalized spline generalized additive model of hospital admissions in Connecticut between \Sexpr{formatYear(startDate)} and \Sexpr{formatYear(endDate)}}
+
+\author{Ben Artin, YSPH/YSM 2018, if all goes well}
+\date{Draft \#1, \today}
+
+\begin{document}
+
+\maketitle
 
 \begin{abstract}
+
+\abstractsection{Background}
+
+Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in young infants. Immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to immunprophylaxis regimen outside of Florida. 
+
+\abstractsection{Methods}
+
+We describe a generalized additive model of RSV incidence using cubic cyclic penalized splines and apply that model to hospital admissions records from Connecticut between \Sexpr{formatDate(startDate)} and \Sexpr{formatDate(endDate)} to estimate coverage (TODO: is coverage the best term?) of RSV immunoprophylaxis administered in Connecticut according to the AAP guidelines. We also formulate several alternative immunoprophylaxis regimens with the same net pharmaceutical cost, and compare the coverage and implementation complexity of those alternative regimens to the AAP-recommended regimen.
+
+\abstractsection{Results}
+
+At 95\% confidence level, we found alternative regimens which account for spatial variability of RSV incidence to have superior coverage (to that of the AAP regimen) in some regions of Connecticut, and non-inferior coverage in other regions. We also found alternative regimens which account for temporal RSV variability to have non-superior coverage to our spatially-adjusted regimens, while being considerably more complex to implement. Finally, we found our best-performing alternative to AAP guidelines to provide a XX\% state-wide increase in RSV prophylaxis coverage over the AAP regimen.
+
+\abstractsection{Conclusion}
+
+We conclude that the increased prophylaxis coverage provided by regimens based on our spatial analysis warrants further analysis to determine whether the potential reduction in hospitalization rate is nullified by the potential increase in implementation cost.
     
-\end{abstract}    
+\end{abstract}
 
 \begin{multicols}{2}
 
 \section{Introduction}
+
+\subsection{Respiratory syncytial virus}
+
+Respiratory syncytial virus (RSV) causes upper respiratory infections in humans of all ages. In adults, RSV infection is typically asymptomatic or gives rise to mild respiratory illness.
+
+In children, however, the infection often incites more serious respiratory illness, sometimes leading to hospitalization.
+
+Risk factors for serious illness and hospitalization due to RSV infection in children include prematurity, chronic lung disease of prematurity, congenital heart disease, anatomic pulmonary abnormalities, neuromuscular disorders, trisomy 21, immunocompromised status, and cystic fibrosis. 
+
+Hospitalization rate of RSV-infected infants at high risk of complications is approximately 10\% in the populations in which it has been studied.
+
+\subsection{Respiratory syncytial virus seasonality}
+
+TODO
+
+\subsection{RSV immunoprophylaxis}
+
+Immunoprophylaxis with palivizumab, a monoclonal antibody medication, has been approved for prevention of RSV infection since 1998. Palivizumab is administered via intramuscular injection, and requires monthly dosing. Its price is \$1500-\$3000 per dose.
+
+Palivizumab has been found to be effective in reducing hospitalizations due to RSV; in double-blinded trials in high-risk infants, it reduced hospitalization rate by 45-55\% compared to placebo.
+
+Owing to the high cost, the American Academy of Pediatrics (AAP) recommends palivizumab immunoprophylaxis only for high-risk infants, and only during RSV season. These guidelines were most recently revised in ???.
+
+In their guidelines, the AAP acknowledges the potential significance of spatial and temporal variation in RSV incidence, but does not recommend local variance from nation-wide prophylaxis guidelines outside of Florida. 
+
+\subsection{Spatio-temporal variability of RSV in Connecticut}
+
+The Department of Public Health of the state of Connecticut, via its Office of Health Care Access (OHCA), maintains a database of all hospitalizations in every non-federal short-stay acute-care general hospital in the state. This database has previously been used to show regional variability in time of peak RSV incidence within Connecticut.
+
+No prior research is available regarding year-to-year variation in timing of RSV season in Connecticut.
+
+\subsection{Study aims}
+
+Motivated by AAP's recognition of the impact of spatial variation in RSV incidence on optimizing RSV immunoprophylaxis guidelines, and the known spatial variability of RSV incidence in Connecticut, our study asks these questions:
+
+\begin{itemize}
+	\item To what extent does regional variability of RSV incidence in Connecticut impact the effectiveness of the AAP-recommended prophylaxis regimen?
+	\item Can we use spatial analysis of RSV to propose alternative guidelines, either state-wide or regional, that would improve effectiveness over AAP-recommended prophylaxis, without increasing treatment cost?
+	\item Is there year-to-year variation in timing of RSV season in Connecticut?
+	\item Can we take advantage of any year-to-year variation to improve upon AAP-recommended prophylaxis, without increasing treatment cost?
+\end{itemize}
 
 \section{Methods}
 
@@ -95,7 +208,7 @@ countiesForPlots = thresholdsByCounty$county[!thresholdsByCounty$county %in% low
 
 We identified \Sexpr{nrow(dataset)} cases of RSV in Connecticut between \Sexpr{formatDate(startDate)} and \Sexpr{formatDate(endDate)}.
 
-The cases were identified from the hospitalization database maintained by the Office of Health Care Access (OHCA) of the Department of Public Health of the state of Connecticut, which records all hospitalizations in non-federal short-stay acute-care general hospitals in Connecticut. OHCA provided us with weekly hospitalization statistics. 
+The cases were identified from the hospitalization database maintained by the OHCA, who provided us with weekly hospitalization statistics. 
 
 We defined a case of RSV to be a hospital stay recorded in the OHCA hospitalization database meeting the following criteria:
 
@@ -105,83 +218,102 @@ We defined a case of RSV to be a hospital stay recorded in the OHCA hospitalizat
     \item hospital stay was associated with an RSV billing code\footnote{TODO Which codes?}
 \end{itemize}
 
-\subsection{Modeling all-years RSV incidence}
+\section{Data normalization}
 
-Under the assumption that RSV incidence follows an annual cycle peaking during the winter, we aggregated RSV incidence by week of year.
+TODO: something about mod 52.14 for week-of-year, something about which weeks are attributed to which year/season
 
-Our goal was to generate a model that would allow us to sample from the distribution of (potential) RSV seasons, which in turn would enable us to estimate arbitrary characteristics of RSV seasons. 
+\subsection{Choice of model}
 
-We accomplished this using a generalized additive model (GAM) with cyclic penalized cubic splines with 20 knots\footnote{Using the R \texttt{mgcv} package version 1.8-22}, via Poisson (log) link function.
+Our goal was to construct a model of RSV incidence over time that allows us to easily estimate complex characteristics of RSV seasons, such as season onset and offset, or RSV prophylaxis coverage.
 
-This type of model produces normal distribution estimates of all spline parameters. By sampling spline parameters from those normal distributions, we, in effect, sample from the distribution of splines fitting the data.
+To that end, we looked for a model that allows easy sampling of estimated model parameters; coupling this with Monte Carlo sampling would --- after transforming model parameters into response variables --- allow us to sample arbitrary response variables.
 
-As a result, we were able to estimate various characteristics of RSV seasons simply by sampling from distribution of splines fitting our data, and then --- with each sample spline corresponding to a putative RSV season --- calculating the desired characteristic of each spline. 
+We were willing to assume that RSV incidence can be modeled as a piecewise time series of Poisson variables, and is twice differentiable.
 
-For this, we developed a custom R package for estimation of different characteristics of infectious disease outbreaks, which is available at \href{https://github.com/airbornemint/outbreakpredict}{\nolinkurl{github.com/airbornemint/outbreakpredict}}.
+To meet those criteria and assumptions, we chose generalized additive models (GAM) with penalized cubic B-splines for our analysis. (TODO prior use of pspline GAM in ID epi?)
+
+We developed a custom R package for estimation of arbitrary characteristics of infectious disease outbreaks, as long as the outbreaks are amenable to GAM predictions; this package is available at \href{https://github.com/airbornemint/outbreakpredict}{\nolinkurl{github.com/airbornemint/outbreakpredict}}.
 
 \subsection{Spatial aggregation of RSV incidence}
 
-All-years RSV incidence was aggregated by county, as well as statewide. 
+For our spatial analysis, we aggregated RSV incidence data across all years in our data set. We then spatially aggregated the data to form five regions:
 
-Furthermore, some individual counties, with low incidence of RSV, yielded results with unimpressive statistical power. We aggregated those counties --- \Sexpr{gsub("(.*), (.*)", "\\1, and \\2", paste(lowIncidenceCounties, collapse=", "))} --- into a single non-contiguous region, and included that region as a separate spatial entity in our analysis.
+\begin{itemize}
+    \item One region for the entire state
+    \item One region for each of the counties with high incidence of RSV: Hartford County, Fairfield County, and New Haven County.
+    \item One region comprised of all remaining counties in Connecticut: \Sexpr{gsub("(.*), (.*)", "\\1, and \\2", paste(lowIncidenceCounties, collapse=", "))}
+\end{itemize}
 
-\subsection{Estimating all-years characteristics of RSV seasons}
+We chose county-level aggregation with an eye towards using this data to inform clinical practice guidelines, which are typically based on administrative regions for reasons of administrative and implementation simplicity.
 
-Having aggregated RSV incidence by week of year and by region, we estimated two characteristics of all-years RSV incidence in each region: season onset, defined as the time when cumulative incidence rises beyond \Sexpr{seasonThreshold * 100}\% of the total cumulative incidence; and season offset, defined as the time when cumulative incidence rises beyond \Sexpr{(1 - seasonThreshold) * 100}\% of the total cumulative incidence. 
-
-To arrive at this estimate, we sampled from the RSV season distribution given by the model, and calculated onset and offset for each sampled RSV season.
+We chose to aggregate low-incidence counties into a single (non-contiguous) region because our analysis in those counties individually would have yielded results with unacceptably low statistical power.
 
 \subsection{Estimating coverage of prophylaxis following current guidelines}
 
-We then turned our attention to the current guidelines for RSV prophylaxis, published by the American Academy of Pediatricians, most recently revised in ???. These guidelines recommend RSV prophylaxis with 6 monthly doses of palivizumab, starting in November, for all infants below 2 (?) years of age who are at high risk of ?. 
+We began by assessing the current AAP RSV prophylaxis guidelines. These guidelines recommend RSV prophylaxis with 6 monthly doses of palivizumab, starting in November, for all high-risk infants under 2 (confirm in guidelines) years of age.
 
-Given that high-risk infants are a small subgroup of the general population (?), we assumed that our model for RSV incidence based on hospitalization data is a good approximation of RSV incidence among high-risk infants. We then estimated the fraction of high-risk infants who elude protection from RSV because they are infected before receiving prophylaxis, or after protection from prophylaxis wanes.
+For simplicity, we assumed that protection by palivizumab begins on November 15th and lasts 24 weeks. 
 
-To estimate this, we began by sampling from the RSV season distribution given by the model. For each sampled RSV season, we considereda case of RSV to be covered by prophylaxis if it occurred between zero and 23 weeks (inclusive) after November 15th, and calculated the fraction of those cases among all cases. 
+We defined coverage of a prophylaxis regimen to be the fraction of high-risk infants who would be exposed to RSV while they are protected by palivizumab.
+
+Given that high-risk infants are a small fraction of the general population (citation needed), we assumed that our model for RSV incidence based on hospitalization data of all infants is an unbiased estimate of RSV incidence among unprotected high-risk infants. 
+
+\subsection{Estimating all-years characteristics of RSV seasons}
+
+We then turned our attention to spatial variation of seasonal RSV patterns across the time period covered by our data. In particular, we defined season onset as the time when cumulative incidence rises beyond \Sexpr{seasonThreshold * 100}\% of the total cumulative incidence and season offset as the time when cumulative incidence rises beyond \Sexpr{(1 - seasonThreshold) * 100}\% of the total cumulative incidence. We aggregated our data by week of year across all seasons, and estimated RSV season onset for each region.
+
+The choice of \Sexpr{seasonThreshold * 100}\% and \Sexpr{(1 - seasonThreshold) * 100}\% incidence thresholds was based on our intent to use estimates of RSV season onset and offset to put forth alternate prophylaxis regimens, as described below, while maintaining 6-month dosing schedule (and therefore not increasing medication cost). Incidence cutoffs other than \Sexpr{seasonThreshold * 100}\% and \Sexpr{(1 - seasonThreshold) * 100}\% were briefly investigated, but quickly ruled out because they produced suboptimal results.
 
 \subsection{Devising alternate all-years prophylaxis guidelines}
 
-Following this analysis, we devised six alternate prophylaxis guidelines. In all our alternative guidelines, prophylaxis consists of six monthly doses of palivizumab, and protection is assumed to last 24 weeks from the first dose.
+Following this analysis, we devised six alternate spatially adjusted prophylaxis regimens. In all our alternate regimens, prophylaxis consists of six monthly doses of palivizumab, and protection is assumed to last 24 weeks from the first dose.
 
 \begin{itemize}
-    \item \textbf{By statewide all-years onset}: prophylaxis administration begins on the date of the statewide all-years median RSV season onset. 
-    \item \textbf{By statewide all-years midpoint}: prophylaxis administration begins 12 weeks before the average of the statewide all-years median RSV season onset and offset. 
-    \item \textbf{By statewide all-years offset}: prophylaxis administration begins 24 weeks before the statewide all-years median RSV season offset. 
-    \item \textbf{By regional all-years onset}: prophylaxis administration begins on the date of the regional\footnote{county-wide, or --- in the case of low-incidence counties --- low-incidence-region-wide} all-years median RSV season onset.
-    \item \textbf{By regional all-years midpoint}: prophylaxis administration begins 12 weeks before the average of the regional all-years median RSV season onset and offset. 
-    \item \textbf{By regional all-years offset}: prophylaxis administration ends on the date of the regional all-years median RSV season offset. 
+    \item \textbf{By statewide all-years onset}: prophylaxis administration begins at statewide all-years median RSV season onset. 
+    \item \textbf{By statewide all-years midpoint}: prophylaxis administration begins 12 weeks before the average of the (statewide all-years median) season onset and offset. 
+    \item \textbf{By statewide all-years offset}: prophylaxis administration begins 24 weeks before the (statewide all-years median) RSV season offset. 
+    \item \textbf{By regional all-years onset}: prophylaxis administration begins at regional\footnote{county-wide, or --- in the case of low-incidence counties --- low-incidence-region-wide} all-years median RSV season onset.
+    \item \textbf{By regional all-years midpoint}: prophylaxis administration begins 12 weeks before the average of the (regional all-years median) RSV season onset and offset. 
+    \item \textbf{By regional all-years offset}: prophylaxis administration begins 24 weeks before the (regional all-years median) RSV season offset. 
 \end{itemize}
 
 \subsection{Evaluating alternate prophylaxis guidelines}
 
 We evaluated each of those alternate guidelines in the same way we evaluated the current AAP guidelines, as described above. 
 
-For the three statewide alternate guidelines, we estimated the number of cases eluding prophylaxis statewide, as well as in each region.
+For the three statewide alternate guidelines, we estimated coverage statewide, as well as in each region.
 
-For the three regional alternate guidelines, we estimated the number of cases eluding prophylaxis in each region.
+For the three regional alternate guidelines, we estimated coverage in each region.
 
-(TODO Should we also do a statewide analysis of regional strategies?)
+(TODO Consider also reporting net statewide coverage of regional regimens?)
 
-\subsection{Evaluating temporal variation of RSV seasonality}
+\subsection{Temporal aggregation of RSV incidence}
 
-Our analysis thus far assumed that RSV seasons are similar year-to-year. To evaluate this assumption, we ? TODO
+Our analysis thus far assumed that RSV seasons are similar year-to-year. To analyze the effects on prophylaxis regimens of year-to-year variation between RSV seasons, we chose to aggregate our data into (overlapping) runs of three consecutive seasons, in order to maintain a higher level of statistical power, as well as to limit impact of short-term variation on our results.
+
+This gave us \Sexpr{year(endDate) - year(startDate) -1} ``superseasons'', the first covering \Sexpr{formatYear(startDate)} through \Sexpr{formatYear(startDate + 2*365)}, and the last covering \Sexpr{formatYear(endDate - 2*365)} through \Sexpr{formatYear(endDate)}.
 
 \subsection{Estimating three-year characteristics of RSV seasons}
 
-In order to reduce the potential impact on our model of long-term variation in RSV season onset and offset, we repeated our analysis of RSV season characteristics using a three-year sliding window. Rather that aggregating RSV incidence data across all years, as before, for sliding-window analysis we separately analyzed every three-year period starting on July 1st.
+We began our temporal analysis by estimating RSV season onset and offset for each three-year superseason, using the same penalized spline GAM as all-years analysis, producing --- as before --- statewide and regional estimates of RSV season \Sexpr{seasonThreshold * 100}\% onset and \Sexpr{(1 - seasonThreshold) * 100}\% offset.
 
-This analysis used the same penalized spline GAM as all-years analysis, and also produced statewide and regional estimates of RSV season 5\% onset and 95\% offset.
+\subsection{Evaluating temporal variation of RSV seasonality}
+
+To evaluate year-to-year variation in RSV season onset and offset we modeled median RSV season onset and offset across 3-year superseasons against year using simple linear regression.
 
 \subsection{Devising alternate recent-years prophylaxis guidelines}
 
-This analysis naturally leads to another approach to prophylaxis guidelines, in which prophylaxis recommendation is adjusted every year based on the timing of the RSV season onset and offset from the recent years. We evaluated two such alternate guidelines:
+Finally, to assess the impact of any long-term trends in timing of RSV season on prophylaxis, we formulated three additional prophylaxis regimens. Here, each prophylaxis regimen is adjusted annually based on RSV data from previous three seasons:
 
 \begin{itemize}
-    \item \textbf{By statewide recent-years onset}: prophylaxis administration in a given year begins on the date of the statewide median RSV season onset over the previous three years. 
-    \item \textbf{Statewide sliding window offset}: prophylaxis administration in a given year ends on the date of the statewide median RSV season offset over the previous three years.
+    \item \textbf{By statewide recent-years onset}: prophylaxis administration in a given year begins at statewide median RSV season onset from the previous three years. 
+    \item \textbf{By statewide recent-years midpoint}: prophylaxis administration begins 12 weeks before the average of the (statewide median) RSV RSV season onset and offset from the previous three years. 
+    \item \textbf{By statewide recent-years offset}: prophylaxis administration in a given year begins 24 weeks before the (statewide median) RSV season offset over the previous three years.
 \end{itemize}
 
-As before, both alternate guidelines involve six monthly doses of palivizumab. 
+We then compared those regimens to the one recommended by AAP and to the alternatives we previously devised based on spatial analysis.
+
+As before, all of these three alternate guidelines involved six monthly doses of palivizumab giving 24 weeks of protection. 
 
 \section{Results}
 
@@ -242,22 +374,38 @@ Compared to the statewide median onset of RSV season at \Sexpr{regionOnset("all"
         unprotectedAtStart = (countyPred %>% filter(time==ppxStart))$rsv.cum.fit
         unprotectedAtEnd = (countyPred %>% filter(time==ppxEnd))$rsv.cum.fit
         
-        ggplot(countyPred) +
-            annotate("rect", xmin=ppxStart, xmax=ppxEnd, ymin=-Inf, ymax=+Inf, fill=hsv(1/3, 1, 1, .25)) + 
-            annotate("rect", xmin=countyThresholds$onset.median, xmax=countyThresholds$offset.median, ymin=-Inf, ymax=+Inf, fill=hsv(0, 1, 1, .25)) + 
-            geom_ribbon(aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper, x=time), fill=grey(.25)) + 
-            annotate("segment", x=ppxStart, y=.45, xend=ppxEnd, yend=.45, color=hsv(1/3, 1, .5)) + 
-            annotate("point", x=(ppxStart + ppxEnd) / 2, y=.45, color=hsv(1/3, 1, .5), shape=3) + 
-            annotate("segment", x=countyThresholds$onset.median, y=.55, xend=countyThresholds$offset.median, yend=.55, color=hsv(0, 1, .5)) + 
-            annotate("point", x=(countyThresholds$onset.median + countyThresholds$offset.median) / 2, y=.55, color=hsv(0, 1, .5), shape=3) + 
-            annotate("point", x=ppxStart, y=unprotectedAtStart) + 
-            annotate("point", x=ppxEnd, y=unprotectedAtEnd) + 
-            scale_y_continuous(labels=scales::percent, breaks=seq(0, 1, by=.2), limits=c(0, 1), expand=c(0.05, 0)) +
+        annotation_timespan = function(plot, xmin, xmax, y, color, label) {
+            ymin = y - .01
+            ymax = y + .01
+            yminlabel = y + .01
+            ymaxlabel = y + .11
+            plot + annotation_custom(linesGrob(gp=gpar(col=color)), xmin=xmin, ymin=y, xmax=xmax, ymax=y) + 
+            annotation_custom(linesGrob(gp=gpar(col=color)), xmin=xmin, ymin=ymin, xmax=xmin, ymax=ymax) + 
+            annotation_custom(linesGrob(gp=gpar(col=color, lty="dotted")), xmin=xmin, ymin=0, xmax=xmin, ymax=1) + 
+            annotation_custom(linesGrob(gp=gpar(col=color)), xmin=xmax, ymin=ymin, xmax=xmax, ymax=ymax) + 
+            annotation_custom(linesGrob(gp=gpar(col=color, lty="dotted")), xmin=xmax, ymin=0, xmax=xmax, ymax=1) + 
+#            annotation_custom(linesGrob(gp=gpar(col=color)), xmin=(xmin + xmax) / 2, ymin=y-0.02, xmax=(xmin + xmax) / 2, ymax=y+0.02) + 
+            annotation_custom(textGrob(label, gp=gpar(col=color)), xmin=xmin, xmax=xmax, ymin=yminlabel, ymax=ymaxlabel)
+        }
+        
+        plot = ggplot(countyPred) +
+            geom_ribbon(aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper, x=time), fill=grey(.25))
+        plot = plot %>%
+            annotation_timespan(ppxStart, ppxEnd, 1.05, hsv(1/3, 1, .5), "Prophylaxis") %>%
+            annotation_timespan(countyThresholds$onset.median, countyThresholds$offset.median, -0.05, hsv(0, 1, .5), "RSV Season")
+        plot = plot + 
+            annotate("segment", x=-Inf, y=unprotectedAtStart, xend=ppxStart, yend=unprotectedAtStart, linetype=3) + 
+            annotate("segment", x=-Inf, y=unprotectedAtEnd, xend=ppxEnd, yend=unprotectedAtEnd, linetype=3) + 
+            scale_y_continuous(labels=scales::percent, breaks=seq(0, 1, by=.2), limits=c(0, 1), expand=c(0.2, 0)) +
             labs(x=c) +
             theme(
                 axis.title.y=element_blank(),
                 axis.ticks.x=element_blank()
             )
+        table = ggplot_gtable(ggplot_build(plot))
+        table$layout$clip[table$layout$name == "panel"] <- "off"
+        
+        plot
     }), cols=2)
 @
 \caption{RSV relative cumulative incidence by region}
@@ -292,33 +440,65 @@ Compared to the statewide median onset of RSV season at \Sexpr{regionOnset("all"
 \label{fig:coverageByRegion}
 \end{figure*}
 
+\begin{figure*}[t]
+<<onsetOffsetByYear, warning=FALSE>>=
+    onset = ggplot(stateThresholdsByWindow) +
+        geom_errorbar(aes(ymin=onset.lower, ymax=onset.upper, x=year), width=.25) + 
+        geom_point(aes(y=onset.median, x=year)) + 
+        labs(x="RSV Season Onset")
+    offset = ggplot(stateThresholdsByWindow) +
+        geom_errorbar(aes(ymin=offset.lower, ymax=offset.upper, x=year), width=.25) + 
+        geom_point(aes(y=offset.median, x=year)) + 
+        labs(x="RSV Season Offset")
+    
+    ggplot2.multiplot(plotlist=list(onset, offset), cols=2)
+@
+
+\caption{RSV season onset and offset by three-year superseason.}
+\label{fig:onsetOffsetByYear}
+\end{figure*}
+
 \subsection{RSV season in low-incidence counties begins late}
 
 Meanwhile, in comparison with the statewide RSV season onset and offset, the low-incidence region has RSV season with later onset at \Sexpr{regionOnset("lowIncidence")} weeks (\Sexpr{regionOnsetCI("all", level)}); season offset shows no change from the statewide median. (Figure \ref{fig:seasonByRegion}.)
 
 \subsection{AAP guidelines perform best in low-incidence counties and worst in Fairfield county}
 
-Statewide, our model shows that \Sexpr{regionStrategyCoverage("all", "aap")} of RSV cases (\Sexpr{regionStrategyCoverageCI("all", "aap", level)}) occur during the time when palivizumab is administered according to the AAP guidelines. The AAP guidelines perform better in the low-incidence counties, where \Sexpr{regionStrategyCoverage("lowIncidence", "aap")} cases (\Sexpr{regionStrategyCoverageCI("lowIncidence", "aap", level)}) occur during the prophylaxis time window, but worse in Fairfield county, where \Sexpr{regionStrategyCoverage("Fairfield", "aap")} cases ((\Sexpr{regionStrategyCoverageCI("Fairfield", "aap", level)})) occur during this time. (Table \ref{table:coverageByRegionAAP}.)
+Statewide, our model shows that \Sexpr{regionStrategyCoverage("all", "aap")} of RSV cases (\Sexpr{regionStrategyCoverageCI("all", "aap", level)}) occur while palivizumab, administered according to AAP guidelines, offers protection. The AAP guidelines perform better in the low-incidence counties, where \Sexpr{regionStrategyCoverage("lowIncidence", "aap")} cases (\Sexpr{regionStrategyCoverageCI("lowIncidence", "aap", level)}) occur during the prophylaxis time window, but worse in Fairfield county, where \Sexpr{regionStrategyCoverage("Fairfield", "aap")} cases ((\Sexpr{regionStrategyCoverageCI("Fairfield", "aap", level)})) occur during this time. (Table \ref{table:coverageByRegionAAP}.)
 
-The cause of this is evident in Figure \ref{fig:coverageByRegionAAPInsight}, which shows temporal misalignment between the time window of the RSV season (delineated by median 2.5\% onset and 97.5\% offset in each region), and the time window of AAP prophylaxis guidelines. Fairfield county, owing to its early season onset has disproportionately many cases before prophylaxis administration begins; on the other hand, the low-incidence counties, owing to their late season onset, have their RSV seasons almost entirely contained within the prophylaxis window.
+The cause of this is evident in Figure \ref{fig:coverageByRegionAAPInsight}, which shows temporal misalignment between the time window of the RSV season (delineated by median \Sexpr{seasonThreshold * 100}\%  onset and \Sexpr{(1 - seasonThreshold) * 100}\% offset in each region), and the time window of AAP prophylaxis guidelines. Fairfield county, owing to its early season onset, has disproportionately many cases before prophylaxis administration begins; on the other hand, the low-incidence counties, owing to their late season onset, have their RSV seasons almost entirely contained within the prophylaxis window.
 
-\subsection{All-years alternate guidelines are superior to AAP statewide and in Hartford county, and non-inferior otherwise}
+\subsection{All-years prophylaxis regimens are superior to AAP recommendations statewide and in Hartford county}
 
-The six alternate prophylaxis guidelines based on all-years data (in which prophylaxis time window is determined by statewide or regional all-years RSV season onset or offset), when compared to the AAP guidelines, yield non-inferior results in all regions, and superior results both statewide and in Hartford county. (Figure \ref{fig:coverageByRegion}.)
+The six spatially adjusted prophylaxis guidelines based on all-years data, when compared to the AAP guidelines, yield non-inferior results in all regions, and superior results both statewide and in Hartford county. (Figure \ref{fig:coverageByRegion}.)
 
 Statewide, the AAP guidelines produce prophylaxis coverage for \Sexpr{regionStrategyCoverage("all", "aap")} cases (\Sexpr{regionStrategyCoverageCI("all", "aap", level)}); meanwhile, the guidelines based on all-years statewide onset yield the weakest improvement at \Sexpr{regionStrategyCoverage("all", "stateOnset")} coverage (\Sexpr{regionStrategyCoverageCI("all", "stateOnset", level)}), and other alternate guidelines yield similar results.
 
 In Hartford county, the improvement is more noteworthy. Here, the AAP guidelines cover \Sexpr{regionStrategyCoverage("Hartford", "aap")} of cases (\Sexpr{regionStrategyCoverageCI("Hartford", "aap", level)}); the guidelines based on all-years regional offset generate the weakest improvement to \Sexpr{regionStrategyCoverage("Hartford", "countyOffset")} coverage (\Sexpr{regionStrategyCoverageCI("Hartford", "countyOnset", level)}), and other alternate guidelines are comparable.
 
-In every region, all alternate guidelines based on all-years analysis are non-inferior to AAP guidelines and non-superior to each other. 
+In every region, all alternate regimens based on all-years analysis are non-inferior to the AAP guidelines and non-superior to each other. 
 
-\subsection{Sliding window alternate guidelines are inferior to AAP guidelines in low-incidence counties, and non-superior otherwise.}
+\subsection{RSV season onset and offset is unchanged over time}
 
-Contrariwise, the two strategies based on statewide data produced non-superior results in all regions except for the low-incidence counties, where they produced inferior results. (Figure.)
+Our linear regression of median superseason onset and offset against calendar year (Figure \ref{fig:onsetOffsetByYear}) indicates (at 95\% confidence level) that season onset has not been drifting (\Sexpr{formatDriftCI(onsetByYear, level)}), and neither has season offset (\Sexpr{formatDriftCI(offsetByYear, level)}). 
 
-Due to the non-superiority of statewide sliding-window strategies, regional sliding-window strategies were not evaluated. 
+We did not analyze any long-term patterns, such as cyclicity.
+
+\subsection{Recent-years prophylaxis regimens are non-superior to others.}
+
+The three regimens based on statewide recent-years analysis produced non-superior results in all regions except for the low-incidence counties, where they produced inferior results. (TODO: Figure.) TODO: specifics
+
+Due to the non-superiority of regimens based on statewide recent-years data, we did not evaluate regimens based on regional recent-years data. 
 
 \section{Discussion}
+
+Our model shows that coverage of RSV immunoprophylaxis in high-risk infants in Connecticut can be improved from that provided by the prophylaxis regimen currently recommended by the AAP. 
+
+The simplest such improvement we can propose is to ignore regional variation within Connecticut, and begin prophylaxis throughout Connecticut a month earlier, according to the regimen based on all-years statewide season onset analysis. However --- because our analysis suggests that that regimen might be slightly inferior to the AAP-recommended regimen in counties with low incidence of RSV --- this might lead to a bifurcation, in which clinicians in low-incidence counties would continue following the current AAP guidelines, and in others would adopt the new guidelines. 
+
+Therefore, since an attempt to transition to new state-wide guidelines might effectively result in a transition to county-level guidelines, it would likely be preferable to use our county-level analysis in the first place. With that, our analysis favors the prophylaxis regimen linked to regional RSV season midpoint. Under this regimen, TODO which county uses what, and the net benefit would be XX\% increase in prophylaxis coverage. 
+
+However, that leaves open the question of whether transitioning to such guidelines would be too costly. Although our prophylaxis regimens were specifically chosen to keep fixed the cost of pharmaceuticals, we did not evaluate implementation cost of our proposals; such analysis would be necessary before elevating them from proposals to recommendations.
 
 \end{multicols}
 
