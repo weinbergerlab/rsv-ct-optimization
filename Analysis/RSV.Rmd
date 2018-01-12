@@ -4,7 +4,7 @@ output: html_notebook
 ---
 
 ```{r setup, include=FALSE, error=FALSE, warning=FALSE, message=FALSE}
-install.packages(c("dplyr", "zipcode", "reshape", "mgcv", "ggplot2", "gridExtra", "devtools"))
+install.packages(c("dplyr", "zipcode", "reshape", "mgcv", "ggplot2", "gridExtra", "devtools", "data.table"))
 library(devtools)
 install_github("gavinsimpson/tsgam")
 install_github("kassambara/easyGgplot2")
