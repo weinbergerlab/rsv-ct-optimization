@@ -283,3 +283,70 @@ unprotectedByCounty = fixedStratUnprotectedByCounty %>%
     frac.median=1 - frac.median,
     strat = factor(strat, names(ppxFixedStrategies(NULL)))
   )
+
+# *** State-level sliding window analysis
+
+stateObsByWindow = dataset %>%
+  mutate(time=weeki) %>%
+  group_by(time, year, weekofyear) %>%
+  summarize(rsv=sum(rsv)) %>%
+  as.data.frame()
+
+total = data.frame(time=stateObsByWindow$time, rsv=0)
+
+for (idx in seq(1, slidingWindowDuration)) {
+  total = total %>%
+    inner_join(stateObsByWindow %>%
+                 mutate(time=time + 52 * idx) %>%
+                 select(time, rsv),
+               by="time"
+    ) %>%
+    mutate(rsv=rsv.x + rsv.y) %>%
+    select(time, rsv)
+}
+
+stateObsByWindow = stateObsByWindow %>%
+  select(-rsv) %>%
+  inner_join(total, by="time") %>%
+  group_by(year) %>%
+  mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / sum(rsv)) %>%
+  select(-time) %>%
+  rename(time=weekofyear) %>%
+  filter(year >= min(rsvYears) + slidingWindowDuration) %>%
+  as.data.frame()
+
+rsvWindowYears = unique(stateObsByWindow$year)
+
+statePredByWindow = data.frame()
+stateThresholdsByWindow = data.frame()
+
+for (y in rsvWindowYears) {
+
+  stateYearObs = stateObsByWindow %>% filter(year==y)
+  stateYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=stateYearObs)
+
+  stateYearPred = stateYearModel %>%
+    predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
+
+  stateYearPred = modelTime %>%
+    cbind(data.frame(rsv.fit=stateYearPred$fit, rsv.fit.se=stateYearPred$se.fit)) %>%
+    cbind(stateYearModel %>% outbreak.predict.timeseries(modelTime, outbreak.calc.cum())) %>%
+    rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
+    mutate(year=y)
+
+  statePredByWindow = statePredByWindow %>% rbind(stateYearPred)
+
+  stateYearThresholds = stateYearModel %>%
+    outbreak.predict.scalars(
+      modelTime,
+      outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold)
+    ) %>%
+    mutate(year=y)
+
+  stateThresholdsByWindow = stateThresholdsByWindow %>% rbind(stateYearThresholds)
+}
+
+# *** Season drift analysis
+
+onsetByYear = lm(onset.median ~ year, data=stateThresholdsByWindow)
+offsetByYear = lm(onset.median ~ year, data=stateThresholdsByWindow)
