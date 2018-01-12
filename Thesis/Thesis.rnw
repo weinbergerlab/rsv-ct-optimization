@@ -1,10 +1,11 @@
 % Agenda
-%  * Is coverage the right word
+%  * Is coverage the right word -> preventable fraction
 %  * Round time periods pre-coverage analysis in order to make conclusion make sense
 %  * Added guidelines based on season midpoint
 %  * Nothing in linear regression of onset/offset
 %  * What level of feedback am I looking for
 %  * Publication-quality not a goal for Jan 26
+%  * Ed Goldstein and Mark Ipswitch
 % 
 % Todo
 %  * Change how mod 52-1/7 is done
