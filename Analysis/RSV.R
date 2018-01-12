@@ -13,6 +13,8 @@ set.seed(0)
 
 simulations = 20
 
+# *** Data munging helpers
+
 # RSV week-of-year is -26..25, with week 0 being first week of the year
 rsvWeek = function(weeki) {
   (weeki + 26) %% 52 - 26
@@ -32,11 +34,16 @@ summarizeCountyGroups = function(data) {
   )
 }
 
+# *** Analysis parameters
+
 lowIncidenceCounties = c("Tolland", "Windham", "Middlesex", "Litchfield", "New London")
 eps = .05
 level = .95
 seasonThreshold = 0.025
 ppxDuration = 24 # weeks
+slidingWindowDuration = 3 # Years
+
+# *** Load / munge data
 
 # Load data
 dataset = fread("../ct rsv time series.csv", sep=",", header=TRUE, colClasses=c("patzip"="character"))
@@ -91,7 +98,9 @@ startDate = min(dataset$adate)
 endDate = max(dataset$adate)
 
 rsvTime = dataset$weekofyear
-modelTime = data.frame(time=seq(min(rsvTime) - 1 + eps, max(rsvTime), eps))
+modelTime = seq(min(rsvTime) - 1 + eps, max(rsvTime), eps)
+
+# *** Prophyaxis assessment helpers
 
 evalStrategy = function(start, end, time) {
   as.numeric((time > rsvWeek(start)) & (time < rsvWeek(end)))
@@ -105,6 +114,7 @@ evalOffsetStrategy = function(end, time) {
   as.numeric((time > rsvWeek(end - ppxDuration)) & (time < rsvWeek(end)))
 }
 
+# *** Prophylaxis regimen definitions
 
 # Return a list of prophylaxis strategies for a county. If c is NULL, then it returns a list of prophylaxis strategy names
 ppxFixedStrategies = function(c=NULL) {
@@ -143,36 +153,58 @@ ppxFixedStrategies = function(c=NULL) {
   )
 }
 
-# Estimate % left unprotected by prophylaxis strategy
-outbreak.calc.unprotected = function(model, params, time, strategies) {
-  # Get model predictions for given (randomized) param values
-  time = time + 0.5
-  predictors = model %>% predict(data.frame(time=time), type="lpmatrix")
-  fit = predictors %*% params
+ppxSlidingStrategies = function(c=NULL, y=NULL) {
+  if (!is.null(y) && !is.null(c)) {
+    stateSlidingOnset = (stateThresholdsByWindow %>% filter(year==y))$onset.median
+    stateSlidingOffset = (stateThresholdsByWindow %>% filter(year==y))$offset.median
+  }
 
-  # Map spline fit back to data
-  fit = fit %>% model$family$linkinv()
-
-  # Calculate total # of unprotected cases for each strategy
-  unprotected = as.data.frame(lapply(strategies, function(strat) {
-    sum(fit * (1 - sapply(time, strat)))
-  }))
-
-  # Calculate total # of cases
-  total = sum(fit)
-
-  unprotected %>%
-    rename_all(funs(
-      sprintf("%s.count", .)
-    )) %>%
-    cbind(
-      (unprotected / total) %>%
-        rename_all(funs(
-          sprintf("%s.frac", .)
-        ))
-    ) %>%
-    mutate(total=total)
+  list(
+    stateSlidingOnset=function(time) {
+      evalOnsetStrategy(stateSlidingOnset, time)
+    },
+    stateSlidingOffset=function(time) {
+      evalOffsetStrategy(stateSlidingOffset, time)
+    }
+  )
 }
+
+# *** Prophylaxis coverage estimation
+
+# Estimate % left unprotected by prophylaxis strategy
+outbreak.calc.unprotected = function(strategies) {
+  function(model, params, time) {
+    # Get model predictions for given (randomized) param values
+    time = time + 0.5
+    predictors = model %>% predict(data.frame(time=time), type="lpmatrix")
+    fit = predictors %*% params
+
+    # Map spline fit back to data
+    fit = fit %>% model$family$linkinv()
+
+    # Calculate total # of unprotected cases for each strategy
+    unprotected = as.data.frame(lapply(strategies, function(strat) {
+      sum(fit * (1 - sapply(time, strat)))
+    }))
+
+    # Calculate total # of cases
+    total = sum(fit)
+
+    unprotected %>%
+      rename_all(funs(
+        sprintf("%s.count", .)
+      )) %>%
+      cbind(
+        (unprotected / total) %>%
+          rename_all(funs(
+            sprintf("%s.frac", .)
+          ))
+      ) %>%
+      mutate(total=total)
+  }
+}
+
+# *** State-level all-years analysis
 
 stateObs = dataset %>%
   rename(time=weekofyear) %>%
@@ -184,25 +216,23 @@ stateObs = dataset %>%
 stateModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=stateObs)
 
 statePred = stateModel %>%
-  predict(type="response", newdata=modelTime, se.fit=TRUE)
+  predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
 
 statePred = modelTime %>%
   cbind(data.frame(rsv.fit=statePred$fit, rsv.fit.se=statePred$se.fit)) %>%
   cbind(stateModel %>%
-          outbreak.predict.timeseries(modelTime, function(model, params, newdata) {
-            outbreak.calc.cum(model, params, newdata)
-          }, nsim=simulations)
+          outbreak.predict.timeseries(modelTime, outbreak.calc.cum(), nsim=simulations)
   ) %>%
   rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median)
 
 stateThresholds = stateModel %>%
   outbreak.predict.scalars(
     modelTime,
-    function(model, params, newdata) {
-      outbreak.calc.thresholds(model, params, newdata$time, onset=seasonThreshold, offset=1 - seasonThreshold)
-    },
+    outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold),
     nsim=simulations
   )
+
+# *** Regional all-years analysis
 
 obsByCounty = dataset %>%
   rename(time=weekofyear) %>%
@@ -224,16 +254,14 @@ for (c in levels(obsByCounty$county)) {
   countyModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=countyObs)
 
   countyPred = countyModel %>%
-    predict(type="response", newdata=modelTime, se.fit=TRUE)
+    predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
 
-  countyPred = modelTime %>%
+  countyPred = data.frame(time=modelTime) %>%
     cbind(data.frame(rsv.fit=countyPred$fit, rsv.fit.se=countyPred$se.fit)) %>%
     cbind(countyModel %>%
             outbreak.predict.timeseries(
               modelTime,
-              function(model, params, newdata) {
-                outbreak.calc.cum(model, params, newdata)
-              },
+              outbreak.calc.cum(),
               nsim=simulations
             )
     ) %>%
@@ -245,9 +273,7 @@ for (c in levels(obsByCounty$county)) {
   countyThresholds = countyModel %>%
     outbreak.predict.scalars(
       modelTime,
-      function(model, params, newdata) {
-        outbreak.calc.thresholds(model, params, newdata$time, onset=seasonThreshold, offset=1 - seasonThreshold)
-      },
+      outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold),
       nsim=simulations
     ) %>%
     mutate(county=factor(c, levels=levels(obsByCounty$county)))
@@ -257,9 +283,7 @@ for (c in levels(obsByCounty$county)) {
   countyUnprotected = countyModel %>%
     outbreak.predict.scalars(
       modelTime,
-      function(model, params, newdata) {
-        outbreak.calc.unprotected(model, params, newdata$time, ppxFixedStrategies(c))
-      },
+      outbreak.calc.unprotected(ppxFixedStrategies(c)),
       nsim=simulations
     ) %>%
     mutate(county=factor(c, levels=levels(obsByCounty$county)))

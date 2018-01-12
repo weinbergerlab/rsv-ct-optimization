@@ -443,11 +443,11 @@ for (c in levels(obsByCountyYear$county)) {
     countyYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=countyYearObs)
     
     countyYearPred = countyYearModel %>% 
-      predict(type="response", newdata=modelTime, se.fit=TRUE)
+      predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
 
-    countyYearPred = modelTime %>% 
+    countyYearPred = data.frame(time=modelTime) %>% 
       cbind(data.frame(rsv.fit=countyYearPred$fit, rsv.fit.se=countyYearPred$se.fit)) %>%
-      cbind(countyYearModel %>% outbreak.predict.timeseries(modelTime, function(model, params, newdata) { outbreak.calc.cum(model, params, newdata) })) %>%
+      cbind(countyYearModel %>% outbreak.predict.timeseries(modelTime, outbreak.calc.cum())) %>%
       rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
       mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
   
@@ -456,7 +456,7 @@ for (c in levels(obsByCountyYear$county)) {
     countyYearThresholds = countyYearModel %>%
       outbreak.predict.scalars(
         modelTime,
-        function(model, params, newdata) { outbreak.calc.thresholds(model, params, newdata$time, onset=seasonThreshold, offset=1 - seasonThreshold) }
+        outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold)
       ) %>%
       mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
 
@@ -466,9 +466,7 @@ for (c in levels(obsByCountyYear$county)) {
       countyYearUnprotectedSim = countyYearModel %>%
         outbreak.predict.scalars.sim(
           modelTime,
-          function(model, params, newdata) { 
-            outbreak.calc.unprotected(model, params, newdata$time, ppxSlidingStrategies(c, y))
-          }
+          outbreak.calc.unprotected(ppxSlidingStrategies(c, y))
         ) %>%
         mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
       
