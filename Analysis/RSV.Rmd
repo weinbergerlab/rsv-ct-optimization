@@ -34,97 +34,8 @@ plots = lapply(rsvCounties, function(c) {
 })
 
 ggplot2.multiplot(plotlist=plots, cols=4)
-
 ```
 
-```{r}
-ppxSlidingStrategies = function(c=NULL, y=NULL) {
-  if (!is.null(y) && !is.null(c)) {
-    stateSlidingOnset = (stateThresholdsByWindow %>% filter(year==y))$onset.median
-    stateSlidingOffset = (stateThresholdsByWindow %>% filter(year==y))$offset.median
-  }
-
-  list(
-    stateSlidingOnset=function(time) {
-      evalOnsetStrategy(stateSlidingOnset, time)
-    },
-    stateSlidingOffset=function(time) {
-      evalOffsetStrategy(stateSlidingOffset, time)
-    }
-  )
-}
-
-slidingWindowDuration = 3 # Years
-
-```
-
-```{r}
-stateObsByWindow = dataset %>% 
-  mutate(time=weeki) %>% 
-  group_by(time, year, weekofyear) %>% 
-  summarize(rsv=sum(rsv)) %>%
-  as.data.frame()
-
-total = data.frame(time=stateObsByWindow$time, rsv=0)
-
-for (idx in seq(1, slidingWindowDuration)) {
-  total = total %>%
-    inner_join(stateObsByWindow %>%
-                 mutate(time=time + 52 * idx) %>%
-                 select(time, rsv),
-               by="time"
-               ) %>%
-    mutate(rsv=rsv.x + rsv.y) %>%
-    select(time, rsv)
-}
-
-stateObsByWindow = stateObsByWindow %>%
-  select(-rsv) %>%
-  inner_join(total, by="time") %>%
-  group_by(year) %>%
-  mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / sum(rsv)) %>% 
-  select(-time) %>%
-  rename(time=weekofyear) %>%
-  filter(year >= min(rsvYears) + slidingWindowDuration) %>%
-  as.data.frame()
-
-rsvWindowYears = unique(stateObsByWindow$year)
-
-statePredByWindow = data.frame()
-stateThresholdsByWindow = data.frame()
-
-progress = txtProgressBar(max=length(rsvWindowYears), style=3)
-idx = 0
-
-for (y in rsvWindowYears) {
-
-  stateYearObs = stateObsByWindow %>% filter(year==y)
-  stateYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=stateYearObs)
-  
-  stateYearPred = stateYearModel %>% 
-    predict(type="response", newdata=modelTime, se.fit=TRUE)
-
-  stateYearPred = modelTime %>% 
-    cbind(data.frame(rsv.fit=stateYearPred$fit, rsv.fit.se=stateYearPred$se.fit)) %>%
-    cbind(stateYearModel %>% outbreak.predict.timeseries(modelTime, function(model, params, newdata) { outbreak.calc.cum(model, params, newdata) })) %>%
-    rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
-    mutate(year=y)
-
-  statePredByWindow = statePredByWindow %>% rbind(stateYearPred)
-
-  stateYearThresholds = stateYearModel %>%
-    outbreak.predict.scalars(
-      modelTime,
-      function(model, params, newdata) { outbreak.calc.thresholds(model, params, newdata$time, onset=seasonThreshold, offset=1 - seasonThreshold) }
-    ) %>%
-    mutate(year=y)
-
-  stateThresholdsByWindow = stateThresholdsByWindow %>% rbind(stateYearThresholds)
-
-  idx = idx + 1
-  setTxtProgressBar(progress, idx)
-}
-```
 
 ```{r}
 makeStateWindowPlots = function(c, plotter) {
@@ -240,17 +151,6 @@ ggplot2.multiplot(plotlist=makeStateWindowPlots(rsvWindowYears, function(y, stat
 
 ```
 
-```{r}
-onset = ggplot(stateThresholdsByWindow) +
-  geom_errorbar(aes(ymin=onset.lower, ymax=onset.upper, x=year), width=.25) + 
-  labs(x="RSV Season Onset")
-offset = ggplot(stateThresholdsByWindow) +
-  geom_errorbar(aes(ymin=offset.lower, ymax=offset.upper, x=year), width=.25) + 
-  labs(x="RSV Season Offset")
-
-ggplot2.multiplot(plotlist=list(onset, offset), cols=2)
-
-```
 
 
 ```{r}
