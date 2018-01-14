@@ -5,6 +5,7 @@ options(tikzDefaultEngine='pdftex')
 
 plotWidth=3.1
 plotHeight=2.5
+plotTextBaseSize=8
 
 # Formatting utilities
 formatDate = function(date) {
@@ -92,6 +93,10 @@ formatDriftCI = function(lm, level, negate=TRUE) {
 latexPercent = function(f) {
   sprintf("%.0f\\%%", f * 100)
 }
+
+onsetOffsetLabeller = labeller(
+  variable=c(`onset` = "RSV season onset", `offset` = "RSV season offset")
+)
 
 # Counties which we plot (so, not individual low-incidence counties)
 countiesForPlots = thresholdsByCounty$county[!thresholdsByCounty$county %in% lowIncidenceCounties]

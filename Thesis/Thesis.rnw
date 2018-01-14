@@ -11,11 +11,21 @@
 @
 
 <<load>>=
+library(reshape)
+library(dplyr)
+library(mgcv)
+library(outbreakpredict)
+library(zipcode)
+library(ggplot2)
+library(easyGgplot2)
+library(data.table)
+library(splitstackshape)
+
 read_chunk("../Analysis/RSV.R")
 read_chunk("../Thesis/Thesis.R")
 @
 
-<<external>>=
+<<external, cache=TRUE>>=
 @
 
 <<util>>=
@@ -92,6 +102,15 @@ read_chunk("../Thesis/Thesis.R")
 \thispagestyle{empty}
 \clearpage
 
+\tableofcontents
+\clearpage
+
+\listoftables
+\clearpage
+
+\listoffigures
+\clearpage
+
 \begin{multicols}{2}
 
 \section{Introduction}
@@ -100,7 +119,7 @@ read_chunk("../Thesis/Thesis.R")
 
 Respiratory syncytial virus (RSV) causes upper respiratory infections in humans of all ages. In adults, RSV infection is typically asymptomatic or gives rise to mild respiratory illness.
 
-In children, however, the infection often incites more serious respiratory illness, sometimes leading to hospitalization.
+In children, however, the infection often incites more serious respiratory illness, making RSV a leading cause of hospitalization among infants.\cite{Hall:2009gi,Hall:2013jo,Zhou:2012ho,Boyce:2000gz}
 
 Risk factors for serious illness and hospitalization due to RSV infection in children include prematurity, chronic lung disease of prematurity, congenital heart disease, anatomic pulmonary abnormalities, neuromuscular disorders, trisomy 21, immunocompromised status, and cystic fibrosis. 
 
@@ -112,17 +131,17 @@ TODO
 
 \subsection{RSV immunoprophylaxis}
 
-Immunoprophylaxis with palivizumab, a monoclonal antibody medication, has been approved for prevention of RSV infection since 1998. Palivizumab is administered via intramuscular injection, and requires monthly dosing. Its price is \$1500-\$3000 per dose.
+Immunoprophylaxis with palivizumab, a monoclonal antibody medication, has been approved for prevention of RSV infection since 1998. Palivizumab is administered via intramuscular injection, and requires monthly dosing.\cite{Andabaka:2013dr} Its price is \$1500-\$3000 per dose.\cite{Hampp:2011ju}
 
-Palivizumab has been found to be effective in reducing hospitalizations due to RSV; in double-blinded trials in high-risk infants, it reduced hospitalization rate by 45-55\% compared to placebo.
+Palivizumab has been found to be effective in reducing hospitalizations due to RSV; in double-blinded trials in high-risk infants, it reduced hospitalization rate by 45-55\% compared to placebo.\cite{Group:1998ih,Feltes:2003wm}
 
-Owing to the high cost, the American Academy of Pediatrics (AAP) recommends palivizumab immunoprophylaxis only for high-risk infants, and only during RSV season. These guidelines were most recently revised in 2014.
+Owing to the high cost, the American Academy of Pediatrics (AAP) recommends palivizumab immunoprophylaxis only for high-risk infants, and only during RSV season.\cite{Anonymous:1998up,AmericanAcademyofPediatricsCommitteeonInfectiousDiseasesandCommitteeonFetusandNewborn:2003ug,AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} These guidelines were most recently revised in 2014.
 
-In their guidelines, the AAP acknowledges the potential significance of spatial and temporal variation in RSV incidence, but does not recommend local variance from nation-wide prophylaxis guidelines outside of Florida. 
+In their guidelines, the AAP acknowledges the potential significance of spatial and temporal variation in RSV incidence, but does not recommend local variance from nation-wide prophylaxis guidelines outside of Florida.\cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} 
 
 \subsection{Spatio-temporal variability of RSV in Connecticut}
 
-The Department of Public Health of the state of Connecticut, via its Office of Health Care Access (OHCA), maintains a database of all hospitalizations in every non-federal short-stay acute-care general hospital in the state. This database has previously been used to show regional variability in time of peak RSV incidence within Connecticut.
+The Department of Public Health of the state of Connecticut, via its Office of Health Care Access (OHCA), maintains a database of all hospitalizations in every non-federal short-stay acute-care general hospital in the state. Previous analysis of this database has shown regional variability in time of peak RSV incidence within Connecticut.\cite{Noveroske:y4fi3188}
 
 No prior research is available regarding year-to-year variation in timing of RSV season in Connecticut.
 
@@ -279,7 +298,7 @@ Compared to the statewide median onset of RSV season at \Sexpr{regionOnset("all"
         
     tikz("figure/seasonByRegion.tex", width=plotWidth, height=plotHeight, pointsize=10)
     ggplot(data) +
-        theme_light(base_size=10) +
+        theme_light(base_size=plotTextBaseSize) +
         geom_errorbar(aes(ymin=lower, ymax=upper, x=county), width=.1) + 
         geom_point(aes(y=median, x=county)) + 
         labs(aes(x=variable)) +
@@ -310,7 +329,7 @@ Statewide, our model shows that \Sexpr{regionStrategyCoverage("all", "aap")} of 
 <<coverageByRegionAAP, results='hide'>>=
     tikz("figure/coverageByRegionAAP.tex", width=plotWidth, height=plotHeight, pointsize=10)
     ggplot(unprotectedByCounty %>% filter(strat=="aap") %>% filter(county %in% countiesForPlots)) +
-        theme_light(base_size=10) +
+        theme_light(base_size=plotTextBaseSize) +
         geom_errorbar(aes(ymax=frac.upper, ymin=frac.lower, x=county), width=.1) + 
         geom_point(aes(y=frac.median, x=county)) + 
         scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
@@ -398,7 +417,7 @@ In every region, all alternate regimens based on all-years analysis are non-infe
         filter(county %in% countiesForPlots)
     tikz("figure/coverageByRegionRegimen.tex", width=plotWidth, height=plotHeight, pointsize=10)
     ggplot(data) +
-        theme_light(base_size=10) +
+        theme_light(base_size=plotTextBaseSize) +
         scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
         scale_linetype_manual(values=c(1, 3, 4, 2, 3, 4, 2)) + 
         scale_color_manual(values=c(grey(0), rep(hsv(0, 1, 1), 3), rep(hsv(4/6, 1, 1), 3))) + 
@@ -439,10 +458,10 @@ Our linear regression of median surseason onset and offset against surseason yea
         
     tikz("figure/onsetOffsetByYear.tex", width=plotWidth, height=plotHeight, pointsize=10)
     ggplot(data) +
-        theme_light(base_size=10) +
+        theme_light(base_size=plotTextBaseSize) +
         geom_errorbar(aes(ymin=lower, ymax=upper, x=year), width=.1) + 
         geom_point(aes(y=median, x=year)) +
-        facet_wrap(~variable, ncol=1, scales="free_y", labeller=onsetOffsetLebeller) +
+        facet_wrap(~variable, ncol=1, scales="free_y", labeller=onsetOffsetLabeller) +
         scale_x_continuous(breaks=seq(1990, 2020, by=5)) +
         labs(y="Surveillance week") + 
         theme(
@@ -452,7 +471,7 @@ Our linear regression of median surseason onset and offset against surseason yea
     dev.off()
 @
 \input{figure/onsetOffsetByYear.tex}
-\caption{RSV season onset and offset by three-year superseason.}
+\caption{RSV season onset and offset by three-year surseason.}
 \label{fig:onsetOffsetByYear}
 \end{figure}
 
@@ -473,5 +492,7 @@ Therefore, since an attempt to transition to new state-wide guidelines might eff
 However, that leaves open the question of whether transitioning to such guidelines would be too costly. Although our prophylaxis regimens were specifically chosen to keep fixed the cost of pharmaceuticals, we did not evaluate implementation cost of our proposals; such analysis would be necessary before elevating them from proposals to recommendations.
 
 \end{multicols}
+
+\printbibliography[title={Bibliography}] % Print the bibliography, section title in curly brackets
 
 \end{document}
