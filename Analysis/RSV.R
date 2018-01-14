@@ -1,14 +1,4 @@
 # ---- external ----
-library(reshape)
-library(dplyr)
-library(mgcv)
-library(outbreakpredict)
-library(zipcode)
-library(ggplot2)
-library(easyGgplot2)
-library(data.table)
-library(splitstackshape)
-
 data(zipcode)
 set.seed(0)
 
