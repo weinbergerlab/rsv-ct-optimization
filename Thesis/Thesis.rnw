@@ -49,7 +49,12 @@ read_chunk("../Thesis/Thesis.R")
 \titleformat{\paragraph}{\normalfont\normalsize\bfseries}{}{0em}{}
 \titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{0em}
 
-\newcommand{\abstractsection}[1]{\makebox[1in][l]{\textbf{#1}}}
+\usepackage{hanging}
+
+\newlength\abstractindent
+\setlength\abstractindent{1in}
+\newcommand{\abstractsection}[1]{\hangpara{\abstractindent}{1}\makebox[1in][l]{\textbf{\textsc{#1}}}}
+\newcommand{\abstractpara}{\hskip\abstractindent\hskip\baseparindent}
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
@@ -70,6 +75,8 @@ read_chunk("../Thesis/Thesis.R")
 
 \begin{document}
 
+\newlength\baseparindent
+\setlength\baseparindent{\parindent}
 \begingroup
 \setlength\parindent{0em}
 
@@ -79,17 +86,24 @@ read_chunk("../Thesis/Thesis.R")
 \clearpage
 \endgroup
 
-\begin{abstract}
+\section*{\centerline{Abstract}}
+\begin{hangparas}{\abstractindent}{1}
 
-\abstractsection{Background} Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in young infants. Immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to immunprophylaxis regimen outside of Florida. 
+\abstractsection{Background}Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in young infants. Immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to immunprophylaxis regimen outside of Florida. 
 
-\abstractsection{Methods} We describe a generalized additive model of RSV incidence using cubic cyclic penalized splines and apply that model to hospital admissions records from Connecticut between \Sexpr{formatDate(startDate)} and \Sexpr{formatDate(endDate)} to estimate fraction of RSV cases in Connecticut preventable by immunoprophylaxis administered according to the AAP guidelines. We also formulate several alternate immunoprophylaxis regimens with the same net pharmaceutical cost, estimate the fraction preventable by those alternate regimens.
+\abstractsection{Methods}We describe a generalized additive model of RSV incidence using cubic cyclic penalized splines and apply that model to hospital admissions records from Connecticut between \Sexpr{formatDate(startDate)} and \Sexpr{formatDate(endDate)} to estimate the fraction of RSV cases in Connecticut preventable by immunoprophylaxis administered according to the AAP guidelines. We also formulate several alternate immunoprophylaxis regimens with the same net pharmaceutical cost, and estimate the fraction preventable by those alternate regimens.
 
-\abstractsection{Results} At 95\% confidence level, we found alternate regimens that account for spatial variability of RSV incidence at the county level to have superior coverage (to that of the AAP-recommended regimen) in some regions of Connecticut, and non-inferior coverage in other regions. We also found alternate regimens that account for temporal RSV variability at the annual level to have non-superior coverage to our spatially-adjusted regimens. Overall, we found our best-performing spatially-adjusted alternate to AAP guidelines to provide a XX\% statewide increase in RSV prophylaxis coverage over the AAP regimen.
+\abstractsection{Results}At \Sexpr{level * 100}\% confidence level, we found that, when it comes to the fraction of RSV cases preventable by an immunoprophylaxis regimen, regimens adjusted for spatial variation in incidence at the county level have superior preventable fraction (than the AAP-recommended regimen) in some regions of Connecticut, and non-inferior preventable fraction in other regions. However, when those regimens were modified to accommodate practicable calendrical boundaries (weekly, biweekly, and monthly), their gains rapidly diminished.
 
-\abstractsection{Conclusion} We conclude that the increased prophylaxis coverage provided by regimens based on our county-level spatial analysis warrants further analysis to determine whether the potential reduction in hospitalization rate is nullified by the potential increase in implementation cost. Our temporal analysis at the annual level showed no additional benefit beyond the spatial analysis, while simultaneously increasing implementation complexity. Overall, we recommend county-level spatial analysis of RSV incidence as the starting point for RSV immunoprophylaxis optimization in Connecticut. 
-    
-\end{abstract}
+\abstractpara{}We also found that alternate regimens adjusted for temporal variation in incidence at the annual level to have non-superior preventable fraction to our spatially-adjusted regimens.
+
+\abstractpara{}Overall, we found our best-performing spatially-adjusted practicable alternate to the AAP guidelines to be based on regional RSV season midpoint with biweekly rounding, and to provide a statewide increase in preventable fraction from \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) to \Sexpr{regionStrategyCoverage("all", "countyMiddle", 2)} (\Sexpr{regionStrategyCoverageCI("all", "countyMiddle", 2, level)}).
+
+\abstractsection{Conclusion}We conclude that the increased preventable fraction provided by prophylaxis regimens based on our county-level spatial analysis warrants further analysis to determine whether the potential reduction in hospitalization rate is nullified by the potential increase in implementation cost. Our temporal analysis at the annual level showed no additional benefit beyond the spatial analysis, while simultaneously increasing implementation complexity.
+
+\abstractpara{}Overall, we recommend county-level spatial analysis of RSV incidence as the starting point for RSV immunoprophylaxis optimization in Connecticut. 
+
+\end{hangparas}
 
 \thispagestyle{empty}
 \clearpage
