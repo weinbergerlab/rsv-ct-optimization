@@ -1,3 +1,14 @@
+# ---- libraries ----
+library(reshape)
+library(dplyr)
+library(mgcv)
+library(outbreakpredict)
+library(zipcode)
+library(ggplot2)
+library(easyGgplot2)
+library(data.table)
+library(splitstackshape)
+
 # ---- external ----
 data(zipcode)
 set.seed(0)
@@ -5,11 +16,6 @@ set.seed(0)
 simulations = 20
 
 # *** Data munging helpers
-
-# RSV week-of-year is -26..25, with week 0 being first week of the year
-rsvWeek = function(weeki) {
-  (weeki + 26) %% 52 - 26
-}
 
 # Augment a (county, time, rsv) data frame with rows for regions consisting of >1 county
 summarizeCountyGroups = function(data) {
@@ -33,22 +39,35 @@ level = .95
 seasonThreshold = 0.025
 ppxDuration = 24 # weeks
 slidingWindowDuration = 3 # Years
+ppxRounding = c(0, 1, 2, 4)
 
 # *** Load / munge data
 
 # Load data
-dataset = fread("../ct rsv time series.csv", sep=",", header=TRUE, colClasses=c("patzip"="character"))
+admissions = fread("../ct rsv time series.csv", sep=",", header=TRUE, colClasses=c("patzip"="character"))
+
+epiyear = function(date) {
+  ifelse(month(date) > 6, year(date) + 1, year(date))
+}
+
+epiyday = function(date) {
+  as.numeric(date - as.Date(ISOdate(epiyear(date) - 1, 6, 30)))
+}
+
+epiweek = function(date) {
+  floor((epiyday(date) - 1) / 7) + 1
+}
 
 # Add week-of-year, with zero = first week of January, drop first 5.5 years because of coding differences
-dataset = dataset %>%
+dataset = admissions %>%
   mutate(
-    weekiadj=round(dataset$weeki * 364 / 365.25),
-    weekofyear=rsvWeek(weekiadj),
-    year=1990 + (weekiadj + 26) %/% 52,
-    adate=as.Date(adate, "%d%b%Y")
+    adate=as.Date(adate, "%d%b%Y"),
+    epiyear=epiyear(adate),
+    epiyday=epiyday(adate),
+    epiweek=epiweek(adate)
   ) %>%
-  filter(weeki > 5.5*52) %>%
-  filter(weeki <= 22.5*52)
+  filter(epiyear >= 1996, epiyear <= 2013) %>%
+  select(patzip, adate, weeki, rsv, epiyear, epiyday, epiweek)
 # Add state based on zipcode and drop everything not in CT
 zipState = zipcode %>% select(zip, state)
 dataset = dataset %>%
@@ -67,9 +86,10 @@ totalRSVByCounty = dataset %>%
   mutate(county=factor(county, county))
 
 rsvCounties = totalRSVByCounty$county
-rsvYears = sort(unique(dataset$year))
-rsvWeekRange = sort(unique(dataset$weeki))
-rsvWeekOfYearRange = sort(unique(dataset$weekofyear))
+rsvEpiYears = sort(unique(dataset$epiyear))
+rsvEpiWeekRange = sort(unique(dataset$epiweek))
+
+highIncidenceCounties = rsvCounties[!rsvCounties %in% lowIncidenceCounties]
 
 dataset = dataset %>%
   mutate(county=factor(county, levels=levels(rsvCounties)))
@@ -88,27 +108,31 @@ dataset = dataset %>%
 startDate = min(dataset$adate)
 endDate = max(dataset$adate)
 
-rsvTime = dataset$weekofyear
+rsvTime = dataset$epiweek
 modelTime = seq(min(rsvTime) - 1 + eps, max(rsvTime), eps)
 
 # *** Prophyaxis assessment helpers
 
-evalStrategy = function(start, end, time) {
-  as.numeric((time > rsvWeek(start)) & (time < rsvWeek(end)))
+evalStrategy = function(start, end, time, rounding) {
+  if (rounding > 0) {
+    start = rounding * round(start / rounding)
+    end = rounding * round(end / rounding)
+  }
+  as.numeric((time >= start) & (time < end))
 }
 
-evalOnsetStrategy = function(start, time) {
-  as.numeric((time > rsvWeek(start)) & (time < rsvWeek(start + ppxDuration)))
+evalOnsetStrategy = function(start, time, rounding=0) {
+  evalStrategy(start, start + ppxDuration, time, rounding)
 }
 
-evalOffsetStrategy = function(end, time) {
-  as.numeric((time > rsvWeek(end - ppxDuration)) & (time < rsvWeek(end)))
+evalOffsetStrategy = function(end, time, rounding=0) {
+  evalStrategy(end - ppxDuration, end, time, rounding)
 }
 
 # *** Prophylaxis regimen definitions
 
 # Return a list of prophylaxis strategies for a county. If c is NULL, then it returns a list of prophylaxis strategy names
-ppxFixedStrategies = function(c=NULL) {
+ppxFixedStrategies = function(c=NULL, rounding=0) {
   stateOnset = stateThresholds$onset.median
   stateOffset = stateThresholds$offset.median
 
@@ -118,41 +142,43 @@ ppxFixedStrategies = function(c=NULL) {
   }
 
   list(
-    # never=function(time) { 0 },
-    # always=function(time) { 1 },
-    aap=function(time) {
-      evalOnsetStrategy(strptime("11-15", format="%m-%d")$yday / 7, time)
-    },
     stateOnset=function(time) {
-      evalOnsetStrategy(stateOnset, time)
+      evalOnsetStrategy(stateOnset, time, rounding)
     },
     stateMiddle=function(time) {
-      evalOnsetStrategy((stateOnset + stateOffset - ppxDuration) / 2, time)
+      evalOnsetStrategy((stateOnset + stateOffset - ppxDuration) / 2, time, rounding)
     },
     stateOffset=function(time) {
-      evalOffsetStrategy(stateOffset, time)
+      evalOffsetStrategy(stateOffset, time, rounding)
     },
     countyOnset=function(time) {
-      evalOnsetStrategy(countyOnset, time)
+      evalOnsetStrategy(countyOnset, time, rounding)
     },
     countyMiddle=function(time) {
-      evalOnsetStrategy((countyOnset + countyOffset - ppxDuration) / 2, time)
+      evalOnsetStrategy((countyOnset + countyOffset - ppxDuration) / 2, time, rounding)
     },
     countyOffset=function(time) {
-      evalOffsetStrategy(countyOffset, time)
+      evalOffsetStrategy(countyOffset, time, rounding)
+    },
+    aap=function(time) {
+      # Epi week 20 starts Nov 12, 13, 14, 15, 16, 17, or 18
+      evalOnsetStrategy(20, time, 0)
     }
   )
 }
 
 ppxSlidingStrategies = function(c=NULL, y=NULL) {
   if (!is.null(y) && !is.null(c)) {
-    stateSlidingOnset = (stateThresholdsByWindow %>% filter(year==y))$onset.median
-    stateSlidingOffset = (stateThresholdsByWindow %>% filter(year==y))$offset.median
+    stateSlidingOnset = (stateThresholdsByWindow %>% filter(epiyear==y))$onset.median
+    stateSlidingOffset = (stateThresholdsByWindow %>% filter(epiyear==y))$offset.median
   }
 
   list(
     stateSlidingOnset=function(time) {
       evalOnsetStrategy(stateSlidingOnset, time)
+    },
+    stateSlidingMiddle=function(time) {
+      evalOnsetStrategy((stateSlidingOnset + stateSlidingOffset - ppxDuration) / 2, time)
     },
     stateSlidingOffset=function(time) {
       evalOffsetStrategy(stateSlidingOffset, time)
@@ -198,7 +224,7 @@ outbreak.calc.unprotected = function(strategies) {
 # *** State-level all-years analysis
 
 stateObs = dataset %>%
-  rename(time=weekofyear) %>%
+  rename(time=epiweek) %>%
   group_by(time) %>%
   summarize(rsv=sum(rsv)) %>%
   mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / sum(rsv)) %>%
@@ -212,7 +238,7 @@ statePred = stateModel %>%
 statePred = modelTime %>%
   cbind(data.frame(rsv.fit=statePred$fit, rsv.fit.se=statePred$se.fit)) %>%
   cbind(stateModel %>%
-          outbreak.predict.timeseries(modelTime, outbreak.calc.cum(), nsim=simulations)
+    outbreak.predict.timeseries(modelTime, outbreak.calc.cum(), nsim=simulations)
   ) %>%
   rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median)
 
@@ -226,7 +252,7 @@ stateThresholds = stateModel %>%
 # *** Regional all-years analysis
 
 obsByCounty = dataset %>%
-  rename(time=weekofyear) %>%
+  rename(time=epiweek) %>%
   group_by(county, time) %>%
   summarize(rsv=sum(rsv)) %>%
   left_join(rsvCountyGroups, by="county") %>%
@@ -234,10 +260,12 @@ obsByCounty = dataset %>%
   do(summarizeCountyGroups(.)) %>%
   group_by(county) %>%
   mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / sum(rsv)) %>%
-  as.data.frame()
+  as.data.frame() %>%
+  mutate(county=factor(county, levels(county)[c(9, 1, 2, 3, 4, 5, 6, 7, 8, 10)]))
 
 predByCounty = data.frame()
 thresholdsByCounty = data.frame()
+fixedStratUnprotectedSimByCountyRounding = data.frame()
 fixedStratUnprotectedByCounty = data.frame()
 
 for (c in levels(obsByCounty$county)) {
@@ -271,39 +299,63 @@ for (c in levels(obsByCounty$county)) {
 
   thresholdsByCounty = thresholdsByCounty %>% rbind(countyThresholds)
 
-  countyUnprotected = countyModel %>%
-    outbreak.predict.scalars(
-      modelTime,
-      outbreak.calc.unprotected(ppxFixedStrategies(c)),
-      nsim=simulations
-    ) %>%
-    mutate(county=factor(c, levels=levels(obsByCounty$county)))
+  for (rounding in ppxRounding) {
+    # Separate simulation from confidence intervals in order to use simulation data to get statewide estimates
+    countyUnprotectedSim = countyModel %>%
+      outbreak.predict.scalars.sim(
+        modelTime,
+        outbreak.calc.unprotected(ppxFixedStrategies(c, rounding)),
+        nsim=simulations
+      )
 
-  fixedStratUnprotectedByCounty = fixedStratUnprotectedByCounty %>% rbind(countyUnprotected)
+    countyUnprotected = countyUnprotectedSim %>%
+      outbreak.predict.scalars.confints() %>%
+      mutate(county=factor(c, levels=levels(obsByCounty$county)), rounding=rounding)
+
+    fixedStratUnprotectedByCounty = fixedStratUnprotectedByCounty %>%
+      rbind(countyUnprotected)
+
+    fixedStratUnprotectedSimByCountyRounding = fixedStratUnprotectedSimByCountyRounding %>%
+      rbind(
+        countyUnprotectedSim %>%
+        mutate(county=factor(c, levels=levels(obsByCounty$county)), rounding=rounding)
+      )
+  }
 }
 
-unprotectedByCounty = fixedStratUnprotectedByCounty %>%
-  select(county, contains("frac")) %>%
-  melt("county") %>%
-  mutate(
-    strat=gsub("([^.]*)\\.(.*)", "\\1", variable),
-    variable=gsub("([^.]*)\\.(.*)", "\\2", variable)
-  ) %>%
-  filter(!(county=="all" & grepl("county", strat))) %>%
-  mutate(strat=as.factor(strat)) %>%
-  cast(county + strat ~ variable) %>%
-  mutate(
-    frac.lower=1 - frac.lower,
-    frac.upper=1 - frac.upper,
-    frac.median=1 - frac.median,
-    strat = factor(strat, names(ppxFixedStrategies(NULL)))
-  )
+fixedStratUnprotectedStatewide = fixedStratUnprotectedSimByCountyRounding %>%
+  filter(county %in% highIncidenceCounties | county == "lowIncidence") %>%
+  group_by(rounding, outbreak.sim) %>%
+  summarize_at(vars(contains("total"), contains(".count")), sum) %>%
+  group_by(rounding, outbreak.sim) %>%
+  do((function(df) {
+    stratNames = names(ppxFixedStrategies())
+    for (stratName in stratNames) {
+      countName = sprintf("%s.count", stratName)
+      fracName = sprintf("%s.frac", stratName)
+      df = df %>%
+        mutate_at(fracName, function(.) { df[[countName]] / df$total })
+    }
+    df
+  }) (.)) %>%
+  ungroup() %>%
+  group_by(rounding) %>%
+  do((function(df) {
+    df %>%
+      select(-rounding, -total, -matches(".count")) %>%
+      outbreak.predict.scalars.confints () %>%
+      mutate(rounding=unique(df$rounding))
+  })(.)) %>%
+  ungroup() %>%
+  mutate(county="all") %>%
+  as.data.frame() %>%
+  mutate(sliding=FALSE)
 
 # *** State-level sliding window analysis
 
 stateObsByWindow = dataset %>%
   mutate(time=weeki) %>%
-  group_by(time, year, weekofyear) %>%
+  group_by(time, epiyear, epiweek) %>%
   summarize(rsv=sum(rsv)) %>%
   as.data.frame()
 
@@ -323,21 +375,21 @@ for (idx in seq(1, slidingWindowDuration)) {
 stateObsByWindow = stateObsByWindow %>%
   select(-rsv) %>%
   inner_join(total, by="time") %>%
-  group_by(year) %>%
+  group_by(epiyear) %>%
   mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / sum(rsv)) %>%
   select(-time) %>%
-  rename(time=weekofyear) %>%
-  filter(year >= min(rsvYears) + slidingWindowDuration) %>%
+  rename(time=epiweek) %>%
+  filter(epiyear >= min(rsvEpiYears) + slidingWindowDuration) %>%
   as.data.frame()
 
-rsvWindowYears = unique(stateObsByWindow$year)
+rsvWindowYears = unique(stateObsByWindow$epiyear)
 
 statePredByWindow = data.frame()
 stateThresholdsByWindow = data.frame()
 
 for (y in rsvWindowYears) {
 
-  stateYearObs = stateObsByWindow %>% filter(year==y)
+  stateYearObs = stateObsByWindow %>% filter(epiyear==y)
   stateYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=stateYearObs)
 
   stateYearPred = stateYearModel %>%
@@ -347,7 +399,7 @@ for (y in rsvWindowYears) {
     cbind(data.frame(rsv.fit=stateYearPred$fit, rsv.fit.se=stateYearPred$se.fit)) %>%
     cbind(stateYearModel %>% outbreak.predict.timeseries(modelTime, outbreak.calc.cum())) %>%
     rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
-    mutate(year=y)
+    mutate(epiyear=y)
 
   statePredByWindow = statePredByWindow %>% rbind(stateYearPred)
 
@@ -356,12 +408,132 @@ for (y in rsvWindowYears) {
       modelTime,
       outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold)
     ) %>%
-    mutate(year=y)
+    mutate(epiyear=y)
 
   stateThresholdsByWindow = stateThresholdsByWindow %>% rbind(stateYearThresholds)
 }
 
 # *** Season drift analysis
 
-onsetByYear = lm(onset.median ~ year, data=stateThresholdsByWindow)
-offsetByYear = lm(onset.median ~ year, data=stateThresholdsByWindow)
+onsetByYear = lm(onset.median ~ epiyear, data=stateThresholdsByWindow)
+offsetByYear = lm(offset.median ~ epiyear, data=stateThresholdsByWindow)
+
+# *** State-level sliding window regimen analysis
+
+obsByCountyYear = dataset %>%
+  rename(time=epiweek) %>%
+  group_by(county, weeki, epiyear, time) %>%
+  summarize(rsv=sum(rsv)) %>%
+  left_join(rsvCountyGroups, by="county") %>%
+  group_by(weeki, epiyear, time) %>%
+  do(summarizeCountyGroups(.)) %>%
+  group_by(county, epiyear) %>%
+  mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / if_else(sum(rsv) > 0, sum(rsv), as.integer(1))) %>%
+  select(-weeki) %>%
+  as.data.frame()
+
+predByCountyYear = data.frame()
+thresholdsByCountyYear = data.frame()
+slidingStratUnprotectedSimByCountyYear = data.frame()
+
+for (c in levels(obsByCountyYear$county)) {
+  for (y in rsvEpiYears) {
+    countyYearObs = obsByCountyYear %>% filter(county==c, epiyear==y)
+    countyYearModel = gam(rsv ~ s(time, k=4, bs="cp", m=3), family=poisson, data=countyYearObs)
+
+    countyYearPred = countyYearModel %>%
+      predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
+
+    countyYearPred = data.frame(time=modelTime) %>%
+      cbind(data.frame(rsv.fit=countyYearPred$fit, rsv.fit.se=countyYearPred$se.fit)) %>%
+      cbind(countyYearModel %>% outbreak.predict.timeseries(modelTime, outbreak.calc.cum(), nsim=simulations)) %>%
+      rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
+      mutate(county=factor(c, levels=levels(obsByCountyYear$county)), epiyear=y)
+
+    predByCountyYear = predByCountyYear %>% rbind(countyYearPred)
+
+    countyYearThresholds = countyYearModel %>%
+      outbreak.predict.scalars(
+        modelTime,
+        outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold)
+      ) %>%
+      mutate(county=factor(c, levels=levels(obsByCountyYear$county)), epiyear=y)
+
+    thresholdsByCountyYear = thresholdsByCountyYear %>% rbind(countyYearThresholds)
+
+    if (y %in% rsvWindowYears) {
+      countyYearUnprotectedSim = countyYearModel %>%
+        outbreak.predict.scalars.sim(
+          modelTime,
+          outbreak.calc.unprotected(ppxSlidingStrategies(c, y))
+        ) %>%
+        mutate(county=factor(c, levels=levels(obsByCountyYear$county)), epiyear=y)
+
+      slidingStratUnprotectedSimByCountyYear = slidingStratUnprotectedSimByCountyYear %>% rbind(countyYearUnprotectedSim)
+    }
+  }
+}
+
+# Aggregate sliding strategies over the entire time span
+
+slidingStratUnprotectedByCounty = slidingStratUnprotectedSimByCountyYear %>%
+  group_by(county, outbreak.sim) %>%
+  summarize_at(vars(contains("total"), contains("count")), sum) %>%
+  group_by(county, outbreak.sim) %>%
+  do((function(df) {
+    stratNames = names(ppxSlidingStrategies())
+    for (stratName in stratNames) {
+      countName = sprintf("%s.count", stratName)
+      fracName = sprintf("%s.frac", stratName)
+      df = df %>%
+        mutate_at(fracName, function(.) { df[[countName]] / df$total })
+    }
+    df
+  }) (.)) %>%
+  group_by(county) %>%
+  do((function(df) {
+    df %>%
+      select(-county, -total, -matches(".count")) %>%
+      outbreak.predict.scalars.confints () %>%
+      mutate(county=unique(df$county))
+  })(.)) %>%
+  ungroup() %>%
+  mutate(sliding=TRUE, rounding=0)
+
+# Merge sliding and fixed strategies into one data frame
+
+
+unprotectedByCounty = fixedStratUnprotectedByCounty %>%
+  mutate(sliding=FALSE) %>%
+  filter(county != "all") %>%
+  select(-matches(".count"), -matches("total")) %>%
+  rbind(fixedStratUnprotectedStatewide) %>%
+  select(county, rounding, sliding, contains("frac")) %>%
+  melt(c("county", "rounding", "sliding")) %>%
+  rbind(
+    slidingStratUnprotectedByCounty %>%
+      as.data.frame() %>%
+      melt(c("county", "rounding", "sliding"))
+  ) %>%
+  cSplit("variable", ".") %>%
+  mutate(strat=variable_1, variable=sprintf("%s.%s", variable_2, variable_3)) %>%
+  select(-variable_1, -variable_2, -variable_3) %>%
+  mutate(strat=as.factor(strat)) %>%
+  cast(county + strat + rounding + sliding ~ variable) %>%
+  mutate(
+    frac.lower=1 - frac.lower,
+    frac.upper=1 - frac.upper,
+    frac.median=1 - frac.median,
+    strat = factor(strat, c(
+      names(ppxSlidingStrategies(NULL, NULL)),
+      names(ppxFixedStrategies(NULL))
+    )[c(4, 5, 6, 7, 8, 9, 1, 2, 3, 10)]),
+    rounding = factor(rounding)
+  )
+
+bestCaseCoverageByRounding = unprotectedByCounty %>%
+  filter(county == "all") %>%
+  group_by(rounding) %>%
+  filter(frac.median == max(frac.median)) %>%
+  group_by(rounding) %>%
+  filter(row_number() == 1)

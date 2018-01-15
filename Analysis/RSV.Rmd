@@ -9,7 +9,8 @@ library(devtools)
 install_github("gavinsimpson/tsgam")
 install_github("kassambara/easyGgplot2")
 install_github("airbornemint/outbreak-predict")
-
+```
+```{r}
 source("./RSV.R")
 ```
 
@@ -317,93 +318,6 @@ ggplot2.multiplot(plotlist=list(onset, offset), cols=2)
 ```
 
 
-```{r warning=FALSE}
-obsByCountyYear = dataset %>% 
-  rename(time=weekofyear) %>% 
-  group_by(county, weeki, year, time) %>% 
-  summarize(rsv=sum(rsv)) %>% 
-  left_join(rsvCountyGroups, by="county") %>%
-  group_by(weeki, year, time) %>%
-  do(summarizeCountyGroups(.)) %>%
-  group_by(county, year) %>%
-  mutate(rsv.cum=cumsum(rsv), rsv.cum.frac=rsv.cum / if_else(sum(rsv) > 0, sum(rsv), as.integer(1))) %>% 
-  select(-weeki) %>%
-  as.data.frame() 
-
-predByCountyYear = data.frame()
-thresholdsByCountyYear = data.frame()
-slidingStratUnprotectedSimByCountyYear = data.frame()
-
-progress = txtProgressBar(max=length(levels(obsByCounty$county)) * length(rsvYears) * 2, style=3)
-idx = 0
-
-for (c in levels(obsByCountyYear$county)) {
-  for (y in rsvYears) {
-    countyYearObs = obsByCountyYear %>% filter(county==c, year==y)
-    countyYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=countyYearObs)
-    
-    countyYearPred = countyYearModel %>% 
-      predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
-
-    countyYearPred = data.frame(time=modelTime) %>% 
-      cbind(data.frame(rsv.fit=countyYearPred$fit, rsv.fit.se=countyYearPred$se.fit)) %>%
-      cbind(countyYearModel %>% outbreak.predict.timeseries(modelTime, outbreak.calc.cum())) %>%
-      rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
-      mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
-  
-    predByCountyYear = predByCountyYear %>% rbind(countyYearPred)
-
-    countyYearThresholds = countyYearModel %>%
-      outbreak.predict.scalars(
-        modelTime,
-        outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold)
-      ) %>%
-      mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
-
-    thresholdsByCountyYear = thresholdsByCountyYear %>% rbind(countyYearThresholds)
-    
-    if (y %in% rsvWindowYears) {
-      countyYearUnprotectedSim = countyYearModel %>%
-        outbreak.predict.scalars.sim(
-          modelTime,
-          outbreak.calc.unprotected(ppxSlidingStrategies(c, y))
-        ) %>%
-        mutate(county=factor(c, levels=levels(obsByCountyYear$county)), year=y)
-      
-      slidingStratUnprotectedSimByCountyYear = slidingStratUnprotectedSimByCountyYear %>% rbind(countyYearUnprotectedSim)
-    }
-
-    idx = idx + 1
-    setTxtProgressBar(progress, idx)
-  }
-}
-
-# Aggregate sliding strategies over the entire time span
-
-unprotectedByCounty = slidingStratUnprotectedSimByCountyYear %>% 
-  group_by(county, outbreak.sim) %>%
-  summarize_at(vars(contains("total"), contains("count")), sum) %>%
-  group_by(county, outbreak.sim) %>%
-  do((function(df) {
-    stratNames = names(ppxSlidingStrategies())
-    for (stratName in stratNames) {
-      countName = sprintf("%s.count", stratName)
-      fracName = sprintf("%s.frac", stratName)
-      df = df %>% 
-        mutate_at(fracName, function(.) { df[[countName]] / df$total })
-    }
-    df
-  }) (.)) %>%
-  group_by(county) %>%
-  do((function(df) {
-    df %>%
-      select(-county, -total, -matches(".count")) %>%
-      outbreak.predict.scalars.confints () %>%
-      mutate(county=unique(df$county))
-  })(.)) %>%
-  inner_join(fixedStratUnprotectedByCounty, by="county")
-```
-
 ```{r}
 for (c in levels(obsByCountyYear$county)) {
   countyThresholdsByYear = thresholdsByCountyYear %>% filter(county==c)
@@ -526,4 +440,7 @@ ignore_ = lapply(levels(obsByCountyYear$county), function(c) {
 })
 ```
 
+```
+
+```
 
