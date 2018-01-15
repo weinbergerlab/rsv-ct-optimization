@@ -3,9 +3,17 @@ library(grid)
 library(tikzDevice)
 options(tikzDefaultEngine='pdftex')
 
-plotWidth=3.1
-plotHeight=2.5
-plotTextBaseSize=8
+figuresDir = ".texpadtmp/figures"
+if (!dir.exists(figuresDir)) {
+  dir.create(figuresDir, recursive=TRUE)
+}
+options(tikzMetricsDictionary='.texpadtmp/tikzDictionary.dat')
+
+inlinePlotWidth = 3.1
+inlinePlotHeight = 2.5
+pagePlotWidth = inlinePlotWidth * 2.1
+pagePlotHeight = inlinePlotHeight * 2.1 * 2 / 5
+plotTextBaseSize = 8
 
 # Formatting utilities
 formatDate = function(date) {
@@ -56,37 +64,40 @@ formatPctCI = function(lower, upper, level) {
   sprintf("%d\\%% CI: %.2f -- %.2f\\%%", level * 100, lower * 100, upper * 100)
 }
 
-regionStrategyCoverage = function(c, s) {
-  formatPct((unprotectedByCounty %>% filter(county==c, strat==s))$frac.median)
+regionStrategyCoverage = function(c, s, r) {
+  formatPct((unprotectedByCounty %>% filter(county==c, strat==s, rounding==r))$frac.median)
 }
 
-regionStrategyCoverageCI = function(c, s, level) {
+regionStrategyCoverageCI = function(c, s, r, level) {
   formatPctCI(
-    (unprotectedByCounty %>% filter(county==c, strat==s))$frac.upper,
-    (unprotectedByCounty %>% filter(county==c, strat==s))$frac.lower,
+    (unprotectedByCounty %>% filter(county==c, strat==s, rounding==r))$frac.upper,
+    (unprotectedByCounty %>% filter(county==c, strat==s, rounding==r))$frac.lower,
     level
   )
 }
 
-driftYearToWeek = function(year, negate) {
-  drift = 365 / 7 * year
-  if (negate) {
-    -drift
-  } else {
-    drift
-  }
+bestCaseCoverage = function(r) {
+  formatPct((bestCaseCoverageByRounding %>% filter(rounding==r))$frac.median)
 }
 
-formatDrift = function(lm, negate=FALSE) {
-  sprintf("%.2f weeks", driftYearToWeek(summary(lm)$coefficients['year', 1], negate))
+bestCaseCoverageCI = function(r, level) {
+  formatPctCI(
+    (bestCaseCoverageByRounding %>% filter(rounding==r))$frac.upper,
+    (bestCaseCoverageByRounding %>% filter(rounding==r))$frac.lower,
+    level
+  )
 }
 
-formatDriftCI = function(lm, level, negate=TRUE) {
-  ci = confint(lm, "year", level=level)
+formatDrift = function(lm) {
+  sprintf("%.2f days/year", summary(lm)$coefficients['epiyear', 1] * 7)
+}
+
+formatDriftCI = function(lm, level) {
+  ci = confint(lm, "epiyear", level=level) * 7
   sprintf(
-    "%d\\%% CI: %.2f -- %.2f weeks", level * 100,
-    driftYearToWeek(min(ci), negate),
-    driftYearToWeek(max(ci), negate)
+    "%d\\%% CI: %.2f -- %.2f days/year", level * 100,
+    min(ci),
+    max(ci)
   )
 }
 
@@ -97,6 +108,16 @@ latexPercent = function(f) {
 onsetOffsetLabeller = labeller(
   variable=c(`onset` = "RSV season onset", `offset` = "RSV season offset")
 )
+
+roundingLabels = c(`0` = "No rounding", `1` = "Weekly", `2` = "Biweekly", `4` = "Monthly")
+
+legendLabels = function(labels) {
+  as.vector(sapply(labels, function(label) {
+    sprintf("%s\\qquad\\qquad", label)
+  }))
+}
+
+twoTone = c("#f1a340", "#998ec3")
 
 # Counties which we plot (so, not individual low-incidence counties)
 countiesForPlots = thresholdsByCounty$county[!thresholdsByCounty$county %in% lowIncidenceCounties]
