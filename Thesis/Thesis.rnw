@@ -388,10 +388,12 @@ Meanwhile, in comparison with the statewide RSV season onset and offset, the low
         geom_point(aes(y=median, x=county)) + 
         labs(aes(x=variable)) +
         facet_wrap(~variable, ncol=1, scales="free_y", labeller=onsetOffsetLabeller) +
+        scale_x_discrete(labels=countyLabels) + 
         labs(y="Surveillance week") + 
         theme(
             axis.title.x=element_blank(),
             axis.ticks.x=element_blank(),
+            axis.text.x=element_text(angle=30, hjust=1)
         )
     dev.off()
 @
@@ -422,10 +424,12 @@ The AAP guidelines perform better in the low-incidence counties, where \Sexpr{re
         geom_errorbar(aes(ymax=frac.upper, ymin=frac.lower, x=county), width=.1) + 
         geom_point(aes(y=frac.median, x=county)) + 
         scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
+        scale_x_discrete(labels=countyLabels) + 
         labs(y="Preventable fraction") +
         theme(
             axis.title.x=element_blank(),
-            axis.ticks.x=element_blank()
+            axis.ticks.x=element_blank(),
+            axis.text.x=element_text(angle=30, hjust=1)
         )
     dev.off()
 @
@@ -471,6 +475,7 @@ In every region, all alternate regimens based on all-years analysis are non-infe
         geom_point(aes(y=frac.median, x=county, color=strat), position=position_dodge(.5), size=.75) +
         labs(y="Preventable fraction", color="Prophylaxis regimen") +
         guides(color=guide_legend(keywidth=3, keyheight=1, ncol=3)) + 
+        scale_x_discrete(labels=countyLabels) + 
         theme(
             axis.title.x=element_blank(),
             axis.ticks.x=element_blank(),
@@ -540,6 +545,7 @@ In every region, all alternate regimens based on all-years analysis are non-infe
         geom_point(aes(y=frac.median, x=county, color=strat), position=position_dodge(.5), size=.75) +
         labs(y="Preventable fraction", color="Prophylaxis regimen") +
         guides(color=guide_legend(keywidth=3, keyheight=1, ncol=3)) + 
+        scale_x_discrete(labels=countyLabels) + 
         theme(
             axis.title.x=element_blank(),
             axis.ticks.x=element_blank(),

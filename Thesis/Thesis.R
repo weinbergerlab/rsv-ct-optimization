@@ -111,6 +111,14 @@ onsetOffsetLabeller = labeller(
 
 roundingLabels = c(`0` = "No rounding", `1` = "Weekly", `2` = "Biweekly", `4` = "Monthly")
 
+countyLabels = c(
+  `all` = "Statewide",
+  `New Haven` = "New Haven county",
+  `Fairfield` = "Fairfield county",
+  `Hartford` = "Hartford county",
+  `lowIncidence` = "Low-incidence counties"
+)
+
 legendLabels = function(labels) {
   as.vector(sapply(labels, function(label) {
     sprintf("%s\\qquad\\qquad", label)
