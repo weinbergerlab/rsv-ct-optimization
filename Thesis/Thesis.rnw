@@ -1,6 +1,4 @@
 % TODO: Better calendrical cues in plots, maybe also with bars?
-% TODO: establish need in intro
-% TODO: adverse effects of immunoprophylaxis
 
 <<options, echo=FALSE>>=
     opts_chunk$set(echo=FALSE, message=FALSE)
@@ -104,7 +102,7 @@ read_chunk("../Thesis/Thesis.R")
 \section*{\centerline{Abstract}}
 \begin{hangparas}{\abstractindent}{1}
 
-\abstractsection{Background}Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in young infants. Immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to immunprophylaxis regimen outside of Florida. 
+\abstractsection{Background}Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in children, leading to hospitalization rates as high as 50\% in high-risk infants. Safe and effective immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to immunoprophylaxis regimen outside of Florida. 
 
 \abstractsection{Methods}We describe a generalized additive model of RSV incidence using cubic cyclic penalized splines and apply that model to hospital admissions records from Connecticut between \Sexpr{formatDate(startDate)} and \Sexpr{formatDate(endDate)} to estimate the fraction of RSV cases in Connecticut preventable by immunoprophylaxis administered according to the AAP guidelines. We also formulate several alternate immunoprophylaxis regimens with the same net pharmaceutical cost, and estimate the fraction preventable by those alternate regimens.
 
@@ -140,11 +138,11 @@ read_chunk("../Thesis/Thesis.R")
 
 Respiratory syncytial virus (RSV) causes upper respiratory infections in humans of all ages. In adults, RSV infection is typically asymptomatic or gives rise to mild respiratory illness.
 
-In children, however, the infection often incites more serious respiratory illness, making RSV a leading cause of hospitalization among infants.\cite{Hall:2009gi,Hall:2013jo,Zhou:2012ho,Boyce:2000gz}
+In children, however, the infection often incites more serious respiratory illness --- with hospitalization rates as high as 4.4\% in infants with no comorbidities --- making RSV a leading cause of hospitalization among infants.\cite{Hall:2009gi,Hall:2013jo,Zhou:2012ho,Boyce:2000gz}
 
-Risk factors for serious illness and hospitalization due to RSV infection in children include prematurity, chronic lung disease of prematurity, congenital heart disease, anatomic pulmonary abnormalities, neuromuscular disorders, trisomy 21, immunocompromised status, and cystic fibrosis. 
+Risk factors for serious illness and hospitalization due to RSV infection in children include prematurity, chronic lung disease of prematurity, congenital heart disease, anatomic pulmonary abnormalities, neuromuscular disorders, trisomy 21, and immunocompromised status.\cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj}
 
-Hospitalization rate of RSV-infected infants at high risk of complications is approximately 10\% in the populations in which it has been studied.
+Hospitalization rate of high-risk infants is anywhere from $2\times$ to $10\times$ higher than in infants with no comorbidities.\cite{Boyce:2000gz}
 
 \subsection{Respiratory syncytial virus seasonality}
 
@@ -154,7 +152,7 @@ RSV seasonality has been established throughout the United States, with a stable
 
 Immunoprophylaxis with palivizumab, a monoclonal antibody medication, has been approved for prevention of RSV infection since 1998. Palivizumab is administered via intramuscular injection, and requires monthly dosing.\cite{Andabaka:2013dr} Its price is \$1500-\$3000 per dose.\cite{Hampp:2011ju}
 
-Palivizumab has been found to be effective in reducing hospitalizations due to RSV; in double-blinded trials in high-risk infants, it reduced hospitalization rate by 45-55\% compared to placebo.\cite{Group:1998ih,Feltes:2003wm}
+Palivizumab has been found to be effective in reducing hospitalizations due to RSV; in double-blinded trials in high-risk infants, it reduced hospitalization rate by 45-55\% compared to placebo.\cite{Group:1998ih,Feltes:2003wm} Its has also been found in clinical trials to be safe and well-tolerated.\cite{Group:1998ih}
 
 Owing to the high cost, the American Academy of Pediatrics (AAP) recommends palivizumab immunoprophylaxis only for high-risk infants, and only during RSV season.\cite{Anonymous:1998up,AmericanAcademyofPediatricsCommitteeonInfectiousDiseasesandCommitteeonFetusandNewborn:2003ug,AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} These guidelines were most recently revised in 2014.
 
@@ -351,6 +349,7 @@ As before, these alternate regimens involved five monthly doses of palivizumab g
 % \uselengthunit{in}\printlength{\columnwidth}
 % column width = 3.20929 in
 
+\setcounter{figure}{3}
 \begin{figure*}[b]
 \begin{center}
 \input{\figuresDir/coverageByRegionAAPInsight.tex}
@@ -358,6 +357,7 @@ As before, these alternate regimens involved five monthly doses of palivizumab g
 \label{fig:coverageByRegionAAPInsight}
 \end{center}
 \end{figure*}
+\setcounter{figure}{1}
 
 \section{Results}
 
@@ -515,16 +515,16 @@ Meanwhile, in comparison with the statewide RSV season onset and offset, the low
     dev.off()
 @
 
-Statewide, our model shows that \Sexpr{regionStrategyCoverage("all", "aap", 0)} of RSV cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) occur while palivizumab, administered according to the AAP guidelines, offers protection.
+Statewide, our model shows that \Sexpr{regionStrategyCoverage("all", "aap", 0)} of RSV cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) occur while palivizumab, administered per the AAP guidelines, offers protection.
 
-The AAP guidelines perform better in the low-RSV counties, where \Sexpr{regionStrategyCoverage("lowIncidence", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("lowIncidence", "aap", 0, level)}) occur during the prophylaxis time window, but worse in Fairfield county, where \Sexpr{regionStrategyCoverage("Fairfield", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("Fairfield", "aap", 0, level)}) occur during this time. (Figure \ref{fig:coverageByRegionAAP}.)
+The AAP guidelines perform better in the low-RSV counties, where \Sexpr{regionStrategyCoverage("lowIncidence", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("lowIncidence", "aap", 0, level)}) occur during the prophylaxis interval, but worse in Fairfield county, where \Sexpr{regionStrategyCoverage("Fairfield", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("Fairfield", "aap", 0, level)}) occur during this time. (Figure \ref{fig:coverageByRegionAAP}.)
 
-The cause of this is evident in Figure \ref{fig:coverageByRegionAAPInsight}, showing temporal misalignment between the RSV season (delineated by median \Sexpr{seasonThreshold * 100}\%  onset and \Sexpr{(1 - seasonThreshold) * 100}\% offset in each region), and the time window of the AAP-recommended prophylaxis regimen. Fairfield county, owing to its early season onset, sees disproportionately many cases before prophylaxis administration begins; on the other hand, the low-RSV counties, owing to their late season onset and relatively shorter RSV seasons, see almost all of their RSV cases within the prophylaxis window.
+The cause of this is evident in Figure \ref{fig:coverageByRegionAAPInsight}, showing temporal misalignment between the RSV season (delineated by median \Sexpr{seasonThreshold * 100}\%  onset and \Sexpr{(1 - seasonThreshold) * 100}\% offset in each region), and the timing of the AAP-recommended prophylaxis regimen. Fairfield county, owing to its early season onset, sees disproportionately many cases before prophylaxis administration begins; on the other hand, the low-RSV counties, owing to their late season onset and relatively shorter RSV seasons, see almost all of their RSV cases within the prophylaxis window.
 
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionAAP.tex}
-\caption{Fraction of RSV cases occurring in Connecticut during the protection window of palivizumab prophylaxis administered according to the AAP guidelines, by region}
+\caption{Fraction of RSV cases occurring in Connecticut during the protection window of palivizumab prophylaxis administered per the AAP guidelines, by region}
 \label{fig:coverageByRegionAAP}
 \end{center}
 \end{figure}
@@ -564,17 +564,18 @@ The cause of this is evident in Figure \ref{fig:coverageByRegionAAPInsight}, sho
     dev.off()
 @
 
-% TODO: Dan says state next paragraph more clearly, it's important
-
+\setcounter{figure}{4}
 \begin{figure*}
 \input{\figuresDir/coverageByRegionRegimen.tex}
 \caption{Fraction of RSV cases occurring in Connecticut during the protection window of palivizumab prophylaxis, by region and prophylaxis regimen}
 \label{fig:coverageByRegionRegimen}
 \end{figure*}
 
+% TODO: Dan says state next paragraph more clearly, it's important
+
 Based on all-years data, the six spatially adjusted prophylaxis regimens (with no rounding of prophylaxis dates), when compared to the AAP guidelines, yield non-inferior results in all regions, and superior results both statewide and in Hartford county. (Figure \ref{fig:coverageByRegionRegimen}.)
 
-Statewide, the AAP guidelines offer protection for \Sexpr{regionStrategyCoverage("all", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}). The regimen based on all-years statewide onset yields the smallest increase, to \Sexpr{regionStrategyCoverage("all", "stateOnset", 0)} (\Sexpr{regionStrategyCoverageCI("all", "stateOnset", 0, level)}); other alternate regimens yield similar results.
+Statewide, the AAP guidelines offer protection to \Sexpr{regionStrategyCoverage("all", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}). The regimen based on all-years statewide onset yields the smallest increase, to \Sexpr{regionStrategyCoverage("all", "stateOnset", 0)} (\Sexpr{regionStrategyCoverageCI("all", "stateOnset", 0, level)}); other alternate regimens yield similar results.
 
 Most of the increase comes from Hartford county, where the AAP guidelines protect \Sexpr{regionStrategyCoverage("Hartford", "aap", 0)} of cases (\Sexpr{regionStrategyCoverageCI("Hartford", "aap", 0, level)}). The regimen based on all-years regional offset generates the smallest increase, to \Sexpr{regionStrategyCoverage("Hartford", "countyOffset", 0)} (\Sexpr{regionStrategyCoverageCI("Hartford", "countyOnset", 0, level)}); other alternate regimens are comparable.
 
@@ -586,6 +587,7 @@ Most of the increase comes from Hartford county, where the AAP guidelines protec
 \end{center}
 \end{figure*}
 
+\setcounter{figure}{7}
 \begin{figure*}[!b]
 \begin{center}
 \input{\figuresDir/coverageByRegionRegimenWithSliding.tex}
@@ -715,6 +717,7 @@ Compared to our regional analysis, the three regimens based on statewide recent-
 
 Due to the non-superiority of regimens based on statewide recent-years analysis, we did not evaluate regimens based on regional recent-years data. 
 
+\setcounter{figure}{6}
 \begin{figure}
 \begin{center}
 \input{\figuresDir/onsetOffsetByYear.tex}
@@ -741,19 +744,19 @@ Similarly, towns that see substantial intercounty travel (for example, employmen
 
 \subsection{Conclusions}
 
-Our analysis confirms regional variation of RSV season timing in Connecticut, defined by RSV season onset and offset, and observable at the county level. We have also shown a misalignment between the prophylaxis regimen recommended by the AAP and the timing of the RSV season in Fairfield County, resulting in the start of the RSV season occurring outside of the prophylaxis window.
+Our analysis confirms the existence of regional variation of RSV season timing in Connecticut (defined by RSV season onset and offset) observable at the county level.
 
-Our attempt to optimize timing of the prophylaxis regimen (without changing it duration and therefore its cost) shows a theoretical possibility of a 1-2\% increase in preventable RSV cases each year, occurring primarily in counties with a higher RSV burden (Fairfield, Hartford, and New Haven counties).
+We have also shown a misalignment between the prophylaxis regimen recommended by the AAP and the timing of the RSV season throughout Connecticut, with most counties RSV season starting before protection from the first dose of prophylaxis takes hold, and ending before protection from the last does wanes. This misalignment is particularly notable in Fairfield County, due to its notably early season onset.
 
-However, that theoretical improvement rapidly wanes when faced with practicalities of clinical practice guideline implementation; in order to derive real-world benefit from our analysis, clinical practice guidelines would need to be localized at the county level, and the timing of prophylaxis adjusted by less than a whole month in each region. 
+Our attempt to optimize timing of the prophylaxis regimen (without changing its duration and therefore its cost) shows the possibility of a theoretical 1-2\% statewide decrease in RSV-associated hospitalizations among high-risk infants each year, occurring primarily in counties with higher RSV burden (Fairfield, Hartford, and New Haven counties).
 
-As a result, we conclude that the case for regional adjustment to RSV immunoprophylaxis guidelines is weak.
+However, the magnitude of that improvement wanes upon encountering practicalities of clinical practice guideline implementation. However, with clinical practice guidelines localized at the county level, and the timing of prophylaxis adjusted in each county by less than a whole month from the current AAP guidelines, we still found the potential for $\sim$1\% statewide decrease in RSV-associated hospitalizations among high risk infants. 
 
-Although we found a weak statewide trend in RSV season onset becoming earlier over time, further analysis did not yield any improvements to prophylaxis based on that trend; the results of our temporal analysis were no stronger than the results of our spatial analysis. Since temporal variation in clinical guidelines would lead to a higher burden of implementation than spatial variation, we see no reason to base RSV immunoprophylaxis clinical practice guidelines on temporal variation in RSV reason timing.
+The prophylaxis regimen with which we were able to attain this improvement is the one in which prophylaxis in each county is timed to the midpoint of the RSV season (rounded to two weeks) in that county, which simultaneously reduces unprotected cases early in the season and ineffective prophylaxis late in the season.
 
-% TODO bring back discussion of cost from draft 1?
+However, increasing complexity of practice guidelines carries with it increased cost of implementation, such as training of clinicians and other healthcare workers. It is therefore not apparent from our research alone that the potential benefits would outweigh the costs. 
 
-% TODO proofread references
+Finally, although we found a weak statewide trend in RSV season onset becoming earlier over time, further analysis did not yield any improvements to prophylaxis based on that trend. Since temporal variation in clinical guidelines would lead to a higher implementation burden than spatial variation, we see no reason to base RSV immunoprophylaxis clinical practice guidelines on temporal variation in RSV reason timing.
 
 \end{multicols}
 
