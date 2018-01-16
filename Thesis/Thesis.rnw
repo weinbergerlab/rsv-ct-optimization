@@ -1,4 +1,5 @@
 % TODO: Better calendrical cues in plots, maybe also with bars?
+% TODO: Plot regression line in onset/offset analysis
 
 <<options, echo=FALSE>>=
     opts_chunk$set(echo=FALSE, message=FALSE)
@@ -386,7 +387,7 @@ As before, these alternate regimens involved five monthly doses of palivizumab g
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         geom_errorbar(aes(ymin=lower, ymax=upper, x=county), width=.1) + 
-        geom_point(aes(y=median, x=county)) + 
+        geom_point(aes(y=median, x=county), size=.75) + 
         geom_blank(data=limits, aes(y=min)) + 
         geom_blank(data=limits, aes(y=max)) + 
         labs(aes(x=variable)) +
@@ -429,7 +430,7 @@ Meanwhile, in comparison with the statewide RSV season onset and offset, the low
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         geom_errorbar(aes(ymax=frac.upper, ymin=frac.lower, x=county), width=.1) + 
-        geom_point(aes(y=frac.median, x=county)) + 
+        geom_point(aes(y=frac.median, x=county), size=.75) + 
         scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
         scale_x_discrete(labels=countyLabels) + 
         labs(y="Preventable fraction") +
@@ -614,7 +615,7 @@ In every region, all alternate regimens based on all-years analysis are non-infe
         scale_x_discrete(labels=roundingLabels) + 
         geom_errorbar(
             aes(ymin=frac.lower, ymax=frac.upper, x=rounding, color=strat, group=strat), 
-            width=.3, 
+            width=.25, 
             position=position_dodge(.5)
         ) + 
         geom_point(aes(y=frac.median, x=rounding, color=strat), position=position_dodge(.5), size=.75) +
@@ -657,8 +658,8 @@ However, with monthly rounding, the gains almost completely vanished, with preve
 
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
-        geom_errorbar(aes(ymin=lower, ymax=upper, x=epiyear), width=.1) + 
-        geom_point(aes(y=median, x=epiyear)) +
+        geom_errorbar(aes(ymin=lower, ymax=upper, x=epiyear), width=.3) + 
+        geom_point(aes(y=median, x=epiyear), size=.75) +
         geom_blank(data=limits, aes(y=min)) + 
         geom_blank(data=limits, aes(y=max)) + 
         facet_wrap(~variable, ncol=1, scales="free_y", labeller=onsetOffsetLabeller) +
