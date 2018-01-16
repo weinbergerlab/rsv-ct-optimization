@@ -26,7 +26,7 @@ read_chunk("../Thesis/Thesis.R")
 \usepackage{printlen}
 \usepackage{textcomp}
 
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage[svgnames]{xcolor} % Must go before tikz and before structure.tex
 \usepackage{tikz}
 \usepackage{draftwatermark}
