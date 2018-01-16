@@ -8,6 +8,7 @@ library(ggplot2)
 library(easyGgplot2)
 library(data.table)
 library(splitstackshape)
+library(maps)
 
 # ---- external ----
 data(zipcode)
@@ -113,12 +114,19 @@ modelTime = seq(min(rsvTime) - 1 + eps, max(rsvTime), eps)
 
 # *** Prophyaxis assessment helpers
 
-evalStrategy = function(start, end, time, rounding) {
-  if (rounding > 0) {
-    start = rounding * round(start / rounding)
-    end = rounding * round(end / rounding)
+epochRound = function(time, epoch) {
+  if (epoch > 0) {
+    # Rounding for prophylaxis strategies has phase as follows
+    # For rounding=1, .5 .. 1.5 round to 1
+    # For rounding=2, 1 .. 3 round to 2
+    # For rounding=4, 2 .. 6 round to 4
+    time = epoch * round(time / epoch)
   }
-  as.numeric((time >= start) & (time < end))
+  time
+}
+
+evalStrategy = function(start, end, time, rounding) {
+  as.numeric((time >= epochRound(start, rounding)) & (time < epochRound(end, rounding)))
 }
 
 evalOnsetStrategy = function(start, time, rounding=0) {
