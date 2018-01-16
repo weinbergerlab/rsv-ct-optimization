@@ -1,6 +1,7 @@
 # ---- util ----
 library(grid)
 library(tikzDevice)
+library(rgdal)
 options(tikzDefaultEngine='pdftex')
 
 figuresDir = ".texpadtmp/figures"
@@ -116,12 +117,16 @@ countyLabels = c(
   `New Haven` = "New Haven county",
   `Fairfield` = "Fairfield county",
   `Hartford` = "Hartford county",
-  `lowIncidence` = "Low-incidence counties"
+  `lowIncidence` = "Low-RSV counties"
 )
 
-legendLabels = function(labels) {
+# .01 to let minor gridlines show through
+epiWeekBreaks = c(3.01, 7.25, 11.75, 16.01, 20.25, 24.75, 29.01, 33.01, 37.5, 42.01, 46.25, 50.75)
+epiWeekLabels = c("Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun")
+
+legendLabels = function(labels, size="") {
   as.vector(sapply(labels, function(label) {
-    sprintf("%s\\qquad\\qquad", label)
+    sprintf("%s%s%s\\qquad\\qquad", size, ifelse(nchar(size) > 0, " ", ""), label)
   }))
 }
 
