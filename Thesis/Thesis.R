@@ -124,6 +124,24 @@ countyLabels = c(
 epiWeekBreaks = c(3.01, 7.25, 11.75, 16.01, 20.25, 24.75, 29.01, 33.01, 37.5, 42.01, 46.25, 50.75)
 epiWeekLabels = c("Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun")
 
+breaks.df = data.frame(i=seq(1, 12), mid=epiWeekBreaks)
+monthBoundaries = breaks.df %>%
+  inner_join(
+    breaks.df %>% mutate(i=i %% 12 + 1) %>% rename(prevMid=mid),
+    by="i"
+  ) %>%
+  inner_join(
+    breaks.df %>% mutate(i=(i - 2) %% 12 + 1) %>% rename(nextMid=mid),
+    by="i"
+  ) %>%
+  mutate(
+    min=prevMid + (mid - prevMid) %% 52 / 2,
+    max=mid + (nextMid - mid) %% 52 / 2
+  ) %>%
+  select(i, min, mid, max)
+
+epiWeekBreaks = sort(unique(c(monthBoundaries$min, monthBoundaries$max)))
+
 legendLabels = function(labels, size="") {
   as.vector(sapply(labels, function(label) {
     sprintf("%s%s%s\\qquad\\qquad", size, ifelse(nchar(size) > 0, " ", ""), label)

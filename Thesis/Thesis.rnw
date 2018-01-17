@@ -1,4 +1,3 @@
-% TODO: Better calendrical cues in plots, maybe also with bars?
 % TODO: Plot regression line in onset/offset analysis
 
 <<options, echo=FALSE>>=
@@ -27,6 +26,7 @@ read_chunk("../Thesis/Thesis.R")
 
 \usepackage{printlen}
 \usepackage{textcomp}
+\usepackage{setspace}
 
 \usepackage[hidelinks]{hyperref}
 \usepackage[svgnames]{xcolor} % Must go before tikz and before structure.tex
@@ -38,7 +38,7 @@ read_chunk("../Thesis/Thesis.R")
 \SetWatermarkHorCenter{12ex}
 \SetWatermarkVerCenter{12ex}
 \SetWatermarkLightness{.5}
-\SetWatermarkText{DRAFT 3}
+\SetWatermarkText{DRAFT 4}
 
 \input{structure.tex}
 \edef\figuresDir{\Sexpr{figuresDir}}
@@ -103,7 +103,8 @@ read_chunk("../Thesis/Thesis.R")
 
 \section*{\centerline{Abstract}}
 \begin{hangparas}{\abstractindent}{1}
-
+\begin{onehalfspacing}
+	
 \abstractsection{Background}Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in children, leading to hospitalization rates as high as 50\% in high-risk infants. Safe and effective immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to immunoprophylaxis regimen outside of Florida. 
 
 \abstractsection{Methods}We describe a generalized additive model of RSV incidence using cubic cyclic penalized splines and apply that model to hospital admissions records from Connecticut between \Sexpr{formatDate(startDate)} and \Sexpr{formatDate(endDate)} to estimate the fraction of RSV cases in Connecticut preventable by immunoprophylaxis administered according to the AAP guidelines. We also formulate several alternate immunoprophylaxis regimens with the same net pharmaceutical cost, and estimate the fraction preventable by those alternate regimens.
@@ -118,7 +119,9 @@ read_chunk("../Thesis/Thesis.R")
 
 \abstractpara{}Overall, we recommend county-level spatial analysis of RSV incidence as the starting point for RSV immunoprophylaxis optimization in Connecticut. 
 
+\end{onehalfspacing}
 \end{hangparas}
+
 
 \thispagestyle{empty}
 \clearpage
@@ -393,7 +396,12 @@ As before, these alternate regimens involved five monthly doses of palivizumab g
         inner_join(onsetOffsetAdjust, by="variable") %>%
         mutate(mid=mid + nudge, min=mid - onsetOffsetRange / 2, max=mid + onsetOffsetRange / 2)
         
-    ggplot(data) +
+    monthBarX = 0.5 + (0.5 - 5.5) * 0.04
+    monthGrob = function(month) {
+        textGrob(epiWeekLabels[month], just="right", gp=gpar(fontsize="6.4", col="grey30"))
+    }
+        
+    plot = ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         geom_errorbar(aes(ymin=lower, ymax=upper, x=county), width=.1) + 
         geom_point(aes(y=median, x=county), size=.75) + 
@@ -402,16 +410,24 @@ As before, these alternate regimens involved five monthly doses of palivizumab g
         labs(aes(x=variable)) +
         facet_wrap(~variable, ncol=1, scales="free_y", labeller=onsetOffsetLabeller) +
         scale_x_discrete(labels=countyLabels) + 
-        scale_y_continuous(minor_breaks=seq(1, 52), breaks=epiWeekBreaks, labels=epiWeekLabels) + 
+        scale_y_continuous(minor_breaks=seq(1, 52), breaks=epiWeekBreaks, labels=rep("\\qquad\\qquad", length(epiWeekBreaks))) + 
         labs(y=NULL) + 
+        annotation_custom(monthGrob(4), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[4], ymax=monthBoundaries$mid[4]) + 
+        annotation_custom(monthGrob(5), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[5], ymax=monthBoundaries$mid[5]) + 
+        annotation_custom(monthGrob(9), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[9], ymax=monthBoundaries$mid[9]) + 
+        annotation_custom(monthGrob(10), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[10], ymax=monthBoundaries$mid[10]) + 
         theme(
             panel.grid.major.y=element_blank(),
             panel.grid.minor.y=element_line(size=rel(2)),
             axis.title.x=element_blank(),
             axis.ticks.x=element_blank(),
-            axis.ticks.y=element_blank(),
             axis.text.x=element_text(angle=30, hjust=1)
         )
+
+	plotGrob = ggplotGrob(plot)
+	plotGrob$layout$clip[grepl("panel", plotGrob$layout$name)] <- "off"
+	grid.draw(plotGrob)
+
     dev.off()
 @
 
@@ -654,7 +670,9 @@ However, with monthly rounding, the gains almost completely vanished, with preve
         mutate(mid=mid + nudge) %>%
         mutate(min=mid - onsetOffsetRange / 2, max=mid + onsetOffsetRange / 2)
 
-    ggplot(data) +
+    monthBarX = 1998.5 + (1998.5 - 2013.5) * 0.04
+
+    plot = ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         geom_errorbar(aes(ymin=lower, ymax=upper, x=epiyear), width=.3) + 
         geom_point(aes(y=median, x=epiyear), size=.75) +
@@ -662,14 +680,22 @@ However, with monthly rounding, the gains almost completely vanished, with preve
         geom_blank(data=limits, aes(y=max)) + 
         facet_wrap(~variable, ncol=1, scales="free_y", labeller=onsetOffsetLabeller) +
         scale_x_continuous(breaks=seq(1990, 2020, by=5)) +
-        scale_y_continuous(minor_breaks=seq(1, 52), breaks=epiWeekBreaks, labels=epiWeekLabels) + 
+        scale_y_continuous(minor_breaks=seq(1, 52), breaks=epiWeekBreaks, labels=rep("\\qquad\\qquad", length(epiWeekBreaks))) + 
+        annotation_custom(monthGrob(4), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[4], ymax=monthBoundaries$mid[4]) + 
+        annotation_custom(monthGrob(5), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[5], ymax=monthBoundaries$mid[5]) + 
+        annotation_custom(monthGrob(9), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[9], ymax=monthBoundaries$mid[9]) + 
+        annotation_custom(monthGrob(10), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[10], ymax=monthBoundaries$mid[10]) + 
         labs(y=NULL) + 
         theme(
             panel.grid.major.y=element_blank(),
             panel.grid.minor.y=element_line(size=rel(2)),
-            axis.ticks.y=element_blank(),
             axis.title.x=element_blank()
         )
+        
+	plotGrob = ggplotGrob(plot)
+	plotGrob$layout$clip[grepl("panel", plotGrob$layout$name)] <- "off"
+	grid.draw(plotGrob)
+    
     dev.off()
 @
 
