@@ -1,4 +1,9 @@
 % TODO: Plot regression line in onset/offset analysis
+% TODO Erin: CL vs CI in abstract?
+% TODO clarify all years analysis in figure captions
+% TODO generally make figures stand more on their own
+% TODO Put 1-2% punchline in the abstract, maybe
+% TODO mention misalignment in results
 
 <<options, echo=FALSE>>=
     opts_chunk$set(echo=FALSE, message=FALSE)
@@ -109,6 +114,8 @@ read_chunk("../Thesis/Thesis.R")
 
 \abstractsection{Methods}We describe a generalized additive model of RSV incidence using cubic cyclic penalized splines and apply that model to hospital admissions records from Connecticut between \Sexpr{formatDate(startDate)} and \Sexpr{formatDate(endDate)} to estimate the fraction of RSV cases in Connecticut preventable by immunoprophylaxis administered according to the AAP guidelines. We also formulate several alternate immunoprophylaxis regimens with the same net pharmaceutical cost, and estimate the fraction preventable by those alternate regimens.
 
+% TODO reword next paragraph
+
 \abstractsection{Results}At \Sexpr{level * 100}\% confidence level, we found that, when it comes to the fraction of RSV cases preventable by an immunoprophylaxis regimen, regimens adjusted for spatial variation in incidence at the county level have superior preventable fraction (than the AAP-recommended regimen) in some regions of Connecticut, and non-inferior preventable fraction in other regions. However, when those regimens were modified to accommodate practicable calendrical boundaries (weekly, biweekly, and monthly), their gains rapidly diminished.
 
 \abstractpara{}We also found that alternate regimens adjusted for temporal variation in incidence at the annual level to have non-superior preventable fraction to our spatially-adjusted regimens.
@@ -210,7 +217,7 @@ Due to changes in diagnostic coding, we excluded data prior to July 1996; we sim
 
 \subsection{Choice of model}
 
-Our goal was to construct a model of annual RSV incidence that allows us to easily estimate complex characteristics of RSV seasons, such as season onset and offset, or preventable RSV case fraction.
+Our goal was to construct a model of annual RSV incidence that allows us to easily estimate complex characteristics of RSV seasons, such as season onset and offset.
 
 To that end, we looked for a model that allows easy sampling of estimated model parameters; coupling this with Monte Carlo sampling would --- after transforming model parameters into response variables --- allow us to sample arbitrary response variables.
 
@@ -592,6 +599,7 @@ The cause of this is in temporal misalignment between the RSV season (delineated
 \end{figure*}
 
 % TODO: Dan says state next paragraph more clearly, it's important
+% TODO: Hartford county is a lie
 
 Based on all-years data, the six spatially adjusted prophylaxis regimens (with no rounding of prophylaxis dates), when compared to the AAP guidelines, yield non-inferior results in all regions, and superior results both statewide and in Hartford county. (Figure \ref{fig:coverageByRegionRegimen}.)
 
@@ -634,6 +642,8 @@ In every region, all alternate regimens based on all-years analysis are non-infe
 After we applied weekly, biweekly, and monthly rounding to start and end dates of our six alternate immunoprophylaxis regimens, we found that longer rounding intervals diminished the benefit of spatial analysis. (Figure \ref{fig:coverageByRoundingRegimen}.)
 
 With weekly rounding, our regimens were non-inferior to the AAP recommendation, and produced an increase in preventable fraction from AAP's \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) to \Sexpr{bestCaseCoverage(1)} (\Sexpr{bestCaseCoverageCI(1, level)}) statewide. The increase was most notable in Fairfield and Hartford counties. 
+
+% TODO data not shown
 
 Biweekly rounding yielded regimens similarly non-inferior to the AAP recommendation, with an increase in preventable fraction to \Sexpr{bestCaseCoverage(2)} (\Sexpr{bestCaseCoverageCI(2, level)}) statewide. The increase was most notable in Fairfield and New Haven counties.
 
@@ -770,7 +780,7 @@ Throughout, we assume that RSV-associated hospitalizations are an unbiased estim
 
 Our model of palivizumab immunoprophylaxis assumes a protection period with a hard start at administration and a hard stop at 24 weeks post-administration; the physiologic response to monoclonal antibody immunoprophylaxis is actually tapered on both ends.
 
-Similarly, we assumed the protection by palivizumab is constant at 100\% throughout the protection period; however, not only is breakthrough RSV illness known to occur in patients on palivizumab, but it is an indication for discontinuing the remained of the prophylaxis regimen. 
+Similarly, we assumed the protection by palivizumab is constant at 100\% throughout the protection period; however, not only is breakthrough RSV illness known to occur in patients on palivizumab, but it is an indication for discontinuing the remainder of the prophylaxis regimen. 
 
 In areas of Connecticut associated with relatively high amount of interstate travel (such as urban centers near the state lines), our analysis --- by only considering residents of Connecticut --- likely underestimates RSV burden.
 
