@@ -18,11 +18,15 @@ plotTextBaseSize = 8
 
 # Formatting utilities
 formatDate = function(date) {
-  format(date, "%B, %d, %Y")
+  format(date, "%B, %e, %Y")
 }
 
 formatYear = function(date) {
   format(date, "%Y")
+}
+
+formatMonth = function(date) {
+  format(date, "%B %Y")
 }
 
 formatThreshold = function(threshold) {
@@ -148,7 +152,8 @@ legendLabels = function(labels, size="") {
   }))
 }
 
-twoTone = c("#f1a340", "#998ec3")
+twoTone = c("#018571", "#80cdc1")
+twoToneAlt = c("#018571", "#a6611a")
 
 # Counties which we plot (so, not individual low-incidence counties)
 countiesForPlots = thresholdsByCounty$county[!thresholdsByCounty$county %in% lowIncidenceCounties]
