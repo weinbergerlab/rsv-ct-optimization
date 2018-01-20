@@ -1,4 +1,6 @@
 # ---- util ----
+library(magrittr)
+library(rgeos)
 library(grid)
 library(tikzDevice)
 library(rgdal)
@@ -139,7 +141,7 @@ monthBoundaries = breaks.df %>%
     by="i"
   ) %>%
   mutate(
-    min=prevMid + (mid - prevMid) %% 52 / 2,
+    min=(prevMid + (mid - prevMid) %% 52 / 2) %% 52,
     max=mid + (nextMid - mid) %% 52 / 2
   ) %>%
   select(i, min, mid, max)
