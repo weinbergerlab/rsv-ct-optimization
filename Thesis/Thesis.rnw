@@ -168,7 +168,7 @@ Palivizumab has been found to be effective in reducing hospitalizations due to R
 
 Owing to the high cost, the American Academy of Pediatrics (AAP) recommends palivizumab immunoprophylaxis only for high-risk infants, and only during RSV season.\cite{Anonymous:1998up,AmericanAcademyofPediatricsCommitteeonInfectiousDiseasesandCommitteeonFetusandNewborn:2003ug,AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} These guidelines were most recently revised in 2014.
 
-In their guidelines, the AAP acknowledges the potential significance of spatial and temporal variation in RSV incidence, but --- outside of Florida --- does not recommend local variance from nation-wide prophylaxis guidelines.\cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} 
+The AAP acknowledges the potential significance of spatial and temporal variation in RSV incidence, but --- outside of Florida --- does not recommend local variance from nation-wide prophylaxis guidelines.\cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} 
 
 \subsection{Spatio-temporal variability of RSV}
 
@@ -447,7 +447,7 @@ Compared to the statewide median onset of RSV season at \Sexpr{regionOnset("all"
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionAAP.tex}
-\caption[Regional variation in the fraction of RSV hospitalizations occurring while the AAP-recommended RSV prophylaxis is active]{Regional variation in the fraction of RSV hospitalizations occurring while when protection by palivizumab --- when administered per the AAP guidelines ---  is active}
+\caption[Regional variation in the fraction of RSV hospitalizations occurring while the AAP-recommended RSV prophylaxis is active]{Regional variation in the fraction of RSV hospitalizations occurring while protection by palivizumab --- administered per the AAP guidelines ---  is active}
 \label{fig:coverageByRegionAAP}
 \end{center}
 \end{figure}
@@ -527,13 +527,15 @@ Meanwhile, in comparison with the statewide RSV season onset and offset, the low
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         geom_ribbon(aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper, x=time), fill=grey(.25)) +
-    	geom_segment(aes(x=start, y=lineYmin, xend=start, yend=lineYmax, color=variable), linetype="11", data=spans) + 
-    	geom_segment(aes(x=end, y=lineYmin, xend=end, yend=lineYmax, color=variable), linetype="11", data=spans) + 
-    	geom_rect(aes(xmin=start, ymin=barYmin, xmax=end, ymax=barYmax, fill=variable, color=variable), data=spans) + 
-    	geom_segment(aes(x=-Inf, y=unprotected.start, xend=ppx.start, yend=unprotected.start), linetype=3, data=thresholds) + 
-        geom_segment(aes(x=-Inf, y=unprotected.end, xend=ppx.end, yend=unprotected.end), linetype=3, data=thresholds) + 
-        scale_y_continuous(labels=latexPercent, breaks=seq(0, 1, by=.2), limits=c(-0.1, 1.1), expand=c(0, 0)) +
-        scale_x_continuous(breaks=epiWeekBreaks, labels=epiWeekLabels, limits=c(1, 52)) + 
+    	geom_segment(aes(x=start, y=lineYmin, xend=start, yend=lineYmax, color=variable), data=spans, size=.375) + 
+    	geom_segment(aes(x=end, y=lineYmin, xend=end, yend=lineYmax, color=variable), data=spans, size=.375) + 
+    	geom_rect(aes(xmin=start, ymin=barYmin, xmax=end, ymax=barYmax, fill=variable, color=variable), data=spans, size=.375) + 
+    	geom_segment(aes(x=-Inf, y=unprotected.start, xend=ppx.start, yend=unprotected.start), linetype="11", data=thresholds, size=.375) + 
+        geom_segment(aes(x=-Inf, y=unprotected.end, xend=ppx.end, yend=unprotected.end), linetype="11", data=thresholds, size=.375) + 
+        geom_point(aes(x=min(monthBoundaries$min), y=unprotected.end), data=thresholds, shape=18) + 
+        geom_point(aes(x=min(monthBoundaries$min), y=unprotected.start), data=thresholds, shape=18) + 
+        scale_y_continuous(labels=latexPercent, breaks=seq(0, 1, by=.2), limits=c(-0.1, 1.1), expand=c(0, 0), minor_breaks=epiWeekBreaks) +
+        scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
         scale_color_manual(labels=spanLabels, values=twoToneAlt) +
         scale_fill_manual(labels=spanLabels, values=twoToneAlt) +
         guides(color=guide_legend(keywidth=3, keyheight=.4)) + 
@@ -541,7 +543,6 @@ Meanwhile, in comparison with the statewide RSV season onset and offset, the low
         labs(x=NULL, y="Cumulative indicence fraction") + 
         theme(
             panel.grid.major.x=element_blank(),
-            panel.grid.minor.x=element_blank(),
             legend.title=element_blank(),
             axis.title.y=element_blank(),
             axis.ticks.x=element_blank(),
@@ -584,13 +585,14 @@ The cause of this is in temporal misalignment between the RSV season (delineated
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
-        scale_color_manual(labels=stratLabels[c(seq(1, 6), 10)], values=c(rep(twoTone, each=3), grey(0))) + 
+        scale_color_manual(name="Prophylaxis regimen", labels=stratLabels[c(seq(1, 6), 10)], values=c(rep(twoTone, each=3), grey(0))) + 
+        scale_shape_manual(name="Prophylaxis regimen", labels=stratLabels[c(seq(1, 6), 10)], values=c(15, 16, 17, 15, 16, 17, 15)) + 
         geom_errorbar(
             aes(ymin=frac.lower, ymax=frac.upper, x=county, color=strat, group=strat), 
             width=.3, 
             position=position_dodge(.5)
         ) + 
-        geom_point(aes(y=frac.median, x=county, color=strat), position=position_dodge(.5), size=.75) +
+        geom_point(aes(y=frac.median, x=county, color=strat, shape=strat), position=position_dodge(.5), size=.75) +
         labs(y="Preventable fraction", color="Prophylaxis regimen") +
         guides(color=guide_legend(keywidth=3, keyheight=1, ncol=3)) + 
         scale_x_discrete(labels=countyLabels) + 
@@ -623,15 +625,16 @@ In every region, all alternate regimens based on all-years analysis are non-infe
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         scale_y_continuous(labels=latexPercent, limits=c(0.90, 1.00), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
-        scale_color_manual(labels=stratLabels[c(seq(1, 6), 10)], values=c(rep(twoTone, each=3), grey(0))) + 
+        scale_color_manual(name="Prophylaxis regimen", labels=stratLabels[c(seq(1, 6), 10)], values=c(rep(twoTone, each=3), grey(0))) + 
+        scale_shape_manual(name="Prophylaxis regimen", labels=stratLabels[c(seq(1, 6), 10)], values=c(15, 16, 17, 15, 16, 17, 15)) + 
         scale_x_discrete(labels=roundingLabels) + 
         geom_errorbar(
             aes(ymin=frac.lower, ymax=frac.upper, x=rounding, color=strat, group=strat), 
             width=.25, 
             position=position_dodge(.5)
         ) + 
-        geom_point(aes(y=frac.median, x=rounding, color=strat), position=position_dodge(.5), size=.75) +
-        labs(x="Calendrical rounding", y="Preventable fraction", color="Prophylaxis regimen") +
+        geom_point(aes(y=frac.median, x=rounding, color=strat, shape=strat), position=position_dodge(.5), size=.75) +
+        labs(x="Calendrical rounding", y="Preventable fraction") +
         guides(color=guide_legend(keywidth=3, keyheight=1, ncol=3)) + 
         theme(
             legend.position="bottom"
@@ -650,7 +653,7 @@ However, with monthly rounding, the gains almost completely vanished, with preve
 \begin{figure*}
 \begin{center}
 \input{\figuresDir/coverageByRoundingRegimen.tex}
-\caption[The effect of calendrical rounding of start and end of RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of RSV prophylaxis regimens on their performance, showing that longer rounding intervals diminish the benefits of using an alternate regimen over the existing AAP-recommended regimen. Preventable fraction: the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection}
+\caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance, showing that longer rounding intervals diminish the benefits of alternate regimens over the AAP-recommended regimen. Preventable fraction: the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection}
 \label{fig:coverageByRoundingRegimen}
 \end{center}
 \end{figure*}
@@ -739,14 +742,15 @@ Season offset, on the other hand, has not been drifting earlier or later (\Sexpr
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
-        scale_color_manual(labels=stratLabels[c(seq(1, 3), seq(7, 10))], values=c(rep(twoToneAlt, each=3), grey(0))) + 
+        scale_color_manual(name="Prophylaxis regimen", labels=stratLabels[c(seq(1, 3), seq(7, 10))], values=c(rep(twoToneAlt, each=3), grey(0))) + 
+        scale_shape_manual(name="Prophylaxis regimen", labels=stratLabels[c(seq(1, 3), seq(7, 10))], values=c(15, 16, 17, 15, 16, 17, 15)) + 
         geom_errorbar(
             aes(ymin=frac.lower, ymax=frac.upper, x=county, color=strat, group=strat), 
             width=.3, 
             position=position_dodge(.5)
         ) + 
-        geom_point(aes(y=frac.median, x=county, color=strat), position=position_dodge(.5), size=.75) +
-        labs(y="Preventable fraction", color="Prophylaxis regimen") +
+        geom_point(aes(y=frac.median, x=county, color=strat, shape=strat), position=position_dodge(.5), size=.75) +
+        labs(y="Preventable fraction") +
         guides(color=guide_legend(keywidth=3, keyheight=1, ncol=3)) + 
         scale_x_discrete(labels=countyLabels) + 
         theme(
@@ -767,7 +771,7 @@ Due to the non-superiority of regimens based on statewide recent-years analysis,
 \begin{figure*}
 \begin{center}
 \input{\figuresDir/coverageByRegionRegimenWithSliding.tex}
-\caption[Comparison of prophylaxis regimens based on all-years data to those based on recent-years data]{Comparison of prophylaxis regimens based on all-years data to those based on recent-years data, showing temporal analysis adds no benefit over spatial analysis alone. Preventable fraction: fraction of RSV hospitalizations occurring while while the prophylaxis regimen offers protection}
+\caption[Comparison of prophylaxis regimens based on all-years data to those based on recent-years data]{Comparison of prophylaxis regimens based on all-years data to those based on recent-years data, showing temporal analysis adds no benefit over spatial analysis alone. Preventable fraction: fraction of RSV hospitalizations occurring while the prophylaxis regimen offers protection}
 \label{fig:coverageByRegionRegimenWithSliding}
 \end{center}
 \end{figure*}
@@ -780,7 +784,7 @@ Throughout, we assume that RSV-associated hospitalizations are an unbiased estim
 
 Our model of palivizumab immunoprophylaxis assumes a protection period with a hard start at administration and a hard stop at 24 weeks post-administration; the physiologic response to monoclonal antibody immunoprophylaxis is actually tapered on both ends.
 
-Similarly, we assumed the protection by palivizumab is constant at 100\% throughout the protection period; however, not only is breakthrough RSV illness known to occur in patients on palivizumab, but it is an indication for discontinuing the remainder of the prophylaxis regimen. 
+Similarly, we assumed the protection by palivizumab is constant at 100\% throughout the protection period; however, not only is breakthrough RSV illness known to occur in patients on palivizumab, but it is an indication for discontinuing the prophylaxis regimen. 
 
 In areas of Connecticut associated with a relatively high amount of interstate travel (such as urban centers near the state lines), our analysis --- by only considering residents of Connecticut --- likely underestimates RSV burden.
 
@@ -792,7 +796,7 @@ Our analysis confirms the existence of regional variation of RSV season timing i
 
 We have also shown a misalignment between the prophylaxis regimen recommended by the AAP and the timing of the RSV season throughout Connecticut, with most counties' RSV season starting before protection from the first dose of prophylaxis takes hold, and ending before protection from the last dose wanes. This misalignment is particularly notable in Fairfield County, due to its notably early season onset.
 
-Our attempt to optimize timing of the prophylaxis regimen (without changing its duration and therefore its cost) shows the possibility of a theoretical 1-2\% statewide decrease in RSV-associated hospitalizations among high-risk infants each year, occurring primarily in counties with higher RSV burden (Fairfield, Hartford, and New Haven counties).
+Our attempt to optimize timing of the prophylaxis regimen (without changing its duration and therefore its cost) shows the possibility of a theoretical 1-2\% statewide decrease in RSV-associated hospitalizations among high-risk infants each year, primarily in counties with higher RSV burden (Fairfield, Hartford, and New Haven counties).
 
 However, the magnitude of that improvement wanes upon encountering practicalities of clinical practice guideline implementation. Nonetheless, with clinical practice guidelines localized at the county level, and the timing of prophylaxis adjusted in each county by less than a whole month from the current AAP guidelines, we still found the potential for $\sim$1\% statewide decrease in RSV-associated hospitalizations among high risk infants. 
 
