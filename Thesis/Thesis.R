@@ -114,7 +114,7 @@ onsetOffsetLabeller = labeller(
   variable=c(`onset` = "RSV season onset", `offset` = "RSV season offset")
 )
 
-roundingLabels = c(`0` = "No rounding", `1` = "Weekly", `2` = "Biweekly", `4` = "Monthly")
+roundingLabels = c(`0` = "No rounding", `1` = "Weekly rounding", `2` = "Biweekly rounding", `4` = "Monthly rounding")
 
 countyLabels = c(
   `all` = "Statewide",
