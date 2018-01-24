@@ -1,9 +1,9 @@
 # ---- util ----
 library(magrittr)
-library(rgeos)
 library(grid)
 library(tikzDevice)
 library(rgdal)
+library(ggplot2)
 options(tikzDefaultEngine='pdftex')
 
 figuresDir = ".texpadtmp/figures"
@@ -118,6 +118,19 @@ onsetOffsetLabeller = labeller(
 
 roundingLabels = c(`0` = "No rounding", `1` = "Weekly rounding", `2` = "Biweekly rounding", `4` = "Monthly rounding")
 
+stratLabels = c(
+  `stateOnset` = "Statewide all-years onset",
+  `stateMiddle` = "Statewide all-years midseason", 
+  `stateOffset` = "Statewide all-years offset", 
+  `countyOnset` = "Regional all-years onset",
+  `countyMiddle` = "Regional all-years midseason",
+  `countyOffset` = "Regional all-years offset", 
+  `stateSlidingOnset` = "Statewide recent-years onset",
+  `stateSlidingMiddle` = "Statewide recent-years midseason",
+  `stateSlidingOffset` = "Statewide recent-years offset", 
+  `aap` = "AAP guidelines"
+)
+
 countyLabels = c(
   `all` = "Statewide",
   `New Haven` = "New Haven county",
@@ -155,7 +168,19 @@ legendLabels = function(labels, size="") {
 }
 
 twoTone = c("#018571", "#80cdc1")
-twoToneAlt = c("#018571", "#a6611a")
+
+lightBlue = "#a6cee3"
+darkBlue = "#1f78b4"
+lightGreen = "#b2df8a"
+darkGreen = "#33a02c"
+lightRed = "#fb9a99"
+darkRed = "#e31a1c"
+lightOrange = "#fdbf6f"
+darkOrange = "#ff7f00"
+lightPurple = "#cab2d6"
+darkPurple = "#6a3d9a"
+lightBrown = "#ffff99"
+darkBrown = "#b15928"
 
 # Counties which we plot (so, not individual low-incidence counties)
 countiesForPlots = thresholdsByCounty$county[!thresholdsByCounty$county %in% lowIncidenceCounties]
