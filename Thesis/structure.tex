@@ -50,8 +50,8 @@
 \geometry{
 	top=1cm, % Top margin
 	bottom=1.5cm, % Bottom margin
-	left=2cm, % Left margin
-	right=2cm, % Right margin
+	left=2.5cm, % Left margin
+	right=1.5cm, % Right margin
 	includehead, % Include space for a header
 	includefoot, % Include space for a footer
 	%showframe, % Uncomment to show how the type block is set on the page
@@ -90,7 +90,7 @@
 % Footers
 \lfoot{} % Left footer
 \cfoot{} % Center footer
-\rfoot{\footnotesize Page \thepage\ of \pageref{LastPage}} % Right footer, "Page 1 of 2"
+\fancyfoot[RO,LE]{\footnotesize Page \thepage\ of \pageref{LastPage}} % Right footer, "Page 1 of 2"
 
 \fancypagestyle{firstpage}{ % Page style for the first page with the title
 	\fancyhf{}

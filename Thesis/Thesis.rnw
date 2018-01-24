@@ -22,7 +22,7 @@ read_chunk("../Thesis/Thesis.R")
 <<util, warning=FALSE>>=
 @
     
-\documentclass[10pt,letter]{article}
+\documentclass[10pt,letter,twoside]{article}
 
 \usepackage{multicol,float}
 \floatplacement{figure}{H}
@@ -78,6 +78,7 @@ read_chunk("../Thesis/Thesis.R")
 
 \date{\today}
 
+\pagestyle{empty}
 \begin{document}
 
 \newlength\baseparindent
@@ -102,7 +103,7 @@ read_chunk("../Thesis/Thesis.R")
 
 \thispagestyle{firstpage}
 
-\clearpage
+\cleardoublepage
 \endgroup
 
 \section*{\centerline{Abstract}}
@@ -123,9 +124,9 @@ read_chunk("../Thesis/Thesis.R")
 \end{hangparas}
 
 
-\thispagestyle{empty}
-\clearpage
+\cleardoublepage
 
+\pagestyle{fancy}
 \tableofcontents
 \clearpage
 
