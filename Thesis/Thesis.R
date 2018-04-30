@@ -161,9 +161,9 @@ monthBoundaries = breaks.df %>%
 
 epiWeekBreaks = sort(unique(c(monthBoundaries$min, monthBoundaries$max)))
 
-legendLabels = function(labels, size="") {
+legendLabels = function(labels, rep=2) {
   as.vector(sapply(labels, function(label) {
-    sprintf("%s%s%s\\qquad\\qquad", size, ifelse(nchar(size) > 0, " ", ""), label)
+    sprintf("%s%s", label, strrep("\\qquad", rep))
   }))
 }
 

@@ -1,0 +1,437 @@
+<<options, echo=FALSE>>=
+    opts_chunk$set(echo=FALSE, message=FALSE)
+@
+
+<<load>>=
+read_chunk("../Analysis/RSV.R")
+read_chunk("../Thesis/Thesis.R")
+@
+
+<<libraries, cache=FALSE>>=
+@
+
+<<external, cache=TRUE>>=
+@
+
+<<util, warning=FALSE>>=
+@
+
+<<posterUtil, cache=TRUE>>=
+posterPlotWidth = 19
+posterPlotHeight = posterPlotWidth * 3 / 10
+plotTextBaseSize = 24
+@
+
+<<coverageByRegionAAPInsightPoster, results='hide'>>=
+    tikz(sprintf("%s/coverageByRegionAAPInsightPoster.tex", figuresDir), width=posterPlotWidth, height=posterPlotHeight, pointsize=37)
+
+    strat = ppxFixedStrategies("all")[["aap"]]
+    
+    data = predByCounty %>%
+	    filter(county %in% countiesForPlots)
+
+    thresholds = data %>%
+    	mutate(ppx=strat(time)) %>%
+    	filter(ppx > 0) %>%
+    	group_by(county) %>%
+    	do(
+    		data.frame(
+    			ppx.start=min(.$time),
+    			ppx.end=max(.$time),
+    			unprotected.start=min(.$rsv.cum.fit),
+    			unprotected.end=max(.$rsv.cum.fit)
+    		)
+    	) %>%
+    	ungroup() %>%
+    	as.data.frame() %>%
+    	inner_join(thresholdsByCounty, by="county")
+    	
+    barYmin = 0.025
+    barYmax = 0.075
+    
+    spanExtents = data.frame(
+        variable=c("ppx", "season"), 
+        barYmin=c(1 + barYmin, -barYmax), 
+        barYmax=c(1 + barYmax, -barYmin), 
+        lineYmin=c(0, -barYmin), 
+        lineYmax=c(1 + barYmin, 1)
+    )
+    	
+    spans = thresholds %>%
+        select(county, matches("ppx."), matches(".median")) %>%
+        rename(season.start=onset.median, season.end=offset.median) %>%
+        melt(id.vars="county") %>%
+        cSplit("variable", ".") %>%
+        rename(variable=variable_1, part=variable_2) %>%
+        cast(county + variable ~ part) %>%
+        right_join(spanExtents, by="variable")
+        
+    spanLabels = legendLabels(c("AAP-recommended prophylaxis", "RSV season"), 20)
+    	
+    ggplot(data) +
+        theme_light(base_size=plotTextBaseSize) +
+        geom_ribbon(aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper, x=time), fill=grey(.25)) +
+    	geom_segment(aes(x=start, y=lineYmin, xend=start, yend=lineYmax, color=variable), data=spans, size=2) + 
+    	geom_segment(aes(x=end, y=lineYmin, xend=end, yend=lineYmax, color=variable), data=spans, size=2) + 
+    	geom_rect(aes(xmin=start, ymin=barYmin, xmax=end, ymax=barYmax, fill=variable, color=variable), data=spans, size=2) + 
+    	geom_segment(aes(x=-Inf, y=unprotected.start, xend=ppx.start, yend=unprotected.start), linetype="55", data=thresholds, size=2) + 
+        geom_segment(aes(x=-Inf, y=unprotected.end, xend=ppx.end, yend=unprotected.end), linetype="55", data=thresholds, size=2) + 
+        geom_point(aes(x=min(monthBoundaries$min), y=unprotected.end), data=thresholds, shape=18) + 
+        geom_point(aes(x=min(monthBoundaries$min), y=unprotected.start), data=thresholds, shape=18) + 
+        scale_y_continuous(labels=latexPercent, breaks=seq(0, 1, by=.2), limits=c(-0.1, 1.1), expand=c(0, 0)) +
+        scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
+        scale_color_manual(labels=spanLabels, values=c(darkPurple, darkRed)) +
+        scale_fill_manual(labels=spanLabels, values=c(darkPurple, darkRed)) +
+        guides(color=guide_legend(keywidth=3, keyheight=.4, label.vjust=0.2)) + 
+        facet_wrap(~county, ncol=5, labeller=labeller(county=countyLabels)) +
+        labs(x=NULL, y="Cumulative indicence") + 
+        theme(
+            panel.grid.major.x=element_blank(),
+            legend.title=element_blank(),
+            axis.title.y=element_text(vjust=1, margin=margin(0, .5, 0, 0, "in")),
+            axis.ticks.x=element_blank(),
+            axis.text.x=element_text(angle=90, hjust=1, vjust=1),
+            axis.text.y=element_text(vjust=1),
+            legend.position="top",
+            strip.text.x=element_text(margin=margin(.2, 0, .1, 0, "in")),
+            plot.margin=unit(c(0,1.5,.375,1.875),"in"),
+            panel.border=element_rect(fill=NA, colour="grey70", size=rel(5)),
+            panel.grid.major=element_line(size=rel(2.5)),
+            panel.grid.minor=element_line(size=rel(1.25)),
+            axis.ticks=element_line(colour="grey70", size=rel(2.5)),
+        )
+    
+    dev.off()
+@
+
+<<coverageByRegionPoster, results='hide', warning=FALSE>>=
+    tikz(sprintf("%s/coverageByRegionRegimenPoster.tex", figuresDir), width=posterPlotWidth, height=posterPlotHeight * 1.25, pointsize=37)
+    data = unprotectedByCounty %>% 
+        filter(county %in% countiesForPlots, rounding==0, sliding==FALSE)
+
+    ggplot(data) +
+        theme_light(base_size=plotTextBaseSize) +
+        scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
+        scale_color_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 6), 10)], 15), values=c(rep(c(darkBrown, darkOrange), each=3), darkPurple)) + 
+        scale_shape_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 6), 10)], 15), values=c(16, 15, 17, 16, 15, 17, 16)) + 
+        geom_errorbar(
+            aes(ymin=frac.lower, ymax=frac.upper, x=county, color=strat, group=strat), 
+            width=.3, 
+            lwd=2,
+            position=position_dodge(.5)
+        ) + 
+        geom_point(aes(y=frac.median, x=county, color=strat, shape=strat), position=position_dodge(.5), size=.75*5) +
+        labs(y="Preventable fraction", color="Prophylaxis regimen") +
+        guides(color=guide_legend(keywidth=3, keyheight=.5, ncol=3, title.hjust=1)) + 
+        scale_x_discrete(labels=countyLabels) + 
+        theme(
+            axis.title.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.title.y=element_text(vjust=1, margin=margin(0, .5, 0, 0, "in")),
+            legend.position="top",
+            axis.text.x=element_text(vjust=1, margin=margin(.125, 0, 0, 0, "in")),
+#            strip.text.x=element_text(margin=margin(.2, 0, .1, 0, "in")),
+            plot.margin=unit(c(0,1.5,.375,1.875),"in"),
+            panel.border=element_rect(fill=NA, colour="grey70", size=rel(5)),
+            panel.grid.major=element_line(size=rel(2.5)),
+            panel.grid.minor=element_line(size=rel(1.25)),
+            axis.ticks=element_line(colour="grey70", size=rel(2.5)),
+        )
+    dev.off()
+@
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[final]{beamer}
+
+\edef\figuresDir{.texpadtmp/figures}
+
+\usepackage[scale=1.24]{beamerposter} % Use the beamerposter package for laying out the poster
+
+\usetheme{confposter} % Use the confposter theme supplied with this template
+
+\setbeamertemplate{headline}{
+ \leavevmode
+  \begin{columns}
+   \begin{column}{\linewidth}
+    \centering
+    \usebeamercolor{title in headline}{\color{jblue}\Huge{\textbf{\inserttitle}}\\[0.5ex]}
+    \usebeamercolor{author in headline}{\color{fg}\Large{\insertauthor}\\[.5ex]}
+%    \usebeamercolor{institute in headline}{\color{fg}\large{\insertinstitute}\\[.5ex]}
+    \vskip1cm
+   \end{column}
+   \vspace{1cm}
+  \end{columns}
+ \vspace{0.5in}
+ \hspace{0.5in}\begin{beamercolorbox}[wd=46in,colsep=0.15cm]{cboxb}\end{beamercolorbox}
+ \vspace{0.1in}
+}
+
+
+\setbeamercolor{block title}{fg=ngreen,bg=white} % Colors of the block titles
+\setbeamercolor{block body}{fg=black,bg=white} % Colors of the body of blocks
+\setbeamercolor{block alerted title}{fg=white,bg=dblue!70} % Colors of the highlighted block titles
+\setbeamercolor{block alerted body}{fg=black,bg=white} % Colors of the body of highlighted blocks
+% Many more colors are available for use in beamerthemeconfposter.sty
+
+%-----------------------------------------------------------
+% Define the column widths and overall poster size
+% To set effective sepwid, onecolwid and twocolwid values, first choose how many columns you want and how much separation you want between columns
+% In this template, the separation width chosen is 0.024 of the paper width and a 4-column layout
+% onecolwid should therefore be (1-(# of columns+1)*sepwid)/# of columns e.g. (1-(4+1)*0.024)/4 = 0.22
+% Set twocolwid to be (2*onecolwid)+sepwid = 0.464
+% Set threecolwid to be (3*onecolwid)+2*sepwid = 0.708
+
+\newlength{\sepwid}
+\newlength{\onecolwid}
+\newlength{\twocolwid}
+\newlength{\threecolwid}
+\setlength{\paperwidth}{47in} % A0 width: 46.8in
+\setlength{\paperheight}{35in} % A0 height: 33.1in
+\setlength{\sepwid}{0pt} % Separation width (white space) between columns
+\setlength{\onecolwid}{0.22\paperwidth} % Width of one column
+\setlength{\twocolwid}{0.44\paperwidth} % Width of two columns
+\setlength{\threecolwid}{0.708\paperwidth} % Width of three columns
+\setlength{\topmargin}{-0.5in} % Reduce the top margin size
+%-----------------------------------------------------------
+
+\usepackage{graphicx}  % Required for including images
+
+\usepackage{booktabs} % Top and bottom rules for tables
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION 
+%----------------------------------------------------------------------------------------
+
+\title{Assessment and optimization of RSV prophylaxis in Connecticut} % Poster title
+
+\author{Ben Artin, YSPH/YSM 2018} % Author(s)
+
+\institute{Advisors: Daniel Weinberger, PhD; Virginia Pitzer, ScD} % Institution(s)
+
+%----------------------------------------------------------------------------------------
+
+\usepackage[backend=bibtex,style=nejm,sorting=none,autocite=superscript,articledoi=true,url=false]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+
+\addbibresource{../Thesis.bib} % The filename of the bibliography
+%\renewcommand{\cite}[1]{\autocite{#1}}
+\renewcommand{\cite}[1]{}
+
+\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+
+\begin{document}
+
+\addtobeamertemplate{block end}{}{\vspace*{2ex}} % White space under blocks
+\addtobeamertemplate{block alerted end}{}{\vspace*{2ex}} % White space under highlighted (alert) blocks
+
+\setlength{\belowcaptionskip}{2ex} % White space under figures
+\setlength\belowdisplayshortskip{2ex} % White space under equations
+
+\begin{frame}[t] % The whole poster is enclosed in one beamer frame
+
+\begin{columns}[t] % The whole poster consists of three major columns, the second of which is split into two columns twice - the [t] option aligns each column's content to the top
+
+\begin{column}{\onecolwid} % The first column
+
+%----------------------------------------------------------------------------------------
+%	OBJECTIVES
+%----------------------------------------------------------------------------------------
+
+\begin{alertblock}{Objectives}
+
+\begin{itemize}
+\item Estimate variation in timing of respiratory syncytial virus (RSV) season in Connecticut by county and by year
+\item Evaluate effectiveness of the RSV immunoprophylaxis regimen recommended by the American Academy of Pediatrics (AAP)
+\item Formulate alternative prophylaxis regimens to account for regional and annual variation in timing of RSV season in Connecticut
+\item Compare effectiveness of alternative regimens against the AAP recommendation
+\end{itemize}
+
+\end{alertblock}
+
+%----------------------------------------------------------------------------------------
+%	INTRODUCTION
+%----------------------------------------------------------------------------------------
+
+\begin{block}{Background}
+
+Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in children,\cite{Hall:2009gi,Hall:2013jo,Zhou:2012ho,Boyce:2000gz} and leads to hospitalization rates as high as 50\% in high-risk infants.\cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj,Boyce:2000gz} Safe and effective immunoprophylaxis (palivizumab) is available, but costly.\cite{Hampp:2011ju,Andabaka:2013dr,Group:1998ih,Feltes:2003wm}
+
+The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season.\cite{Anonymous:1998up,AmericanAcademyofPediatricsCommitteeonInfectiousDiseasesandCommitteeonFetusandNewborn:2003ug,AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to immunoprophylaxis regimen outside of Florida.\cite{CentersforDiseaseControlandPreventionCDC:2011wt,CentersforDiseaseControlandPreventionCDC:2013wv,AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj}
+
+In this study, we investigated the value of using spatial and temporal variation in RSV incidence to adjust the RSV prophylaxis regimen in Connecticut.
+
+\begin{center}
+\vspace{2.35in}
+\includegraphics[height=320pt]{EPH}
+\hspace{40pt}
+\includegraphics[height=320pt]{Medicine}
+\end{center}
+
+\end{block}
+
+%------------------------------------------------
+
+%\begin{figure}
+%\includegraphics[width=0.8\linewidth]{placeholder.jpg}
+%\caption{Figure caption}
+%\end{figure}
+
+%----------------------------------------------------------------------------------------
+
+\end{column} % End of the first column
+
+\begin{column}{\twocolwid} % Begin a column which is two columns wide (column 2)
+
+%\begin{columns}[t,totalwidth=\twocolwid] % Split up the two columns wide column
+%
+%\begin{column}{\onecolwid}\vspace{-.6in} % The first column within column 2 (column 2.1)
+%
+%\end{column} % End of column 2.1
+%
+%\begin{column}{\onecolwid}\vspace{-.6in} % The second column within column 2 (column 2.2)
+%
+%\begin{block}{Methods}
+%
+%\end{block}
+%
+%%----------------------------------------------------------------------------------------
+%
+%\end{column} % End of column 2.2
+%
+%\end{columns} % End of the split of column 2 - any content after this will now take up 2 columns width
+
+\begin{block}{Methods}
+
+\begin{enumerate}
+\item Identified \Sexpr{nrow(dataset)} RSV-associated hospitalizations in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. 
+\item Modeled RSV seasons using Monte Carlo sampling of log-linked generalized additive model with penalized cubic B-splines.
+%\item We developed and published a custom R package, \texttt{outbreak-inference}, for estimation of outbreak characteristics.
+\item Estimated the fraction of all RSV-associated hospitalizations that occur during the interval when RSV prophylaxis is recommended (``preventable fraction'') under the AAP guidelines.
+\item Estimated RSV season onset and offset in each region across all years.
+\item Constructed alternative prophylaxis regimens based on regional variation in RSV season timing.
+\item Estimated preventable fraction of the regionally adjusted alternative regimens.
+\end{enumerate}
+
+\end{block}
+
+\begin{block}{Results}
+
+\begin{alertblock}{AAP-recommended prophylaxis lags behind RSV season}
+
+\begin{figure}
+\begin{center}
+\input{\figuresDir/coverageByRegionAAPInsightPoster.tex}
+\label{fig:coverageByRegionAAPInsight}
+\caption{Regional variation in the lag between RSV seasons and the AAP-recommended prophylaxis regimen}
+\end{center}
+\end{figure}
+
+\end{alertblock}
+
+\begin{alertblock}{Spatial adjustments yield up to 1\% improvement}
+
+\begin{figure}
+\begin{center}
+\input{\figuresDir/coverageByRegionRegimenPoster.tex}
+\label{fig:coverageByRegionRegimen}
+\caption{Comparison of six spatially adjusted RSV prophylaxis regimens to the AAP-recommended regimen}
+\end{center}
+\end{figure}
+
+\end{alertblock}
+\end{block} 
+
+%----------------------------------------------------------------------------------------
+%	RESULTS
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+
+\end{column} % End of the second column
+
+\begin{column}{\onecolwid} % The third column
+
+%----------------------------------------------------------------------------------------
+%	CONCLUSION
+%----------------------------------------------------------------------------------------
+
+\begin{block}{Conclusion}
+
+Timing of RSV season in Connecticut varies by several weeks in different parts of the state. The AAP-recommended
+prophylaxis regimen is misaligned with the RSV season in the counties with highest RSV incidence. 
+
+Timing of RSV immunoprophylaxis could be adjusted to achieve approximately a 1\% increase in RSV prevention statewide.
+
+This gain requires using immunoprophylaxis schedule based on 1-week or 2-week intervals, rather 
+than the month-based schedule currently used in AAP recommendations.
+
+Year-to-year variability of RSV season timing in Connecticut is less significant than regional differences within the state.
+Accounting for year-to-year variability in our model did not produce any additional improvements beyond the 1\% gained from accounting 
+for regional variability.
+
+\end{block}
+
+%----------------------------------------------------------------------------------------
+%	ADDITIONAL INFORMATION
+%----------------------------------------------------------------------------------------
+
+\begin{block}{Limitations}
+
+Our model of AAP prophylaxis regimen assumes protection begins on November 15th, whereas prophylaxis start dates
+are actually spread out throughout November.
+
+We assumed that RSV illness after receiving prophylaxis (breakthrough illness) is negligible.
+
+We do not have data for RSV infections among travelers from other states, and therefore our analysis underestimates RSV
+incidence in regions with high levels of interstate travel, such as urban centers near state lines.
+
+Our regional analysis does not account for inter-county travel, such as in employment hubs near county lines.
+
+\end{block}
+
+%----------------------------------------------------------------------------------------
+%	REFERENCES
+%----------------------------------------------------------------------------------------
+
+%\begin{block}{References}
+%
+%\small{\printbibliography}
+%
+%\end{block}
+
+%----------------------------------------------------------------------------------------
+%	CONTACT INFORMATION
+%----------------------------------------------------------------------------------------
+
+%\begin{center}
+%\begin{tabular}{ccc}
+%\includegraphics[width=0.4\linewidth]{logo.png} & \hfill & \includegraphics[width=0.4\linewidth]{logo.png}
+%\end{tabular}
+%\end{center}
+
+\setbeamercolor{block alerted title}{fg=black,bg=black!10} % Change the alert block title colors
+\setbeamercolor{block alerted body}{fg=black,bg=white} % Change the alert block body colors
+
+\vspace{2.1in}
+
+\begin{alertblock}{Thesis advisors}
+
+\begin{itemize}
+\item Daniel Weinberger, PhD, YSPH
+\item Virginia Pitzer, ScD, YSPH
+\end{itemize}
+
+\end{alertblock}
+
+%----------------------------------------------------------------------------------------
+
+\end{column} % End of the third column
+
+\end{columns} % End of all the columns in the poster
+
+\end{frame} % End of the enclosing frame
+
+\end{document}
+
