@@ -10,7 +10,7 @@
 
 <<load>>=
 read_chunk("../Analysis/RSV.R")
-read_chunk("../Thesis/Thesis.R")
+read_chunk("../Paper/RSVOptimization.R")
 @
 
 <<libraries, cache=FALSE>>=
@@ -87,19 +87,6 @@ read_chunk("../Thesis/Thesis.R")
 \setlength\parindent{0em}
 
 \maketitle
-
-\begin{center}
-
-\vspace{20pt}
-\large Submitted to the School of Public Health and the School of Medicine, in partial fulfillment of the requirements for the degrees of Master of Public Health and Master of Medical Sciences
-
-\vspace{40pt}
-
-\includegraphics[height=160pt]{EPH}
-\hspace{40pt}
-\includegraphics[height=160pt]{Medicine}
-
-\end{center}
 
 \thispagestyle{firstpage}
 

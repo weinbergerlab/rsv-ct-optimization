@@ -5,7 +5,6 @@
 *.nb.html
 Analysis/plots/**/*.pdf
 
-/Thesis/Thesis.pdf
-/Thesis/Thesis.tex
-/Thesis/main.pdf
-/Thesis/cache
+/Paper/RSVOptimization.pdf
+/Paper/RSVOptimization.tex
+/Paper/cache
