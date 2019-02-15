@@ -2,7 +2,7 @@
 library(reshape)
 library(dplyr)
 library(mgcv)
-library(outbreakpredict)
+library(outbreakinference)
 library(zipcode)
 library(ggplot2)
 library(easyGgplot2)
