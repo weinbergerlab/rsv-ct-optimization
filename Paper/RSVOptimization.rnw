@@ -83,7 +83,7 @@ read_chunk("../Paper/RSVOptimization.R")
 
 \thispagestyle{firstpage}
 
-\cleardoublepage
+\clearpage
 \endgroup
 
 \section*{\centerline{Abstract}}
@@ -104,7 +104,7 @@ read_chunk("../Paper/RSVOptimization.R")
 \end{hangparas}
 
 
-\cleardoublepage
+\clearpage
 
 \pagestyle{fancy}
 
@@ -114,7 +114,7 @@ read_chunk("../Paper/RSVOptimization.R")
 \listoffigures
 \clearpage
 
-\begin{multicols}{1}
+%\begin{multicols}{1}
 
 \section{Introduction}
 
@@ -683,7 +683,7 @@ However, with monthly rounding, the gains almost completely vanished, with preve
 \end{center}
 \end{figure*}
 
-\columnbreak
+%\columnbreak
 
 \paragraph{RSV season onset is slowly moving earlier}
 
@@ -824,7 +824,7 @@ In areas of Connecticut associated with a relatively high amount of interstate t
 
 Finally, towns that see substantial inter-county travel (for example, employment hubs near county lines) likely bias our regional analysis.
 
-\end{multicols}
+%\end{multicols}
 
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
