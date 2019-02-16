@@ -486,7 +486,7 @@ for (c in levels(obsByCountyYear$county)) {
 
 slidingStratUnprotectedByCounty = slidingStratUnprotectedSimByCountyYear %>%
   group_by(county, outbreak.sim) %>%
-  summarize_at(vars(contains("total"), contains("count")), sum) %>%
+  summarize_at(vars(contains("total"), contains(".count")), sum) %>%
   group_by(county, outbreak.sim) %>%
   do((function(df) {
     stratNames = names(ppxSlidingStrategies())
