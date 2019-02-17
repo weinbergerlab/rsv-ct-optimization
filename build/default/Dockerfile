@@ -6,9 +6,11 @@ RUN apt-get update -y -qq
 
 # These are needed to build the image (and will not be present in the final image)
 ENV DOCKER_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget libgdal-dev gcc"
+RUN apt-get install -y -qq --no-install-recommends ${DOCKER_APT_DEPENDENCIES}
+
 # These are needed to run the image
-ENV BUILD_APT_DEPENDENCIES="wget xzdec libblas3 libgomp1 texlive"
-RUN apt-get install -y -qq --no-install-recommends ${DOCKER_APT_DEPENDENCIES} ${BUILD_APT_DEPENDENCIES}
+ENV BUILD_APT_DEPENDENCIES="wget xzdec libblas3 libgomp1 texlive gpg"
+RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
 RUN echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
