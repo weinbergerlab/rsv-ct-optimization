@@ -5,11 +5,10 @@ stages:
   
 variables:
   BUILD_DIR: "Paper/build"
-  CACHE_DIR: "${BUILD_DIR}/cache"
-  R_PACKAGE_DIR: "${CACHE_DIR}/r"
-  TEX_PACKAGE_DIR: "${CACHE_DIR}/tex"
-  APT_DIR: "${CACHE_DIR}/apt"
-  KNITR_CACHE_DIR: "${CACHE_DIR}/knitr"
+  R_PACKAGE_DIR: "Paper/build/cache/r"
+  TEX_PACKAGE_DIR: "Paper/build/cache/tex"
+  APT_DIR: "Paper/build/cache/apt"
+  KNITR_CACHE_DIR: "Paper/build/cache/knitr"
   APT_DEPENDENCIES: libcurl4-openssl-dev zlib1g-dev libssl-dev texlive-full wget xzdec libgdal-dev
   CRAN_DEPENDENCIES: reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal
   R_GITHUB_DEPENDENCIES: kassambara/easyGgplot2 airbornemint/outbreak-predict
@@ -44,8 +43,14 @@ paper:
     - tlmgr init-usertree
     - tlmgr install ${TEX_DEPENDENCIES}
   script:
-    - echo cd "${BUILD_DIR}/Paper"
+    - echo cd "Paper"
     - realpath "${KNITR_CACHE_DIR}" | xargs -d '\n' -I {KNITR_CACHE_DIR} echo Rscript -e "opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
+    - realpath "${BUILD_DIR}" | xargs -d '\n' -I {BUILD_DIR} echo pdflatex -output-dir={BUILD_DIR} RSVOptimization.tex
+    - echo cd build
+    - echo biblatex RSVOptimization
+    - echo cd ..
+    - realpath "${BUILD_DIR}" | xargs -d '\n' -I {BUILD_DIR} echo pdflatex -output-dir={BUILD_DIR} RSVOptimization.tex
+    - realpath "${BUILD_DIR}" | xargs -d '\n' -I {BUILD_DIR} echo pdflatex -output-dir={BUILD_DIR} RSVOptimization.tex
 
 do.docker.on:
   stage: do.docker.on
