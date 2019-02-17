@@ -1,10 +1,10 @@
 <<options, echo=FALSE>>=
-    opts_chunk$set(echo=FALSE, message=FALSE)
+    knitr::opts_chunk$set(echo=FALSE, message=FALSE)
 @
 
 <<load>>=
-read_chunk("../Analysis/RSV.R")
-read_chunk("../Paper/RSVOptimization.R")
+knitr::read_chunk("../Analysis/RSV.R")
+knitr::read_chunk("../Paper/RSVOptimization.R")
 @
 
 <<libraries, cache=FALSE>>=
