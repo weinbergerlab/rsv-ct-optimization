@@ -61,6 +61,7 @@ do.docker.off:
   tags:
     - docker.bootstrap
   image: python:3-stretch
+  when: always
   script:
     - pip3 install -U python-digitalocean
     - python3 bootstrap.py off
