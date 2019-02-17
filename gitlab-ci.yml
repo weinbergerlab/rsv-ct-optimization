@@ -1,0 +1,74 @@
+stages:
+  - do.docker.on
+  - tex
+  - do.docker.off
+  
+variables:
+  BUILD_DIR: "Paper/build"
+  CACHE_DIR: "${BUILD_DIR}/cache"
+  R_PACKAGE_DIR: "${CACHE_DIR}/r"
+  TEX_PACKAGE_DIR: "${CACHE_DIR}/tex"
+  APT_DIR: "${CACHE_DIR}/apt"
+  KNITR_CACHE_DIR: "${CACHE_DIR}/knitr"
+  APT_DEPENDENCIES: libcurl4-openssl-dev zlib1g-dev libssl-dev texlive-full wget xzdec libgdal-dev
+  CRAN_DEPENDENCIES: reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal
+  R_GITHUB_DEPENDENCIES: kassambara/easyGgplot2 airbornemint/outbreak-predict
+  TEX_DEPENDENCIES: float printlen setspace xcolor pgf ms draftwatermark everypage microtype caption booktabs lastpage enumitem sectsty
+  DO_API_TOKEN: a86131682a3afcb9cf8d8f5c3d5fb04864f15596a4849437b4695432a69551bb
+  DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
+
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - "${R_PACKAGE_DIR}"
+    - "${TEX_PACKAGE_DIR}"
+    - "${KNITR_CACHE_DIR}"
+    - "${APT_DIR}"
+    
+paper:
+  stage: tex
+  tags:
+    - docker
+  image: rocker/r-ver:latest
+  before_script:
+    - export BUILD_DIR=`realpath "${BUILD_DIR}"`
+    - export R_PACKAGE_DIR=`realpath "${R_PACKAGE_DIR}"`
+    - export TEX_PACKAGE_DIR=`realpath "${TEX_PACKAGE_DIR}"`
+    - export APT_DIR=`realpath "${APT_DIR}"`
+    - export KNITR_CACHE_DIR=`realpath "${KNITR_CACHE_DIR}"`
+    - mkdir -p "${R_PACKAGE_DIR}" "${TEX_PACKAGE_DIR}" "${APT_DIR}" "${KNITR_CACHE_DIR}"
+    - cd "${BUILD_DIR}"
+    - apt-get -o dir="${APT_DIR}" update
+    - apt-get -o dir="${APT_DIR}" install -y --no-install-recommends ${APT_DEPENDENCIES}
+    - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
+    - echo "R_LIBS=${R_PACKAGE_DIR}" > .Renviron
+    - echo "R_LIBS_USER=${R_PACKAGE_DIR}" >> .Renviron
+    - echo "R_PACKAGE_DIR=${R_PACKAGE_DIR}" >> .Renviron
+    - install2.r -s -l "${R_PACKAGE_DIR}" ${CRAN_DEPENDENCIES}
+    - Rscript -e "devtools::install_github(commandArgs(trailingOnly=TRUE))" ${R_GITHUB_DEPENDENCIES}
+    - export TEXMFHOME="${TEX_PACKAGE_DIR}"
+    - tlmgr init-usertree
+    - tlmgr install ${TEX_DEPENDENCIES}
+  script:
+    - echo cd "${BUILD_DIR}/Paper"
+    - echo Rscript -e "opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
+
+do.docker.on:
+  stage: do.docker.on
+  tags:
+    - docker
+  image: 3-stretch
+  script:
+    - pip3 install -U python-digitalocean
+    - python3 .bootstrap on
+
+do.docker.off:
+  stage: do.docker.off
+  tags:
+    - docker
+  image: 3-stretch
+  script:
+    - pip3 install -U python-digitalocean
+    - python3 .bootstrap off
+
