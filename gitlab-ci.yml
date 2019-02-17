@@ -30,10 +30,10 @@ paper:
       - "${KNITR_CACHE_DIR}"
       - "${APT_DIR}"
   before_script:
-    - export R_PACKAGE_DIR=`realpath "${R_PACKAGE_DIR}"
-    - export TEX_PACKAGE_DIR=`realpath "${TEX_PACKAGE_DIR}"
-    - export KNITR_CACHE_DIR=`realpath "${KNITR_CACHE_DIR}"
-    - export APT_DIR=`realpath "${APT_DIR}"
+    - export R_PACKAGE_DIR=`realpath "${R_PACKAGE_DIR}"`
+    - export TEX_PACKAGE_DIR=`realpath "${TEX_PACKAGE_DIR}"`
+    - export KNITR_CACHE_DIR=`realpath "${KNITR_CACHE_DIR}"`
+    - export APT_DIR=`realpath "${APT_DIR}"`
     - export TEXMFHOME="${TEX_PACKAGE_DIR}"
     - mkdir -p "${R_PACKAGE_DIR}" "${TEX_PACKAGE_DIR}" "${APT_DIR}" "${KNITR_CACHE_DIR}"
     - apt-get -o dir::cache="${APT_DIR}" update
