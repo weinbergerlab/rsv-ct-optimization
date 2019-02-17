@@ -1,7 +1,7 @@
 FROM rocker/r-ver
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
-ENV BUILD_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev texlive-full wget xzdec libgdal-dev"
+ENV BUILD_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev texlive wget xzdec libgdal-dev"
 ENV BUILD_CRAN_DEPENDENCIES="reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal"
 ENV BUILD_R_GITHUB_DEPENDENCIES="kassambara/easyGgplot2 airbornemint/outbreak-predict"
 ENV BUILD_TEX_DEPENDENCIES=""
