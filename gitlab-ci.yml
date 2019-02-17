@@ -22,11 +22,11 @@ paper:
   script:
     - export DOCKER_IMAGE_ID=`build/docker/run build/default "${TEX_DIR}"`
     - export DOCKER_IMAGE_ID="${DOCKER_IMAGE_ID:?Docker did not start}"
-    - docker exec -it "${DOCKER_IMAGE_ID}" Rscript -e "opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
-    - docker exec -it "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - docker exec -it "${DOCKER_IMAGE_ID}" --work-dir "/build${TEX_OUTPUT_DIR}" biblatex RSVOptimization
-    - docker exec -it "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - docker exec -it "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - docker exec --interactive "${DOCKER_IMAGE_ID}" Rscript -e "knitr::opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
+    - docker exec --interactive "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - docker exec --interactive "${DOCKER_IMAGE_ID}" --work-dir "/build${TEX_OUTPUT_DIR}" biblatex RSVOptimization
+    - docker exec --interactive "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - docker exec --interactive "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - docker stop "${DOCKER_IMAGE_ID}"
 
 do.docker.on:
