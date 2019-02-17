@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+# Extract environment variables needed for building, and pass them to the next command in A=B form
+
+from os import environ
+
+prefixes = ["GITLAB_", "CI_",]
+
+for k, v in environ.items():
+    if any(k.startswith(prefix) for prefix in prefixes):
+        print "%s=%s" % (k, v)

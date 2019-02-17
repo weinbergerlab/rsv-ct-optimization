@@ -4,16 +4,6 @@ stages:
   - do.docker.off
   
 variables:
-  PAPER_DIR: "Paper"
-  BUILD_DIR: "Paper/build"
-  R_PACKAGE_DIR: "Paper/build/cache/r"
-  TEX_PACKAGE_DIR: "Paper/build/cache/tex"
-  APT_DIR: "Paper/build/cache/apt"
-  KNITR_CACHE_DIR: "Paper/build/cache/knitr"
-  APT_DEPENDENCIES: libcurl4-openssl-dev zlib1g-dev libssl-dev texlive-full wget xzdec libgdal-dev
-  CRAN_DEPENDENCIES: reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal
-  R_GITHUB_DEPENDENCIES: kassambara/easyGgplot2 airbornemint/outbreak-predict
-  TEX_DEPENDENCIES: ""
   DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
 
 
@@ -21,40 +11,22 @@ paper:
   stage: tex
   tags:
     - docker
-  image: rocker/r-ver:latest
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
-      - "${R_PACKAGE_DIR}"
-      - "${TEX_PACKAGE_DIR}"
       - "${KNITR_CACHE_DIR}"
-      - "${APT_DIR}"
-  before_script:
-    - mkdir -p "${R_PACKAGE_DIR}" "${TEX_PACKAGE_DIR}" "${APT_DIR}" "${KNITR_CACHE_DIR}"
-    - export R_PACKAGE_DIR=`realpath "${R_PACKAGE_DIR}"`
-    - export TEX_PACKAGE_DIR=`realpath "${TEX_PACKAGE_DIR}"`
-    - export KNITR_CACHE_DIR=`realpath "${KNITR_CACHE_DIR}"`
-    - export APT_DIR=`realpath "${APT_DIR}"`
-    - export TEXMFHOME="${TEX_PACKAGE_DIR}"
-    - apt-get -o dir::cache="${APT_DIR}" update
-    - apt-get -o dir::cache="${APT_DIR}" install -y --no-install-recommends ${APT_DEPENDENCIES}
-    - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-    - echo "R_LIBS=${R_PACKAGE_DIR}" > .Renviron
-    - echo "R_LIBS_USER=${R_PACKAGE_DIR}" >> .Renviron
-    - echo "R_PACKAGE_DIR=${R_PACKAGE_DIR}" >> .Renviron
-    - install2.r -s -l ${R_PACKAGE_DIR} ${CRAN_DEPENDENCIES}
-    - Rscript -e "devtools::install_github(commandArgs(trailingOnly=TRUE))" ${R_GITHUB_DEPENDENCIES}
-    - tlmgr init-usertree
-    - tlmgr install ${TEX_DEPENDENCIES}
+  variables:
+    TEX_DIR: "Paper"
+    TEX_OUTPUT_DIR: "Paper/build"
+    KNITR_CACHE_DIR: "Paper/build/cache/knitr"
   script:
-    - echo cd "${PAPER_DIR}"
-    - echo Rscript -e "opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
-    - echo pdflatex -output-dir="${BUILD_DIR}" RSVOptimization.tex
-    - echo cd "${BUILD_DIR}"
-    - echo biblatex RSVOptimization
-    - echo cd "${PAPER_DIR}"
-    - echo pdflatex -output-dir="${BUILD_DIR}" RSVOptimization.tex
-    - echo pdflatex -output-dir="${BUILD_DIR}" RSVOptimization.tex
+    - export DOCKER_IMAGE_ID=`build/docker/run build/default "${TEX_DIR}"`
+    - echo docker exec -it "${DOCKER_IMAGE_ID}" Rscript -e "opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
+    - echo docker exec -it "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - echo docker exec -it "${DOCKER_IMAGE_ID}" --work-dir "/build${TEX_OUTPUT_DIR}" biblatex RSVOptimization
+    - echo docker exec -it "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - echo docker exec -it "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - echo docker stop "${DOCKER_IMAGE_ID}"
 
 do.docker.on:
   stage: do.docker.on

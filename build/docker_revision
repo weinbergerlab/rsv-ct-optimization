@@ -1,0 +1,5 @@
+#!/bin/bash -ex
+
+# Extract the short hash of the most recent commit in which ${BUILD_DOCKER_CONTEXT} was modified
+
+/usr/bin/git rev-list -n1 HEAD -- "${1}" | /usr/bin/xargs git rev-parse --short
