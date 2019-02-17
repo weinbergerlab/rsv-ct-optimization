@@ -17,20 +17,20 @@ variables:
   DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
 
 
-cache:
-  key: "$CI_COMMIT_REF_SLUG"
-  paths:
-    - "${R_PACKAGE_DIR}"
-    - "${TEX_PACKAGE_DIR}"
-    - "${KNITR_CACHE_DIR}"
-    - "${APT_DIR}"
-    
 paper:
   stage: tex
   tags:
     - docker
   image: rocker/r-ver:latest
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${R_PACKAGE_DIR}"
+      - "${TEX_PACKAGE_DIR}"
+      - "${KNITR_CACHE_DIR}"
+      - "${APT_DIR}"
   before_script:
+    - env
     - mkdir -p "${R_PACKAGE_DIR}" "${TEX_PACKAGE_DIR}" "${APT_DIR}" "${KNITR_CACHE_DIR}"
     - apt-get -o dir::cache="${APT_DIR}" update
     - apt-get -o dir::cache="${APT_DIR}" install -y --no-install-recommends ${APT_DEPENDENCIES}
