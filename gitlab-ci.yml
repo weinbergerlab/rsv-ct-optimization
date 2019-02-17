@@ -21,6 +21,7 @@ paper:
     KNITR_CACHE_DIR: "Paper/build/cache/knitr"
   script:
     - export DOCKER_IMAGE_ID=`build/docker/run build/default "${TEX_DIR}"`
+    - export DOCKER_IMAGE_ID="${DOCKER_IMAGE_ID:?Docker did not start}"
     - echo docker exec -it "${DOCKER_IMAGE_ID}" Rscript -e "opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
     - echo docker exec -it "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - echo docker exec -it "${DOCKER_IMAGE_ID}" --work-dir "/build${TEX_OUTPUT_DIR}" biblatex RSVOptimization

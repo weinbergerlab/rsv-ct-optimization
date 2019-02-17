@@ -26,8 +26,8 @@ _DOCKER_ENVIRONMENT_FILE=$(pwd)/docker-bootstrap-environment.txt
 
 _DOCKER=${DOCKER:-/usr/bin/docker}
 
-"${_DOCKER}" login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY_IMAGE}" >> docker-bootstrap.log 2>&1
-("${_DOCKER}" pull "${_DOCKER_IMAGE_TAG}" > /dev/null) || ("${_DOCKER}" build -t "${_DOCKER_IMAGE_TAG}" "${_BUILD_DOCKER_CONTEXT}" >> docker-bootstrap.log)
-"${_DOCKER}" push "${_DOCKER_IMAGE_TAG}" > /dev/null
-"${_SCRIPT_ROOT}"/environment > "${_DOCKER_ENVIRONMENT_FILE}"
+"${_DOCKER}" login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY_IMAGE}" 1>&2
+("${_DOCKER}" pull "${_DOCKER_IMAGE_TAG}" 1>&2) || ("${_DOCKER}" build -t "${_DOCKER_IMAGE_TAG}" "${_BUILD_DOCKER_CONTEXT}" 1>&2)
+"${_DOCKER}" push "${_DOCKER_IMAGE_TAG}" 1>&2
+"${_SCRIPT_ROOT}"/environment > "${_DOCKER_ENVIRONMENT_FILE}" 1>&2
 "${_DOCKER}" run --interactive --tty --detach --volume "$(pwd)":/build --workdir /build/"${_DOCKER_WORKDIR}" --env-file  "${_DOCKER_ENVIRONMENT_FILE}" "${_DOCKER_IMAGE_TAG}" /bin/sh
