@@ -14,7 +14,6 @@ variables:
   CRAN_DEPENDENCIES: reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal
   R_GITHUB_DEPENDENCIES: kassambara/easyGgplot2 airbornemint/outbreak-predict
   TEX_DEPENDENCIES: float printlen setspace xcolor pgf ms draftwatermark everypage microtype caption booktabs lastpage enumitem sectsty
-  DO_API_TOKEN: a86131682a3afcb9cf8d8f5c3d5fb04864f15596a4849437b4695432a69551bb
   DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
 
 
