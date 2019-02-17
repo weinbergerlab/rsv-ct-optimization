@@ -57,7 +57,7 @@ do.docker.on:
   stage: do.docker.on
   tags:
     - docker.bootstrap
-  image: 3-stretch
+  image: python:3-stretch
   script:
     - pip3 install -U python-digitalocean
     - python3 .bootstrap on
@@ -66,7 +66,7 @@ do.docker.off:
   stage: do.docker.off
   tags:
     - docker.bootstrap
-  image: 3-stretch
+  image: python:3-stretch
   script:
     - pip3 install -U python-digitalocean
     - python3 .bootstrap off
