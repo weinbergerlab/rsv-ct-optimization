@@ -3,7 +3,7 @@ LABEL maintainer="Ben Artin <ben@artins.org>"
 
 ENV DOCKER_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget libgdal-dev gcc"
 ENV BUILD_APT_DEPENDENCIES="wget xzdec"
-ENV BUILD_CRAN_DEPENDENCIES="reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal"
+ENV BUILD_CRAN_DEPENDENCIES="reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal libblas3 libgomp1"
 ENV BUILD_R_GITHUB_DEPENDENCIES="kassambara/easyGgplot2 airbornemint/outbreak-predict"
 ENV BUILD_TEX_DEPENDENCIES=""
 
