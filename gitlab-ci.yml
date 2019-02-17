@@ -38,8 +38,8 @@ paper:
     - export KNITR_CACHE_DIR=`realpath "${KNITR_CACHE_DIR}"`
     - mkdir -p "${R_PACKAGE_DIR}" "${TEX_PACKAGE_DIR}" "${APT_DIR}" "${KNITR_CACHE_DIR}"
     - cd "${BUILD_DIR}"
-    - apt-get -o dir="${APT_DIR}" update
-    - apt-get -o dir="${APT_DIR}" install -y --no-install-recommends ${APT_DEPENDENCIES}
+    - apt-get -o dir::cache="${APT_DIR}" update
+    - apt-get -o dir::cache="${APT_DIR}" install -y --no-install-recommends ${APT_DEPENDENCIES}
     - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
     - echo "R_LIBS=${R_PACKAGE_DIR}" > .Renviron
     - echo "R_LIBS_USER=${R_PACKAGE_DIR}" >> .Renviron
