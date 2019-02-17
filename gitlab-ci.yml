@@ -4,6 +4,7 @@ stages:
   - do.docker.off
   
 variables:
+  PAPER_DIR: "Paper"
   BUILD_DIR: "Paper/build"
   R_PACKAGE_DIR: "Paper/build/cache/r"
   TEX_PACKAGE_DIR: "Paper/build/cache/tex"
@@ -12,7 +13,7 @@ variables:
   APT_DEPENDENCIES: libcurl4-openssl-dev zlib1g-dev libssl-dev texlive-full wget xzdec libgdal-dev
   CRAN_DEPENDENCIES: reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal
   R_GITHUB_DEPENDENCIES: kassambara/easyGgplot2 airbornemint/outbreak-predict
-  TEX_DEPENDENCIES: float printlen setspace xcolor pgf ms draftwatermark everypage microtype caption booktabs lastpage enumitem sectsty
+  TEX_DEPENDENCIES: ""
   DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
 
 
@@ -29,28 +30,31 @@ paper:
       - "${KNITR_CACHE_DIR}"
       - "${APT_DIR}"
   before_script:
-    - env
+    - export R_PACKAGE_DIR=`realpath "${R_PACKAGE_DIR}"
+    - export TEX_PACKAGE_DIR=`realpath "${TEX_PACKAGE_DIR}"
+    - export KNITR_CACHE_DIR=`realpath "${KNITR_CACHE_DIR}"
+    - export APT_DIR=`realpath "${APT_DIR}"
+    - export TEXMFHOME="${TEX_PACKAGE_DIR}"
     - mkdir -p "${R_PACKAGE_DIR}" "${TEX_PACKAGE_DIR}" "${APT_DIR}" "${KNITR_CACHE_DIR}"
     - apt-get -o dir::cache="${APT_DIR}" update
     - apt-get -o dir::cache="${APT_DIR}" install -y --no-install-recommends ${APT_DEPENDENCIES}
     - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-    - realpath "${R_PACKAGE_DIR}" | xargs -d '\n' -I {R_PACKAGE_DIR} echo "R_LIBS={R_PACKAGE_DIR}" > .Renviron
-    - realpath "${R_PACKAGE_DIR}" | xargs -d '\n' -I {R_PACKAGE_DIR} echo "R_LIBS_USER={R_PACKAGE_DIR}" >> .Renviron
-    - realpath "${R_PACKAGE_DIR}" | xargs -d '\n' -I {R_PACKAGE_DIR} echo "R_PACKAGE_DIR={R_PACKAGE_DIR}" >> .Renviron
-    - realpath "${R_PACKAGE_DIR}" | xargs -d '\n' -I {R_PACKAGE_DIR} install2.r -s -l {R_PACKAGE_DIR} ${CRAN_DEPENDENCIES}
+    - echo "R_LIBS=${R_PACKAGE_DIR}" > .Renviron
+    - echo "R_LIBS_USER=${R_PACKAGE_DIR}" >> .Renviron
+    - echo "R_PACKAGE_DIR=${R_PACKAGE_DIR}" >> .Renviron
+    - install2.r -s -l ${R_PACKAGE_DIR} ${CRAN_DEPENDENCIES}
     - Rscript -e "devtools::install_github(commandArgs(trailingOnly=TRUE))" ${R_GITHUB_DEPENDENCIES}
-    - export TEXMFHOME=`realpath "${TEX_PACKAGE_DIR}"`
     - tlmgr init-usertree
     - tlmgr install ${TEX_DEPENDENCIES}
   script:
-    - echo cd "Paper"
-    - realpath "${KNITR_CACHE_DIR}" | xargs -d '\n' -I {KNITR_CACHE_DIR} echo Rscript -e "opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
-    - realpath "${BUILD_DIR}" | xargs -d '\n' -I {BUILD_DIR} echo pdflatex -output-dir={BUILD_DIR} RSVOptimization.tex
-    - echo cd build
+    - echo cd "${PAPER_DIR}"
+    - echo Rscript -e "opts_chunk$get(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.Rnw')"
+    - echo pdflatex -output-dir="${BUILD_DIR}" RSVOptimization.tex
+    - echo cd "${BUILD_DIR}"
     - echo biblatex RSVOptimization
-    - echo cd ..
-    - realpath "${BUILD_DIR}" | xargs -d '\n' -I {BUILD_DIR} echo pdflatex -output-dir={BUILD_DIR} RSVOptimization.tex
-    - realpath "${BUILD_DIR}" | xargs -d '\n' -I {BUILD_DIR} echo pdflatex -output-dir={BUILD_DIR} RSVOptimization.tex
+    - echo cd "${PAPER_DIR}"
+    - echo pdflatex -output-dir="${BUILD_DIR}" RSVOptimization.tex
+    - echo pdflatex -output-dir="${BUILD_DIR}" RSVOptimization.tex
 
 do.docker.on:
   stage: do.docker.on
