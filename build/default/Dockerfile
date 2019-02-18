@@ -1,4 +1,4 @@
-FROM rocker/r-ver
+FROM ubuntu:latest
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 ### Setup apt packages
@@ -8,8 +8,8 @@ RUN apt-get update -y -qq
 ENV DOCKER_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget libgdal-dev gcc"
 RUN apt-get install -y -qq --no-install-recommends ${DOCKER_APT_DEPENDENCIES}
 
-# These are needed to run the image
-ENV BUILD_APT_DEPENDENCIES="wget xzdec libblas3 libgomp1 texlive gpg"
+# These are needed to run the image # libblas3 libgomp1?
+ENV BUILD_APT_DEPENDENCIES="wget xzdec texlive gpg r-base git-lfs"
 RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
