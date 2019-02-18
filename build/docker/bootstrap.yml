@@ -6,8 +6,9 @@
   tags:
     - docker
   image: python:3-stretch
-  cache:
-    - cache/pip
+    key: bootstrap-digitalocean-"$CI_COMMIT_REF_SLUG"
+    paths:
+      - cache/pip
   variables:
     SCRIPT_BODY: |
       import digitalocean
