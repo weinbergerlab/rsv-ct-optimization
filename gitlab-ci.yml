@@ -1,52 +1,89 @@
 stages:
-  - do.docker.on
+  - digitalocean.pre
+  - docker.pre
+  - knitr
   - tex
-  - do.docker.off
+  - docker.post
+  - digitalocean.post
   
 variables:
   DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
+  TEX_DIR: "Paper"
+  TEX_OUTPUT_DIR: "Paper/build"
+  KNITR_CACHE_DIR: "Paper/build/cache/knitr"
 
+paper:
+  stage: knitr
+  tags:
+    - docker
+  image: ci:${CI_COMMIT_SHORT_SHA}
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${KNITR_CACHE_DIR}"
+  script:
+    - git lfs pull
+    - printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "../ct rsv time series.csv" --decrypt "../ct rsv time series.csv.gpg"
+    - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
+    - Rscript -e "knitr::opts_chunk\$set(cache.path='${CI_PROJECT_DIR}/${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.rnw')"
+  artifacts:
+    paths:
+      - "${TEX_DIR}/RSVOptimization.tex"
 
 paper:
   stage: tex
   tags:
     - docker
+  image: ci:${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - "${KNITR_CACHE_DIR}"
-  variables:
-    TEX_DIR: "Paper"
-    TEX_OUTPUT_DIR: "Paper/build"
-    KNITR_CACHE_DIR: "Paper/build/cache/knitr"
   script:
-    - git lfs pull
-    - export DOCKER_IMAGE_ID=`build/docker/run build/default "${TEX_DIR}"`
-    - export DOCKER_IMAGE_ID="${DOCKER_IMAGE_ID:?Docker did not start}"
-    - printenv DATASET_PASSWORD | docker exec --interactive "${DOCKER_IMAGE_ID}" gpg --batch --passphrase-fd 0 -o "../ct rsv time series.csv" --decrypt "../ct rsv time series.csv.gpg"
-    - docker exec --interactive "${DOCKER_IMAGE_ID}" Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.rnw')"
-    - docker exec --interactive "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - docker exec --interactive "${DOCKER_IMAGE_ID}" --work-dir "/build${TEX_OUTPUT_DIR}" biblatex RSVOptimization
-    - docker exec --interactive "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - docker exec --interactive "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - docker stop "${DOCKER_IMAGE_ID}"
+    - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
+    - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - cd "${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}"
+    - biblatex RSVOptimization
+    - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
+    - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
 
-do.docker.on:
-  stage: do.docker.on
-  tags:
-    - docker.bootstrap
-  image: python:3-stretch-${CI_COMMIT_SHORT_SHA}
+# Set up docker image for the rest of the build, keyed off commit ID
+.docker:
+  tags: 
+    - shell+docker
+    
+docker.pre:
+  extends: .docker
+  stage: docker.pre
   script:
-    - pip3 install -U python-digitalocean
-    - python3 bootstrap.py on
+    - build/docker/pre build/default
 
-do.docker.off:
-  stage: do.docker.off
-  tags:
-    - docker.bootstrap
-  image: python:3-stretch
+docker.post:
+  extends: .docker
+  stage: docker.post
   when: always
   script:
+    - build/docker/post 
+
+# Turn digital ocean droplet on/off
+.digitalocean:
+  tags:
+    - docker-bootstrap
+  image: python:3-stretch
+  before_script:
     - pip3 install -U python-digitalocean
+
+digitalocean.pre:
+  extends: .digitalocean
+  stage: digitalocean.pre
+  script:
+    - python3 bootstrap.py on
+
+digitalocean.post:
+  extends: .digitalocean
+  stage: digitalocean.post
+  when: always
+  script:
     - python3 bootstrap.py off
 

@@ -1,0 +1,27 @@
+#!/bin/bash -e
+
+# Usage: dockerize <context>
+# Prepares a docker container based on `context`
+#
+# 1. Identify commit when `context` was modified
+# 2. Pull or build image for `context` for that commit
+# 3. Push the image back to a tag that includes the current commit ID
+
+# For example, if `context` is `build/docker/my-build-environment`, which was last updated by git commit `a1b2c3d`, and the commit we are building is `e567890`, the image `my-build-environment-a1b2c3d` will be built or pulled, and then pushed as my-build-environment-e567890
+
+_SCRIPT_ROOT=$(realpath "${0}")
+_SCRIPT_ROOT=$(dirname "${_SCRIPT_ROOT}")
+
+_BUILD_DOCKER_CONTEXT=${1}
+_BUILD_DOCKER_TAG_BASE=$(basename "${_BUILD_DOCKER_CONTEXT}")
+
+_DOCKER_IMAGE_GIT_REVISION=$("${_SCRIPT_ROOT}"/docker_revision "${_BUILD_DOCKER_CONTEXT}")
+_DOCKER_IMAGE_TAG=${CI_REGISTRY_IMAGE}:${_BUILD_DOCKER_TAG_BASE}-${_DOCKER_IMAGE_GIT_REVISION}
+_DOCKER_IMAGE_COMMIT_TAG=${CI_REGISTRY_IMAGE}/commit:${_BUILD_DOCKER_TAG_BASE}-${CI_COMMIT_SHORT_SHA}
+
+_DOCKER=${DOCKER:-/usr/bin/docker}
+
+"${_DOCKER}" login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY_IMAGE}"
+("${_DOCKER}" pull "${_DOCKER_IMAGE_TAG}") || ("${_SCRIPT_ROOT}"/build "${_DOCKER}" "${_DOCKER_IMAGE_TAG}" "${_BUILD_DOCKER_CONTEXT}")
+("${_DOCKER}" pull "${_DOCKER_IMAGE_TAG}" "${_DOCKER_IMAGE_COMMIT_TAG}")
+("${_DOCKER}" push "${_DOCKER_IMAGE_COMMIT_TAG}")
