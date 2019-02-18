@@ -29,4 +29,4 @@ _DOCKER=${DOCKER:-/usr/bin/docker}
 "${_DOCKER}" login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY_IMAGE}" 1>&2
 ("${_DOCKER}" pull "${_DOCKER_IMAGE_TAG}" 1>&2) || ("${_SCRIPT_ROOT}"/build "${_DOCKER}" "${_DOCKER_IMAGE_TAG}" "${_BUILD_DOCKER_CONTEXT}" "${_SCRIPT_ROOT}"/runner 1>&2)
 "${_SCRIPT_ROOT}"/environment > "${_DOCKER_ENVIRONMENT_FILE}"
-"${_DOCKER}" run --interactive --tty --detach --volume "$(pwd)":/build --workdir /build/"${_DOCKER_WORKDIR}" --env-file  "${_DOCKER_ENVIRONMENT_FILE}" "${_DOCKER_IMAGE_TAG}" $(id -u)
+"${_DOCKER}" run --interactive --tty --detach --volume "$(pwd)":/build --workdir /build/"${_DOCKER_WORKDIR}" --env-file  "${_DOCKER_ENVIRONMENT_FILE}" "${_DOCKER_IMAGE_TAG}" $(id -u) /bin/bash
