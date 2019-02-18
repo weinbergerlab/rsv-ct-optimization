@@ -12,11 +12,11 @@ variables:
   TEX_OUTPUT_DIR: "Paper/build"
   KNITR_CACHE_DIR: "Paper/build/cache/knitr"
 
-paper:
+knitr:
   stage: knitr
   tags:
     - docker
-  image: ci:${CI_COMMIT_SHORT_SHA}
+  image: commit/default:rev-${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -30,11 +30,11 @@ paper:
     paths:
       - "${TEX_DIR}/RSVOptimization.tex"
 
-paper:
+tex:
   stage: tex
   tags:
     - docker
-  image: ci:${CI_COMMIT_SHORT_SHA}
+  image: commit/default:rev-${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
