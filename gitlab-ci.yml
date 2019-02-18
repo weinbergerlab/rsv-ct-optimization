@@ -22,7 +22,7 @@ paper:
   script:
     - export DOCKER_IMAGE_ID=`build/docker/run build/default "${TEX_DIR}"`
     - export DOCKER_IMAGE_ID="${DOCKER_IMAGE_ID:?Docker did not start}"
-    - printenv DATASET_PASSWORD | docker exec --interactive "${DOCKER_IMAGE_ID}" gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
+    - printenv DATASET_PASSWORD | docker exec --interactive "${DOCKER_IMAGE_ID}" gpg --batch --passphrase-fd 0 -o "../ct rsv time series.csv" --decrypt "../ct rsv time series.csv.gpg"
     - docker exec --interactive "${DOCKER_IMAGE_ID}" Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.rnw')"
     - docker exec --interactive "${DOCKER_IMAGE_ID}" pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - docker exec --interactive "${DOCKER_IMAGE_ID}" --work-dir "/build${TEX_OUTPUT_DIR}" biblatex RSVOptimization
