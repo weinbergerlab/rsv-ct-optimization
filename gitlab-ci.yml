@@ -41,6 +41,7 @@ tex:
       - "${KNITR_CACHE_DIR}"
   script:
     - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
+    - mkdir -p "${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}"
     - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - cd "${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}"
     - biblatex RSVOptimization
