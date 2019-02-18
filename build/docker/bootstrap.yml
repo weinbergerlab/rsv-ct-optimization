@@ -39,7 +39,9 @@
               droplet.shutdown()
     
   before_script:
-    - pip3 --cache-dir cache/pip install -U python-digitalocean
+    - mkdir .cache
+    - cd .cache
+    - pip3 --cache-dir pip install -U python-digitalocean
 
 .digitalocean.pre:
   extends: .digitalocean
