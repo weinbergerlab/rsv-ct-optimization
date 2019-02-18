@@ -19,11 +19,13 @@ knitr:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - "${KNITR_CACHE_DIR}"
+      - "${TEX_DIR}/cache"
   script:
     - git lfs pull
     - printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
     - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
     - Rscript -e "knitr::opts_chunk\$set(cache.path='${CI_PROJECT_DIR}/${KNITR_CACHE_DIR}'); knitr::knit('RSVOptimization.rnw')"
+    - find .
   artifacts:
     paths:
       - "${TEX_DIR}/RSVOptimization.tex"
