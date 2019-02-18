@@ -9,7 +9,7 @@ ENV DOCKER_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget lib
 RUN apt-get install -y -qq --no-install-recommends ${DOCKER_APT_DEPENDENCIES}
 
 # These are needed to run the image
-ENV BUILD_APT_DEPENDENCIES="wget xzdec libblas3 libgomp1 texlive gpg"
+ENV BUILD_APT_DEPENDENCIES="wget xzdec libblas3 libgomp1 texlive gpg git git-lfs"
 RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
@@ -37,4 +37,4 @@ RUN rm -rf /tmp/downloaded_packages
 
 ENV LC_CTYPE=ISO.UTF-8 LANG=ISO.UTF-8
 
-ENTRYPOINT "/bin/bash"
+ENTRYPOINT /bin/bash
