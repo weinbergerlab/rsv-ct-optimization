@@ -1,3 +1,5 @@
+import: build/docker/bootstrap.yml
+
 stages:
   - digitalocean.pre
   - docker.pre
@@ -65,25 +67,11 @@ docker.pre:
 
 
 # Turn digital ocean droplet on/off
-.digitalocean:
-  tags:
-    - docker
-  variables:
-    DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
-  image: python:3-stretch
-  before_script:
-    - pip3 install -U python-digitalocean
-
 digitalocean.pre:
-  extends: .digitalocean
+  extends: .digitalocean.pre
   stage: digitalocean.pre
-  script:
-    - python3 bootstrap.py on
 
 digitalocean.post:
-  extends: .digitalocean
+  extends: .digitalocean.post
   stage: digitalocean.post
-  when: always
-  script:
-    - python3 bootstrap.py off
 
