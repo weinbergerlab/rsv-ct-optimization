@@ -20,6 +20,7 @@ paper:
     TEX_OUTPUT_DIR: "Paper/build"
     KNITR_CACHE_DIR: "Paper/build/cache/knitr"
   script:
+    - git lfs pull
     - export DOCKER_IMAGE_ID=`build/docker/run build/default "${TEX_DIR}"`
     - export DOCKER_IMAGE_ID="${DOCKER_IMAGE_ID:?Docker did not start}"
     - printenv DATASET_PASSWORD | docker exec --interactive "${DOCKER_IMAGE_ID}" gpg --batch --passphrase-fd 0 -o "../ct rsv time series.csv" --decrypt "../ct rsv time series.csv.gpg"
