@@ -2,6 +2,7 @@ FROM ubuntu:latest
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 ### Setup apt packages
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y -qq
 
 # These are needed to build the image (and will not be present in the final image)
@@ -11,6 +12,10 @@ RUN apt-get install -y -qq --no-install-recommends ${DOCKER_APT_DEPENDENCIES}
 # These are needed to run the image # libblas3 libgomp1?
 ENV BUILD_APT_DEPENDENCIES="wget xzdec texlive gpg r-base git-lfs"
 RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
+
+# Finish up the configuration
+RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+RUN dpkg-reconfigure --frontend noninteractive tzdata
 
 ### Setup R packages
 RUN echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
