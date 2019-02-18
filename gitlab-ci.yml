@@ -16,7 +16,7 @@ knitr:
   stage: knitr
   tags:
     - docker
-  image: commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -34,7 +34,7 @@ tex:
   stage: tex
   tags:
     - docker
-  image: commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
