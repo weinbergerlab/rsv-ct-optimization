@@ -7,11 +7,12 @@
     - docker
   image: python:3-stretch
   cache:
-    key: bootstrap-digitalocean-"$CI_COMMIT_REF_SLUG"
+    key: bootstrap-digitalocean-$CI_COMMIT_REF_SLUG
     paths:
-      - cache/pip
+      - ${PIP_CACHE_DIR}
   variables:
     GIT_STRATEGY: none
+    PIP_CACHE_DIR: .cache/pip
     SCRIPT_BODY: |
       import digitalocean
       import sys
@@ -39,9 +40,8 @@
               droplet.shutdown()
     
   before_script:
-    - mkdir .cache
-    - cd .cache
-    - pip3 --cache-dir pip install -U python-digitalocean
+    - mkdir -p "${PIP_CACHE_DIR}"
+    - pip3 --cache-dir "${PIP_CACHE_DIR}" install -U python-digitalocean
 
 .digitalocean.pre:
   extends: .digitalocean
