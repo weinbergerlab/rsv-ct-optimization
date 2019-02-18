@@ -48,6 +48,9 @@ tex:
     - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
     - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
+  artifacts:
+    paths:
+      - "${TEX_OUTPUT_DIR}/RSVOptimization.pdf"
 
 # Set up docker image for the rest of the build, keyed off commit ID
 .docker:
