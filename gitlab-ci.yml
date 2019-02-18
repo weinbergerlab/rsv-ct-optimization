@@ -9,6 +9,7 @@ stages:
   - digitalocean.post
   
 variables:
+  DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
   TEX_DIR: "Paper"
   TEX_OUTPUT_DIR: "Paper/build"
   KNITR_CACHE_DIR: "Paper/build/cache/knitr"
