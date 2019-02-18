@@ -6,7 +6,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y -qq
 
 # These are needed to build the image (and will not be present in the final image)
-ENV DOCKER_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget libgdal-dev gcc"
+ENV DOCKER_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget libgdal-dev gcc r-cran-littler"
 RUN apt-get install -y -qq --no-install-recommends ${DOCKER_APT_DEPENDENCIES}
 
 # These are needed to run the image # libblas3 libgomp1?
