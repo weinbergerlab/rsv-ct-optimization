@@ -17,4 +17,4 @@ ENV LC_CTYPE=ISO.UTF-8 LANG=ISO.UTF-8
 COPY ./entrypoint /usr/local/bin/entrypoint
 RUN chmod a+x /usr/local/bin/entrypoint
 
-ENTRYPOINT /usr/local/bin/entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint"]
