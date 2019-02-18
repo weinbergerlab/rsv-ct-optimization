@@ -1,4 +1,5 @@
-import: build/docker/bootstrap.yml
+include: 
+  - local: build/docker/bootstrap.yml
 
 stages:
   - digitalocean.pre
@@ -41,6 +42,7 @@ tex:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
       - "${KNITR_CACHE_DIR}"
+      - "${TEX_DIR}/cache"
   script:
     - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
     - mkdir -p "${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}"
