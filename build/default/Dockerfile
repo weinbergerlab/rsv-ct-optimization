@@ -25,7 +25,7 @@ RUN dpkg-reconfigure --frontend noninteractive tzdata
 RUN echo "options(Ncpus = $(nproc --all))" >> /usr/lib/R/etc/Rprofile.site
 
 # These come from CRAN
-ARG BUILD_CRAN_DEPENDENCIES="reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr devtools tikzDevice rgdal"
+ARG BUILD_CRAN_DEPENDENCIES="reshape dplyr mgcv zipcode ggplot2 data.table splitstackshape maps knitr tikzDevice rgdal"
 RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
 RUN /usr/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
 
@@ -35,6 +35,7 @@ RUN /usr/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DE
 
 ### Setup TeX packages
 RUN tlmgr init-usertree
+RUN tlmgr option repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2017/tlnet-final/
 
 ARG BUILD_TEX_DEPENDENCIES="framed"
 RUN tlmgr install ${BUILD_TEX_DEPENDENCIES}
