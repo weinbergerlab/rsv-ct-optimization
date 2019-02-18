@@ -10,7 +10,7 @@ ARG DOCKER_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget lib
 RUN apt-get install -y -qq --no-install-recommends ${DOCKER_APT_DEPENDENCIES}
 
 # These are needed to run the image # libblas3 libgomp1?
-ARG BUILD_APT_DEPENDENCIES="wget xzdec texlive gpg r-base git-lfs"
+ARG BUILD_APT_DEPENDENCIES="tzdata language-pack-en-base wget xzdec texlive gpg r-base git-lfs"
 RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 
 # Finish up the configuration
@@ -20,6 +20,7 @@ RUN debconf-set-selections /tmp/debconf.txt
 RUN rm /etc/timezone
 RUN rm /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
+RUN update-locale --reset LANG=en_US.utf8 LANGUAGE=en_US LC_ALL=en_US.utf8 LC_CTYPE=en_US.utf8
 
 ### Setup R packages
 RUN echo "options(Ncpus = $(nproc --all))" >> /usr/lib/R/etc/Rprofile.site
@@ -45,7 +46,5 @@ RUN apt-get remove -y -qq ${DOCKER_APT_DEPENDENCIES}
 RUN apt-get autoremove -y
 RUN apt-get clean
 RUN rm -rf /tmp/*
-
-ENV LC_CTYPE=ISO.UTF-8 LANG=ISO.UTF-8
 
 ENTRYPOINT /bin/bash
