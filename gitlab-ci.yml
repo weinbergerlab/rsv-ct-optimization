@@ -35,7 +35,7 @@ do.docker.on:
   stage: do.docker.on
   tags:
     - docker.bootstrap
-  image: python:3-stretch
+  image: python:3-stretch-${CI_COMMIT_SHORT_SHA}
   script:
     - pip3 install -U python-digitalocean
     - python3 bootstrap.py on
