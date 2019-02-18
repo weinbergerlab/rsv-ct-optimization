@@ -11,6 +11,7 @@
     paths:
       - cache/pip
   variables:
+    GIT_STRATEGY: none
     SCRIPT_BODY: |
       import digitalocean
       import sys
