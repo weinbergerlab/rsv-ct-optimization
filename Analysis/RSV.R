@@ -216,12 +216,12 @@ outbreak.calc.unprotected = function(strategies) {
     total = sum(fit)
 
     unprotected %>%
-      rename_all(list(
+      rename_all(funs(
         sprintf("%s.count", .)
       )) %>%
       cbind(
         (unprotected / total) %>%
-          rename_all(list(
+          rename_all(funs(
             sprintf("%s.frac", .)
           ))
       ) %>%
