@@ -56,4 +56,5 @@ docker.pre:
     - docker
   image: docker
   script:
-    - build/docker/pre build/default
+    - find .
+    - bash build/docker/pre build/default
