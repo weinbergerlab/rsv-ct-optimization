@@ -6,8 +6,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y -qq
 
 # These are only needed to build the image (and will not be present in the final image)
-ARG BUILD_APT_DEPENDENCIES="libgdal-dev gcc g++ make libcurl4-openssl-dev zlib1g-dev libssl-dev"
+ARG BUILD_APT_DEPENDENCIES="libgdal-dev gcc g++ make libcurl4-openssl-dev zlib1g-dev libssl-dev curl"
 RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
+RUN apt-mark auto ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
 ARG R_APT_DEPENDENCIES="libgdal20 r-base  r-cran-littler r-cran-knitr r-cran-reshape r-cran-dplyr r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice r-cran-sp"
@@ -49,7 +50,6 @@ RUN dpkg-reconfigure --frontend noninteractive tzdata
 RUN update-locale --reset LANG=en_US.utf8 LANGUAGE=en_US LC_ALL=en_US.utf8 LC_CTYPE=en_US.utf8
 
 ### Cleanup to reduce size of the image
-RUN apt-get remove -y -qq ${RUN_APT_DEPENDENCIES}
 RUN apt-get autoremove -y
 RUN apt-get clean
 RUN rm -rf /tmp/*
