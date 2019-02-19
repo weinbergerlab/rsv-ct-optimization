@@ -11,13 +11,13 @@ RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 RUN apt-mark auto ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
-ARG R_APT_DEPENDENCIES="libgdal20 r-base  r-cran-littler r-cran-knitr r-cran-reshape r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice r-cran-sp"
+ARG R_APT_DEPENDENCIES="libgdal20 r-base  r-cran-littler r-cran-knitr r-cran-reshape r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice r-cran-sp r-cran-mapproj"
 RUN apt-get install -y -qq --no-install-recommends ${R_APT_DEPENDENCIES}
 
 RUN echo "options(Ncpus = $(nproc --all))" >> /usr/lib/R/etc/Rprofile.site
 
 # These come from CRAN
-ARG BUILD_CRAN_DEPENDENCIES="zipcode splitstackshape maps rgdal dplyr"
+ARG BUILD_CRAN_DEPENDENCIES="zipcode splitstackshape maps rgdal dplyr rgeos"
 RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
 RUN /usr/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
 
