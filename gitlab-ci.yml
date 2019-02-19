@@ -53,10 +53,6 @@ tex:
 docker.pre:
   stage: docker.pre
   tags: 
-    - docker
-  image: docker
+    - docker.pre
   script:
-    - apk update
-    - apk upgrade
-    - apk add bash git
     - build/docker/pre build/default
