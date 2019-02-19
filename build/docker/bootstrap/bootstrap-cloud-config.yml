@@ -1,0 +1,72 @@
+#cloud-config
+# When creating an Ubuntu GitLab CI Runner droplet on DigitalOcean check "User Data" and enter the following information
+# Substitute runner settings at the bottom
+# Debug: look for "/var/lib/cloud/instance/scripts/runcmd" in /var/log/cloud-init.log
+
+runcmd:
+  - while [ ! -d /etc/systemd/system/docker.service.d ] ; do sleep 15 ; done
+  - export DEBIAN_FRONTEND=noninteractive
+  - apt-get update -y -qq
+  # These are needed for setup
+  - export BUILD_APT_DEPENDENCIES="curl cdebootstrap"
+  - apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
+  - apt-mark auto ${BUILD_APT_DEPENDENCIES}
+  # These are needed to run builds
+  - export RUN_APT_DEPENDENCIES="language-pack-en-base tzdata gitlab-runner python git-lfs"
+  - curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | bash
+  - curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash
+  - apt-get install -y -qq --no-install-recommends ${RUN_APT_DEPENDENCIES}
+  # Finish up package configuration
+  - echo tzdata tzdata/Areas select America >> /tmp/debconf.txt
+  - echo tzdata tzdata/Zones/America select New_York >> /tmp/debconf.txt
+  - debconf-set-selections /tmp/debconf.txt
+  - rm /etc/timezone
+  - rm /etc/localtime
+  - dpkg-reconfigure --frontend noninteractive tzdata
+  - update-locale --reset LANG=en_US.utf8 LANGUAGE=en_US LC_ALL=en_US.utf8 LC_CTYPE=en_US.utf8
+  # Setup docker, docker-machine, and gitlab-runner
+  - curl -L https://github.com/docker/machine/releases/download/v0.16.0/docker-machine-$(uname -s)-$(uname -m) > /tmp/docker-machine
+  - install /tmp/docker-machine /usr/local/bin/docker-machine
+  - usermod -a -G docker gitlab-runner
+  # Create and destroy a simple droplet to prime docker-machine (gitlab-runner setup recommends this)
+  - docker-machine create --driver digitalocean --digitalocean-access-token=%(DIGITALOCEAN_API_TOKEN)s gitlab-ci-dispatch-setup
+  - docker-machine rm --force gitlab-ci-dispatch-setup
+  # Register GitLab runner
+  - |
+    echo """
+    #cloud-config
+    runcmd:
+      - curl -sSL https://agent.digitalocean.com/install.sh | sh
+    """ > /etc/gitlab-runner/runner-userdata-yml
+  - >
+    gitlab-runner register --non-interactive
+    --url https://gitlab.com/
+    --tag-list "docker, docker-machine-2g1c"
+    --name gitlab-dispatch
+    --executor docker+machine
+    --docker-image ruby:2.1
+    --docker-privileged
+    --machine-idle-nodes 0
+    --machine-idle-time 7200
+    --machine-max-builds 0
+    --machine-machine-driver digitalocean
+    --machine-machine-name gitlab-ci-%%s
+    --machine-machine-options digitalocean-access-token=%(DIGITALOCEAN_API_TOKEN)s
+    --machine-machine-options digitalocean-image=ubuntu-16-04-x64
+    --machine-machine-options digitalocean-monitoring
+    --machine-machine-options digitalocean-region=sfo2
+    --machine-machine-options digitalocean-size=s-1vcpu-2gb
+    --machine-machine-options digitalocean-tags=gitlab-ci
+    --machine-machine-options digitalocean-userdata=/etc/gitlab-runner/runner-userdata-yml
+    --registration-token %(GITLAB_CI_REGISTRATION_TOKEN)s
+  - >
+    gitlab-runner register --non-interactive
+    --url https://gitlab.com/
+    --tag-list "docker.pre"
+    --name gitlab-dispatch
+    --executor shell
+    --registration-token %(GITLAB_CI_REGISTRATION_TOKEN)s
+  ### Cleanup
+  - apt-get autoremove -y
+  - apt-get clean
+  - rm -rf /tmp/*
