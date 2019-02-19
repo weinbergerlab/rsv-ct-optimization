@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 _DOCKER=${1}
 _DOCKER_IMAGE_TAG=${2}

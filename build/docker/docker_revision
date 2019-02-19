@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/sh -ex
 
 # Extract the short hash of the most recent commit in which ${BUILD_DOCKER_CONTEXT} was modified
 

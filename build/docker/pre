@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 # Usage: dockerize <context>
 # Prepares a docker container based on `context`
