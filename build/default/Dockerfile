@@ -38,7 +38,7 @@ RUN /usr/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DE
 RUN tlmgr init-usertree
 RUN tlmgr --usermode option repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2017/tlnet-final/
 
-ARG BUILD_TEX_DEPENDENCIES="framed printlen pgf draftwatermark everypage lastpage enumitem sectsty xcharter"
+ARG BUILD_TEX_DEPENDENCIES="framed printlen pgf draftwatermark everypage lastpage enumitem sectsty xcharter euenc"
 RUN tlmgr --usermode install ${BUILD_TEX_DEPENDENCIES} || echo "updmap errors are okay?!"
 RUN updmap-user
 
