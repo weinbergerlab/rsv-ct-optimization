@@ -53,6 +53,7 @@ tex:
 docker.pre:
   stage: docker.pre
   tags: 
-    - docker.pre
+    - docker-machine-2g1c
+  image: docker
   script:
     - build/docker/pre build/default
