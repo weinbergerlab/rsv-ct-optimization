@@ -6,7 +6,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y -qq
 
 # These are only needed to build the image (and will not be present in the final image)
-ARG BUILD_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget libgdal-dev gcc r-cran-littler g++"
+ARG BUILD_APT_DEPENDENCIES="libgdal-dev gcc g++ make libcurl4-openssl-dev zlib1g-dev libssl-dev"
 RUN apt-get install -y -qq --no-install-recommends ${RUN_APT_DEPENDENCIES}
 
 # These are needed to run knitr
@@ -23,7 +23,7 @@ RUN dpkg-reconfigure --frontend noninteractive tzdata
 RUN update-locale --reset LANG=en_US.utf8 LANGUAGE=en_US LC_ALL=en_US.utf8 LC_CTYPE=en_US.utf8
 
 ### Setup R packages
-ARG R_APT_DEPENDENCIES="libgdal20 r-base r-cran-knitr r-cran-reshape r-cran-dplyr r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice"
+ARG R_APT_DEPENDENCIES="libgdal20 r-base  r-cran-littler r-cran-knitr r-cran-reshape r-cran-dplyr r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice"
 RUN apt-get install -y -qq --no-install-recommends ${R_APT_DEPENDENCIES}
 
 RUN echo "options(Ncpus = $(nproc --all))" >> /usr/lib/R/etc/Rprofile.site
