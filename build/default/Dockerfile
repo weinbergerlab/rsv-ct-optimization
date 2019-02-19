@@ -10,7 +10,7 @@ ARG BUILD_APT_DEPENDENCIES="libgdal-dev gcc g++ make libcurl4-openssl-dev zlib1g
 RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
-ARG R_APT_DEPENDENCIES="libgdal20 r-base  r-cran-littler r-cran-knitr r-cran-reshape r-cran-dplyr r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice"
+ARG R_APT_DEPENDENCIES="libgdal20 r-base  r-cran-littler r-cran-knitr r-cran-reshape r-cran-dplyr r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice r-cran-sp"
 RUN apt-get install -y -qq --no-install-recommends ${R_APT_DEPENDENCIES}
 
 RUN echo "options(Ncpus = $(nproc --all))" >> /usr/lib/R/etc/Rprofile.site
@@ -22,7 +22,7 @@ RUN /usr/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIE
 
 # These come from GitHub
 ARG BUILD_R_GITHUB_DEPENDENCIES="kassambara/easyGgplot2 airbornemint/outbreak-predict"
-RUN /usr/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
+RUN /usr/lib/R/site-library/littler/examples/installGithub.r --update FALSE ${BUILD_R_GITHUB_DEPENDENCIES}
 
 ### Setup TeX packages
 ARG TEX_APT_DEPENDENCIES="wget xzdec texlive texlive-lang-cyrillic texlive-latex-extra texlive-fonts-extra texlive-pictures"
