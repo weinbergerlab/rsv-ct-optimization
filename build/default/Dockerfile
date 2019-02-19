@@ -1,26 +1,13 @@
 FROM ubuntu:latest
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
-### Setup apt packages
+### Setup apt packages needed to build the image
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y -qq
 
 # These are only needed to build the image (and will not be present in the final image)
 ARG BUILD_APT_DEPENDENCIES="libgdal-dev gcc g++ make libcurl4-openssl-dev zlib1g-dev libssl-dev"
-RUN apt-get install -y -qq --no-install-recommends ${RUN_APT_DEPENDENCIES}
-
-# These are needed to run knitr
-ARG RUN_APT_DEPENDENCIES="tzdata language-pack-en-base gpg git-lfs"
-RUN apt-get install -y -qq --no-install-recommends ${RUN_APT_DEPENDENCIES}
-
-# Finish up the configuration
-RUN echo tzdata tzdata/Areas select America >> /tmp/debconf.txt
-RUN echo tzdata tzdata/Zones/America select New_York >> /tmp/debconf.txt
-RUN debconf-set-selections /tmp/debconf.txt
-RUN rm /etc/timezone
-RUN rm /etc/localtime
-RUN dpkg-reconfigure --frontend noninteractive tzdata
-RUN update-locale --reset LANG=en_US.utf8 LANGUAGE=en_US LC_ALL=en_US.utf8 LC_CTYPE=en_US.utf8
+RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
 ARG R_APT_DEPENDENCIES="libgdal20 r-base  r-cran-littler r-cran-knitr r-cran-reshape r-cran-dplyr r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice"
@@ -47,6 +34,19 @@ RUN tlmgr --usermode option repository http://ftp.math.utah.edu/pub/tex/historic
 ARG BUILD_TEX_DEPENDENCIES="xcharter"
 RUN tlmgr --usermode install ${BUILD_TEX_DEPENDENCIES} || echo "updmap errors are okay?!"
 RUN updmap-user
+
+### Setup misc other packages needed to run our build
+ARG RUN_APT_DEPENDENCIES="tzdata language-pack-en-base gpg git-lfs"
+RUN apt-get install -y -qq --no-install-recommends ${RUN_APT_DEPENDENCIES}
+
+# Finish up the configuration
+RUN echo tzdata tzdata/Areas select America >> /tmp/debconf.txt
+RUN echo tzdata tzdata/Zones/America select New_York >> /tmp/debconf.txt
+RUN debconf-set-selections /tmp/debconf.txt
+RUN rm /etc/timezone
+RUN rm /etc/localtime
+RUN dpkg-reconfigure --frontend noninteractive tzdata
+RUN update-locale --reset LANG=en_US.utf8 LANGUAGE=en_US LC_ALL=en_US.utf8 LC_CTYPE=en_US.utf8
 
 ### Cleanup to reduce size of the image
 RUN apt-get remove -y -qq ${RUN_APT_DEPENDENCIES}
