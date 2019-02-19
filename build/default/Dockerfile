@@ -38,7 +38,7 @@ RUN /usr/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DE
 RUN tlmgr init-usertree
 RUN tlmgr option repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2017/tlnet-final/
 
-ARG BUILD_TEX_DEPENDENCIES="framed"
+ARG BUILD_TEX_DEPENDENCIES="framed printlen"
 RUN tlmgr install ${BUILD_TEX_DEPENDENCIES}
 
 ### Cleanup to reduce size of the image
