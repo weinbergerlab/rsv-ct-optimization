@@ -10,7 +10,7 @@ ARG DOCKER_APT_DEPENDENCIES="libcurl4-openssl-dev zlib1g-dev libssl-dev wget lib
 RUN apt-get install -y -qq --no-install-recommends ${DOCKER_APT_DEPENDENCIES}
 
 # These are needed to run the image # libblas3 libgomp1?
-ARG BUILD_APT_DEPENDENCIES="tzdata language-pack-en-base wget xzdec texlive gpg libgdal20 r-base git-lfs"
+ARG BUILD_APT_DEPENDENCIES="tzdata language-pack-en-base wget xzdec texlive texlive-lang-cyrillic gpg libgdal20 r-base git-lfs"
 RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 
 # Finish up the configuration
@@ -38,7 +38,7 @@ RUN /usr/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DE
 RUN tlmgr init-usertree
 RUN tlmgr --usermode option repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2017/tlnet-final/
 
-ARG BUILD_TEX_DEPENDENCIES="framed printlen pgf draftwatermark everypage lastpage enumitem sectsty xcharter euenc"
+ARG BUILD_TEX_DEPENDENCIES="framed printlen pgf draftwatermark everypage lastpage enumitem sectsty xcharter"
 RUN tlmgr --usermode install ${BUILD_TEX_DEPENDENCIES} || echo "updmap errors are okay?!"
 RUN updmap-user
 
