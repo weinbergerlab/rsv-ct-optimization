@@ -1,7 +1,7 @@
 \documentclass[10pt,letter,twoside]{article}
 
 <<options, echo=FALSE>>=
-    knitr::opts_chunk$set(echo=FALSE, message=FALSE)
+    knitr::opts_chunk$set(echo=FALSE, message=FALSE, error=FALSE)
 @
 
 <<load>>=
