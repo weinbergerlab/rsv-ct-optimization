@@ -55,5 +55,7 @@ docker.pre:
   tags: 
     - dind-mem:2
   image: docker:dind
+  services:
+    - docker:dind
   script:
     - build/docker/pre build/default
