@@ -22,7 +22,7 @@ RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
 RUN /usr/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
 
 # These come from GitHub
-ARG BUILD_R_GITHUB_DEPENDENCIES="kassambara/easyGgplot2 airbornemint/outbreak-predict"
+ARG BUILD_R_GITHUB_DEPENDENCIES="kassambara/easyGgplot2 airbornemint/outbreak-inference"
 RUN /usr/lib/R/site-library/littler/examples/installGithub.r --update FALSE ${BUILD_R_GITHUB_DEPENDENCIES}
 
 ### Setup TeX packages
