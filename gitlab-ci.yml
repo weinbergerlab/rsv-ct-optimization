@@ -56,5 +56,7 @@ docker.pre:
     - docker
   image: docker
   script:
-    - find .
-    - bash build/docker/pre build/default
+    - apk update
+    - apk upgrade
+    - apk add bash git
+    - build/docker/pre build/default
