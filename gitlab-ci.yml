@@ -1,15 +1,9 @@
-include: 
-  - local: build/docker/bootstrap.yml
-
 stages:
-  - digitalocean.pre
   - docker.pre
   - knitr
   - tex
-  - digitalocean.post
   
 variables:
-  DO_DROPLET_PREFIX: gitlab-rsv-ct-optimization
   TEX_DIR: "Paper"
   TEX_OUTPUT_DIR: "Paper/build"
   KNITR_CACHE_DIR: "Paper/.cache/knitr"
@@ -17,7 +11,7 @@ variables:
 knitr:
   stage: knitr
   tags:
-    - docker+private
+    - docker-machine-2g1c
   image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
@@ -36,7 +30,7 @@ knitr:
 tex:
   stage: tex
   tags:
-    - docker+private
+    - docker-machine-2g1c
   image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
@@ -56,23 +50,10 @@ tex:
       - "${TEX_OUTPUT_DIR}/RSVOptimization.pdf"
 
 # Set up docker image for the rest of the build, keyed off commit ID
-.docker:
-  tags: 
-    - shell+private
-    
 docker.pre:
-  extends: .docker
   stage: docker.pre
+  tags: 
+    - docker
+  image: docker
   script:
     - build/docker/pre build/default
-
-
-# Turn digital ocean droplet on/off
-digitalocean.pre:
-  extends: .digitalocean.pre
-  stage: digitalocean.pre
-
-digitalocean.post:
-  extends: .digitalocean.post
-  stage: digitalocean.post
-
