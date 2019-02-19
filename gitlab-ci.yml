@@ -54,6 +54,6 @@ docker.pre:
   stage: docker.pre
   tags: 
     - dind-mem:2
-  image: docker
+  image: docker:dind
   script:
     - build/docker/pre build/default
