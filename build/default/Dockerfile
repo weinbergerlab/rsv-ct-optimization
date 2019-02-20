@@ -11,7 +11,7 @@ RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 RUN apt-mark auto ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
-ARG R_APT_DEPENDENCIES=""
+ARG R_APT_DEPENDENCIES="libgdal20"
 RUN apt-get install -y -qq --no-install-recommends ${R_APT_DEPENDENCIES}
 
 RUN echo "options(Ncpus = $(nproc --all))" >> "/usr/local/lib/R/etc/Rprofile.site"
