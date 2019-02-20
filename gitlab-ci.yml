@@ -1,7 +1,9 @@
-include: "build/docker/docker-setup.yml"
+include:
+  - project: airbornemint/gitlab-docker-bootstrap
+    file: "docker-setup.yml"
 
 stages:
-  - docker
+  - docker-setup
   - knitr
   - tex
   
@@ -45,9 +47,9 @@ tex:
       - "${TEX_DIR}/${TEX_OUTPUT_DIR}/RSVOptimization.pdf"
 
 # Set up docker image for the rest of the build, keyed off commit ID
-docker:
-  extends: .docker
-  stage: docker
+docker-setup:
+  extends: .docker-setup
+  stage: docker-setup
   tags: 
     - dind-mem:2
   variables:
