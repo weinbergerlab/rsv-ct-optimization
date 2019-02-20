@@ -31,10 +31,6 @@ tex:
   tags:
     - docker
   image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${KNITR_CACHE_DIR}"
   script:
     - cd "${TEX_DIR}"
     - mkdir -p "${TEX_OUTPUT_DIR}"
@@ -44,7 +40,7 @@ tex:
     - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
   artifacts:
     paths:
-      - "${TEX_OUTPUT_DIR}/RSVOptimization.pdf"
+      - "${TEX_DIR}/${TEX_OUTPUT_DIR}/RSVOptimization.pdf"
 
 # Set up docker image for the rest of the build, keyed off commit ID
 docker:
