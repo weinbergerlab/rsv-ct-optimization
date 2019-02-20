@@ -8,7 +8,7 @@ runcmd:
   - export DEBIAN_FRONTEND=noninteractive
   - apt-get update -y -qq
   # These are needed for setup
-  - export BUILD_APT_DEPENDENCIES="curl cdebootstrap"
+  - export BUILD_APT_DEPENDENCIES="curl cdebootstrap python-toml"
   - apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
   - apt-mark auto ${BUILD_APT_DEPENDENCIES}
   # These are needed to run builds
@@ -75,6 +75,15 @@ runcmd:
     --tag-list="docker, docker-mem:2, docker-cpu:2, docker-cpu:2-mem:2, dind, dind-mem:2, dind-cpu:2, dind-cpu:2-mem:2"
     --machine-machine-options digitalocean-size=s-2vcpu-2gb
     --machine-machine-name s-2vcpu-2gb-%%s
+  - |
+    echo """
+    import toml
+    path = "/etc/gitlab-runner/config.toml"
+    conf = toml.load(file(path))
+    conf["concurrent"] = 5
+    toml.dump(conf, file(path, "w"))
+    """ | python
+  - gitlab-runner restart
   ### Cleanup
   - apt-get autoremove -y
   - apt-get clean
