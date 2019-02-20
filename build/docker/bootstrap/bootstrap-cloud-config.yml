@@ -32,12 +32,6 @@ runcmd:
   - docker-machine create --driver digitalocean --digitalocean-access-token=%(DIGITALOCEAN_API_TOKEN)s gitlab-ci-dispatch-setup
   - docker-machine rm --force gitlab-ci-dispatch-setup
   # Register GitLab runner
-  - |
-    echo """
-    #cloud-config
-    runcmd:
-      - curl -sSL https://agent.digitalocean.com/install.sh | sh
-    """ > /etc/gitlab-runner/runner-userdata-yml
   - >
     export GITLAB_RUNNER_COMMON='
     --url https://gitlab.com/
@@ -62,7 +56,6 @@ runcmd:
     --machine-machine-options digitalocean-monitoring
     --machine-machine-options digitalocean-region=sfo2
     --machine-machine-options digitalocean-tags=gitlab-ci
-    --machine-machine-options digitalocean-userdata=/etc/gitlab-runner/runner-userdata-yml
     --registration-token %(GITLAB_CI_REGISTRATION_TOKEN)s
     '
   - >
