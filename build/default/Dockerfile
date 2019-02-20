@@ -38,7 +38,7 @@ ARG BUILD_TEX_DEPENDENCIES="xcharter"
 RUN tlmgr --usermode install ${BUILD_TEX_DEPENDENCIES}
 
 ### Setup misc other packages needed to run our build
-ARG RUN_APT_DEPENDENCIES="tzdata language-pack-en-base gpg"
+ARG RUN_APT_DEPENDENCIES="tzdata locales gpg"
 RUN apt-get install -y -qq --no-install-recommends ${RUN_APT_DEPENDENCIES}
 
 # Finish up the configuration
