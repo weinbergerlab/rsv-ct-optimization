@@ -1,4 +1,4 @@
-FROM rocker:r-ver
+FROM rocker/r-ver
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 ### Setup apt packages needed to build the image
