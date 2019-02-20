@@ -19,9 +19,7 @@ knitr:
       - "${KNITR_CACHE_DIR}"
   script:
     - printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
-    - head "ct rsv time series.csv"
     - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
-    - ls -al "../Analysis/RSV.R" "../Paper/RSVOptimization.R"
     - Rscript -e "knitr::opts_chunk\$set(cache.path='${CI_PROJECT_DIR}/${KNITR_CACHE_DIR}/'); knitr::knit('RSVOptimization.rnw')"
   artifacts:
     paths:
