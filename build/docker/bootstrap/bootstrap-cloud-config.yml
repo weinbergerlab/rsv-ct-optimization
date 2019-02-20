@@ -39,10 +39,17 @@ runcmd:
       - curl -sSL https://agent.digitalocean.com/install.sh | sh
     """ > /etc/gitlab-runner/runner-userdata-yml
   - >
-    gitlab-runner register --non-interactive
+    export GITLAB_RUNNER_COMMON='
     --url https://gitlab.com/
-    --tag-list "docker, docker-machine-2g1c"
     --name gitlab-dispatch
+    --limit 5
+    --cache-type s3
+    --cache-shared
+    --cache-s3-server-address sfo2.digitaloceanspaces.com
+    --cache-s3-access-key %(S3_ACCESS_KEY)s
+    --cache-s3-secret-key %(S3_SECRET_KEY)s
+    --cache-s3-bucket-name gitlab-ci-runner-cache
+    --cache-s3-bucket-location sf02
     --executor docker+machine
     --docker-image ruby:2.1
     --docker-privileged
@@ -50,22 +57,24 @@ runcmd:
     --machine-idle-time 7200
     --machine-max-builds 0
     --machine-machine-driver digitalocean
-    --machine-machine-name gitlab-ci-%%s
     --machine-machine-options digitalocean-access-token=%(DIGITALOCEAN_API_TOKEN)s
     --machine-machine-options digitalocean-image=ubuntu-16-04-x64
     --machine-machine-options digitalocean-monitoring
     --machine-machine-options digitalocean-region=sfo2
-    --machine-machine-options digitalocean-size=s-1vcpu-2gb
     --machine-machine-options digitalocean-tags=gitlab-ci
     --machine-machine-options digitalocean-userdata=/etc/gitlab-runner/runner-userdata-yml
     --registration-token %(GITLAB_CI_REGISTRATION_TOKEN)s
+    '
   - >
-    gitlab-runner register --non-interactive
-    --url https://gitlab.com/
-    --tag-list "docker.pre"
-    --name gitlab-dispatch
-    --executor shell
-    --registration-token %(GITLAB_CI_REGISTRATION_TOKEN)s
+    gitlab-runner register ${GITLAB_RUNNER_COMMON} --non-interactive
+    --tag-list="docker, docker-mem:2, dind, dind-mem:2"
+    --machine-machine-options digitalocean-size=s-1vcpu-2gb
+    --machine-machine-name s-1vcpu-2gb-%%s
+  - >
+    gitlab-runner register ${GITLAB_RUNNER_COMMON} --non-interactive
+    --tag-list="docker, docker-mem:2, docker-cpu:2, docker-cpu:2-mem:2, dind, dind-mem:2, dind-cpu:2, dind-cpu:2-mem:2"
+    --machine-machine-options digitalocean-size=s-2vcpu-2gb
+    --machine-machine-name s-2vcpu-2gb-%%s
   ### Cleanup
   - apt-get autoremove -y
   - apt-get clean
