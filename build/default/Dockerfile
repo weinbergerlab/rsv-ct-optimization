@@ -28,7 +28,7 @@ ARG BUILD_R_GITHUB_DEPENDENCIES="kassambara/easyGgplot2 airbornemint/outbreak-in
 RUN /usr/local/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
 
 ### Setup TeX packages
-ARG TEX_APT_DEPENDENCIES="wget xzdec texlive texlive-lang-cyrillic texlive-latex-extra texlive-bibtex-extra texlive-fonts-extra texlive-pictures"
+ARG TEX_APT_DEPENDENCIES="wget xzdec texlive texlive-binaries texlive-lang-cyrillic texlive-latex-extra texlive-bibtex-extra texlive-fonts-extra texlive-pictures"
 RUN apt-get install -y -qq --no-install-recommends ${TEX_APT_DEPENDENCIES}
 
 RUN tlmgr init-usertree

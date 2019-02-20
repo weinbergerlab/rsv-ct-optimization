@@ -39,7 +39,7 @@ tex:
     - cd "${TEX_DIR}"
     - mkdir -p "${TEX_OUTPUT_DIR}"
     - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - (cd "${TEX_OUTPUT_DIR}" && biblatex RSVOptimization)
+    - (cd "${TEX_OUTPUT_DIR}" && bibtex RSVOptimization)
     - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
   artifacts:
