@@ -4,9 +4,9 @@ stages:
   - tex
   
 variables:
-  TEX_DIR: "Paper"
-  TEX_OUTPUT_DIR: "Paper/build"
-  KNITR_CACHE_DIR: "Paper/.cache/knitr"
+  TEX_DIR: "Paper" # Relative to build root
+  TEX_OUTPUT_DIR: "build" # Relative to TEX_DIR
+  KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
 
 knitr:
   stage: knitr
@@ -16,14 +16,15 @@ knitr:
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
-      - "${KNITR_CACHE_DIR}"
+      - "${TEX_DIR}/${KNITR_CACHE_DIR}"
   script:
     - printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
-    - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
-    - Rscript -e "knitr::opts_chunk\$set(cache.path='${CI_PROJECT_DIR}/${KNITR_CACHE_DIR}/'); knitr::knit('RSVOptimization.rnw')"
+    - cd "${TEX_DIR}"
+    - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('RSVOptimization.rnw')"
   artifacts:
     paths:
       - "${TEX_DIR}/RSVOptimization.tex"
+      - "${TEX_DIR}/${TEX_OUTPUT_DIR}"
 
 tex:
   stage: tex
@@ -35,16 +36,12 @@ tex:
     paths:
       - "${KNITR_CACHE_DIR}"
   script:
-    - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
-    - mkdir -p "${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}"
-    - pwd
-    - ls -al 
-    - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - cd "${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}"
-    - biblatex RSVOptimization
-    - cd "${CI_PROJECT_DIR}/${TEX_DIR}"
-    - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - pdflatex -output-dir="${CI_PROJECT_DIR}/${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - cd "${TEX_DIR}"
+    - mkdir -p "${TEX_OUTPUT_DIR}"
+    - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - (cd "${TEX_OUTPUT_DIR}" && biblatex RSVOptimization)
+    - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
   artifacts:
     paths:
       - "${TEX_OUTPUT_DIR}/RSVOptimization.pdf"

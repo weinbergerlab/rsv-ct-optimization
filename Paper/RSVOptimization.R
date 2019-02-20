@@ -6,11 +6,15 @@ library(rgdal)
 library(ggplot2)
 options(tikzDefaultEngine='pdftex')
 
-figuresDir = ".texpadtmp/figures"
+texOutputDir = Sys.getenv("TEX_OUTPUT_DIR")
+if (texOutputDir == "") {
+  texOutputDir = ".texpadtmp"
+}
+figuresDir = paste0(texOutputDir, "/figures")
 if (!dir.exists(figuresDir)) {
   dir.create(figuresDir, recursive=TRUE)
 }
-options(tikzMetricsDictionary='.texpadtmp/tikzDictionary.dat')
+options(tikzMetricsDictionary=paste0(texOutputDir, '/tikzDictionary.dat'))
 
 inlinePlotWidth = 3.1
 inlinePlotHeight = 2.5
