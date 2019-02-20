@@ -35,8 +35,7 @@ RUN tlmgr init-usertree
 RUN tlmgr --usermode option repository http://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2017/tlnet-final/
 
 ARG BUILD_TEX_DEPENDENCIES="xcharter"
-RUN tlmgr --usermode install ${BUILD_TEX_DEPENDENCIES} || echo "updmap errors are okay?!"
-RUN updmap-user
+RUN tlmgr --usermode install ${BUILD_TEX_DEPENDENCIES}
 
 ### Setup misc other packages needed to run our build
 ARG RUN_APT_DEPENDENCIES="tzdata language-pack-en-base gpg"
