@@ -1,3 +1,6 @@
 [submodule "Analysis/outbreak-inference"]
 	path = Analysis/outbreak-inference
-	url = https://airbornemint@gitlab.com/airbornemint/outbreak-inference.git
+	url = ../outbreak-inference.git
+[submodule "build/docker"]
+	path = build/docker
+	url = ../gitlab-docker-bootstrap.git

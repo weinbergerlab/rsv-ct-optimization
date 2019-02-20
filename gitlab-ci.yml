@@ -1,0 +1,56 @@
+include:
+  - project: airbornemint/gitlab-docker-bootstrap
+    file: "docker-setup.yml"
+
+stages:
+  - docker-setup
+  - knitr
+  - tex
+  
+variables:
+  TEX_DIR: "Paper" # Relative to build root
+  TEX_OUTPUT_DIR: "build" # Relative to TEX_DIR
+  KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
+
+knitr:
+  stage: knitr
+  tags:
+    - docker-mem:2
+  image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${TEX_DIR}/${KNITR_CACHE_DIR}"
+  script:
+    - printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
+    - cd "${TEX_DIR}"
+    - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('RSVOptimization.rnw')"
+  artifacts:
+    paths:
+      - "${TEX_DIR}/RSVOptimization.tex"
+      - "${TEX_DIR}/${TEX_OUTPUT_DIR}"
+
+tex:
+  stage: tex
+  tags:
+    - docker
+  image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  script:
+    - cd "${TEX_DIR}"
+    - mkdir -p "${TEX_OUTPUT_DIR}"
+    - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - (cd "${TEX_OUTPUT_DIR}" && bibtex RSVOptimization)
+    - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - pdflatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+  artifacts:
+    paths:
+      - "${TEX_DIR}/${TEX_OUTPUT_DIR}/RSVOptimization.pdf"
+
+# Set up docker image for the rest of the build, keyed off commit ID
+docker-setup:
+  extends: .docker-setup
+  stage: docker-setup
+  tags: 
+    - dind-mem:2
+  variables:
+    BUILD_DOCKER_CONTEXT: build/default
