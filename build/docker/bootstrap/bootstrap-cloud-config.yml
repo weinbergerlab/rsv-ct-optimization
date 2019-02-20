@@ -65,7 +65,7 @@ runcmd:
     --machine-machine-name s-1vcpu-2gb-%%s
   - >
     gitlab-runner register ${GITLAB_RUNNER_COMMON} --non-interactive
-    --tag-list="docker, docker-mem:2, docker-cpu:2, docker-cpu:2-mem:2, dind, dind-mem:2, dind-cpu:2, dind-cpu:2-mem:2"
+    --tag-list="docker-cpu:2, docker-cpu:2-mem:2, dind-cpu:2, dind-cpu:2-mem:2"
     --machine-machine-options digitalocean-size=s-2vcpu-2gb
     --machine-machine-name s-2vcpu-2gb-%%s
   - |
