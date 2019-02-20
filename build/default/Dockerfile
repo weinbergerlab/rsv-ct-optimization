@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM rocker:r-ver
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 ### Setup apt packages needed to build the image
@@ -11,19 +11,21 @@ RUN apt-get install -y -qq --no-install-recommends ${BUILD_APT_DEPENDENCIES}
 RUN apt-mark auto ${BUILD_APT_DEPENDENCIES}
 
 ### Setup R packages
-ARG R_APT_DEPENDENCIES="libgdal20 r-base  r-cran-littler r-cran-knitr r-cran-reshape r-cran-mgcv r-cran-ggplot2 r-cran-data.table r-cran-tikzdevice r-cran-sp r-cran-mapproj"
+ARG R_APT_DEPENDENCIES=""
 RUN apt-get install -y -qq --no-install-recommends ${R_APT_DEPENDENCIES}
 
-RUN echo "options(Ncpus = $(nproc --all))" >> /usr/lib/R/etc/Rprofile.site
+RUN echo "options(Ncpus = $(nproc --all))" >> "/usr/local/lib/R/etc/Rprofile.site"
+
+# install2.r needs these?
+RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
 
 # These come from CRAN
-ARG BUILD_CRAN_DEPENDENCIES="zipcode splitstackshape maps rgdal dplyr rgeos"
-RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
+ARG BUILD_CRAN_DEPENDENCIES="zipcode splitstackshape maps rgdal dplyr rgeos knitr reshape mgcv data.table tikzDevice sp mapproj ggplot2"
 RUN /usr/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
 
 # These come from GitHub
 ARG BUILD_R_GITHUB_DEPENDENCIES="kassambara/easyGgplot2 airbornemint/outbreak-inference"
-RUN /usr/lib/R/site-library/littler/examples/installGithub.r --update FALSE ${BUILD_R_GITHUB_DEPENDENCIES}
+RUN /usr/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
 
 ### Setup TeX packages
 ARG TEX_APT_DEPENDENCIES="wget xzdec texlive texlive-lang-cyrillic texlive-latex-extra texlive-fonts-extra texlive-pictures"
@@ -37,7 +39,7 @@ RUN tlmgr --usermode install ${BUILD_TEX_DEPENDENCIES} || echo "updmap errors ar
 RUN updmap-user
 
 ### Setup misc other packages needed to run our build
-ARG RUN_APT_DEPENDENCIES="tzdata language-pack-en-base gpg git-lfs"
+ARG RUN_APT_DEPENDENCIES="tzdata language-pack-en-base gpg"
 RUN apt-get install -y -qq --no-install-recommends ${RUN_APT_DEPENDENCIES}
 
 # Finish up the configuration
