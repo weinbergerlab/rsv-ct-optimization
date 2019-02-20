@@ -1,3 +1,5 @@
+include: "build/docker/docker-setup.yml"
+
 stages:
   - docker
   - knitr
@@ -44,14 +46,9 @@ tex:
 
 # Set up docker image for the rest of the build, keyed off commit ID
 docker:
+  extends: .docker
   stage: docker
   tags: 
     - dind-mem:2
-  image: docker:dind
-  services:
-    - docker:dind
   variables:
-    DOCKER_DRIVER: overlay2
-    DOCKER_HOST: tcp://docker:2375/
-  script:
-    - build/docker/pre build/default
+    BUILD_DOCKER_CONTEXT: build/default

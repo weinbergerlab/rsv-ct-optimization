@@ -1,8 +1,0 @@
-#!/bin/sh -e
-
-_DOCKER=${1}
-_DOCKER_IMAGE_TAG=${2}
-_BUILD_DOCKER_CONTEXT=${3}
-
-"${_DOCKER}" build --rm=false -t "${_DOCKER_IMAGE_TAG}" "${_BUILD_DOCKER_CONTEXT}"
-"${_DOCKER}" push "${_DOCKER_IMAGE_TAG}"
