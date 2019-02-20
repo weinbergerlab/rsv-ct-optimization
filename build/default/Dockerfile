@@ -21,11 +21,11 @@ RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
 
 # These come from CRAN
 ARG BUILD_CRAN_DEPENDENCIES="zipcode splitstackshape maps rgdal dplyr rgeos knitr reshape mgcv data.table tikzDevice sp mapproj ggplot2"
-RUN /usr/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
+RUN /usr/local/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
 
 # These come from GitHub
 ARG BUILD_R_GITHUB_DEPENDENCIES="kassambara/easyGgplot2 airbornemint/outbreak-inference"
-RUN /usr/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
+RUN /usr/local/lib/R/site-library/littler/examples/installGithub.r ${BUILD_R_GITHUB_DEPENDENCIES}
 
 ### Setup TeX packages
 ARG TEX_APT_DEPENDENCIES="wget xzdec texlive texlive-lang-cyrillic texlive-latex-extra texlive-fonts-extra texlive-pictures"
