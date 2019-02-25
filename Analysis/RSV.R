@@ -14,7 +14,7 @@ library(maps)
 data(zipcode)
 set.seed(0)
 
-simulations = 2000
+simulations = 20
 
 # *** Data munging helpers
 
