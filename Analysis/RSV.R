@@ -48,11 +48,11 @@ ppxRounding = c(0, 1, 2, 4)
 admissions = fread("../ct rsv time series.csv", sep=",", header=TRUE, colClasses=c("patzip"="character"))
 
 epiyear = function(date) {
-  ifelse(month(date) > 6, year(date) + 1, year(date))
+  ifelse(month(date) > 6, year(date), year(date) - 1)
 }
 
 epiyday = function(date) {
-  as.numeric(date - as.Date(ISOdate(epiyear(date) - 1, 6, 30)))
+  as.numeric(date - as.Date(ISOdate(epiyear(date), 6, 30)))
 }
 
 epiweek = function(date) {
@@ -70,7 +70,7 @@ datasetAll = admissions %>%
   select(patzip, adate, weeki, rsv, epiyear, epiyday, epiweek)
 
 dataset = datasetAll %>%
-  filter(epiyear >= 1996, epiyear <= 2013)
+  filter(epiyear >= 1996, epiyear <= 2012)
   
 # Add state based on zipcode and drop everything not in CT
 zipState = zipcode %>% select(zip, state)
