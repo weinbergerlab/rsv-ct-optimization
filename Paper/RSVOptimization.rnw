@@ -92,7 +92,7 @@ knitr::read_chunk("../Paper/RSVOptimization.R")
 
 \abstractsection{Background}Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in children, and leads to hospitalization rates of up to 50\% in high-risk infants. Safe and effective immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to the immunoprophylaxis regimen outside of Florida. In this study, we investigate the value of using spatial and temporal variation in RSV incidence to adjust the RSV prophylaxis regimen in Connecticut.
 
-\abstractsection{Methods}We describe a generalized additive model of RSV incidence using cubic cyclic penalized splines and apply that model to hospital admissions in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We use the model to estimate the fraction of all RSV cases in Connecticut occurring while immunoprophylaxis (administered according to the AAP guidelines) offers protection from RSV infection (``preventable fraction''). We also formulate several alternative immunoprophylaxis regimens, with the same net pharmaceutical cost as the AAP-recommended regimen, and similarly estimate their preventable fraction.
+\abstractsection{Methods}We obtained weekly ZIP-code-level counts of RSV-associated hospital admission in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We fit smoothed curves to these admission counts using a generalized additive model with cubic cyclic penalized splines, and used these curves to estimate the fraction of all RSV cases in Connecticut occurring during the period of protection offered by RSV immunoprophylaxis (``preventable fraction'') under the AAP guidelines. We then used the same model to estimate protection conferred by immunoprophylaxis regimens with alternate start dates (but unchanged duration and net pharmaceutical cost).
 
 \abstractsection{Results}Using preventable fraction to assess different immunoprophylaxis regimens, we found that regimens adjusted for county-level variation in timing of RSV seasons are superior to the current AAP-recommended regimen. We also considered the effect of rounding the timing of the first dose of prophylaxis to pragmatic calendrical boundaries (weekly, biweekly, and monthly), and found that benefits of alternative regimens over the AAP-recommended regimen persisted with biweekly rounding, but not with monthly rounding. Our best-performing pragmatic alternative to the AAP guidelines was based on the regional RSV season midpoint with biweekly rounding. In comparison to the AAP recommendation, whose preventable fraction is \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}), that alternative yielded improvement to \Sexpr{regionStrategyCoverage("all", "countyMiddle", 2)} (\Sexpr{regionStrategyCoverageCI("all", "countyMiddle", 2, level)}). We also found that alternative regimens adjusted for annual variation in the RSV season are non-superior to spatially adjusted regimens.
 
@@ -124,29 +124,17 @@ Respiratory syncytial virus (RSV) causes upper respiratory infections in humans 
 
 For infants, risk factors of serious illness and hospitalization due to RSV infection include prematurity, chronic lung disease of prematurity, congenital heart disease, anatomic pulmonary abnormalities, neuromuscular disorders, trisomy 21, and immunocompromised status.\cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} The hospitalization rate due to RSV among high-risk infants is anywhere from two to ten times higher than among infants with no comorbidities.\cite{Boyce:2000gz}
 
-\subsection{RSV immunoprophylaxis}
+Since 1998, a monoclonal antibody (palivizumab), has been approved in the US for prevention of RSV infection in high-risk infants less than 2 years old. Palivizumab is administered via intramuscular injection and requires five monthly doses, priced at \$1500-\$3000 per dose.\cite{Hampp:2011ju,Andabaka:2013dr} Palivizumab has been found to be effective in reducing hospitalizations due to RSV; in double-blinded trials in high-risk infants, it reduced the hospitalization rate by 45-55\% compared to placebo.\cite{Group:1998ih,Feltes:2003wm} It has also been found to be safe and well-tolerated in clinical trials.\cite{Group:1998ih} Owing to the high cost, the 2014 revision of the American Academy of Pediatrics (AAP) RSV prophylaxis guidelines, recommends palivizumab only for high-risk infants, and only during the RSV season.\cite{Anonymous:1998up,AmericanAcademyofPediatricsCommitteeonInfectiousDiseasesandCommitteeonFetusandNewborn:2003ug,AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj}
 
-Immunoprophylaxis with palivizumab, a monoclonal antibody medication, has been approved in the US for prevention of RSV infection since 1998. Palivizumab is administered via intramuscular injection and requires five monthly doses, priced at \$1500-\$3000 per dose.\cite{Hampp:2011ju,Andabaka:2013dr}
-
-Palivizumab has been found to be effective in reducing hospitalizations due to RSV; in double-blinded trials in high-risk infants, it reduced the hospitalization rate by 45-55\% compared to placebo.\cite{Group:1998ih,Feltes:2003wm} Its has also been found to be safe and well-tolerated in clinical trials.\cite{Group:1998ih}
-
-Owing to the high cost, the American Academy of Pediatrics (AAP) guidelines, revised in 2014, recommend palivizumab immunoprophylaxis only for high-risk infants, and only during the RSV season.\cite{Anonymous:1998up,AmericanAcademyofPediatricsCommitteeonInfectiousDiseasesandCommitteeonFetusandNewborn:2003ug,AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj}
-
-\subsection{RSV seasonality}
-
-RSV seasonality has been established throughout the United States, based on National Respiratory and Enteric Virus Surveillance System data. In all states except for Florida, it shows an annual or biennial cycle with a stable seasonal onset between mid-November and early January and a stable seasonal offset between mid-March and late April.\cite{CentersforDiseaseControlandPreventionCDC:2011wt,CentersforDiseaseControlandPreventionCDC:2013wv} RSV season in Florida begins approximately two months earlier than in other states. \cite{CentersforDiseaseControlandPreventionCDC:2013wv}
+RSV seasonality and spatial variability have been established throughout the United States, based on National Respiratory and Enteric Virus Surveillance System data. In all states except for Florida, RSV shows an annual or biennial cycle with a stable seasonal onset between mid-November and early January and a stable seasonal offset between mid-March and late April.\cite{CentersforDiseaseControlandPreventionCDC:2011wt,CentersforDiseaseControlandPreventionCDC:2013wv} RSV season in Florida begins approximately two months earlier than in other states. \cite{CentersforDiseaseControlandPreventionCDC:2013wv}
 
 The AAP acknowledges the potential significance of spatial and temporal variation in RSV incidence, but --- outside of Florida --- does not recommend local variance from nationwide prophylaxis guidelines.\cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} 
 
-\subsection{Spatio-temporal variability of RSV}
-
-TODO Nationwide spatial variability of RSV season has been established by the Centers for Disease Control and Prevention (CDC).\cite{CentersforDiseaseControlandPreventionCDC:2011wt,CentersforDiseaseControlandPreventionCDC:2013wv}
-
-In Connecticut, the Department of Public Health (CT DPH), via its Office of Health Care Access (OHCA), maintains a database of all hospitalizations in every non-federal short-stay acute-care general hospital in the state. Previous analysis of this database has shown regional variability in time of peak RSV incidence within Connecticut.\cite{Noveroske:y4fi3188} No prior research is available regarding year-to-year variation in timing of RSV season in Connecticut.
+Previous analysis of RSV-associated hospital admissions in Connecticu has shown regional variability in time of peak RSV incidence within Connecticut.\cite{Noveroske:y4fi3188} No prior research is available regarding year-to-year variation in timing of RSV season in Connecticut.
 
 \subsection{Study aims}
 
-Motivated by the AAP's recognition of the significance of spatial variation in formulating prophylaxis guidelines, and the known spatial variability of RSV incidence in Connecticut, we aim to determine whether spatial and temporal variability can be used to optimize RSV prophylaxis in Connecticut by asking these questions:
+Motivated by the AAP's recognition of the significance of spatial variation in formulating prophylaxis guidelines, and the known spatial variability of RSV incidence in Connecticut, we aim to determine whether spatial and temporal variability can be used to optimize RSV prophylaxis in Connecticut by 
 
 \begin{itemize}
 	\item To what extent does regional variability of RSV incidence in Connecticut impact the effectiveness of the AAP-recommended prophylaxis regimen?
@@ -159,7 +147,7 @@ Motivated by the AAP's recognition of the significance of spatial variation in f
 
 \subsection{Case definition}
 
-We defined an RSV-associated hospitalization in Connecticut to be a hospital stay for which:
+In Connecticut, the Department of Public Health (CT DPH), via its Office of Health Care Access (OHCA), maintains a database of all hospitalizations in every non-federal short-stay acute-care general hospital in the state. We defined an RSV-associated hospitalization in Connecticut to be a hospital stay for which:
 
 \begin{itemize}
     \item the postal code of residence listed the in patient's medical record was in Connecticut, and
@@ -168,23 +156,25 @@ We defined an RSV-associated hospitalization in Connecticut to be a hospital sta
 
 Using the OHCA weekly hospitalization statistics, we identified \Sexpr{prettyNum(nrow(dataset), big.mark=",")} RSV-associated hospitalizations in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)} (inclusive).
 
+The study was approved by the Human Investigation Committees at Yale University and the CT DPH. The authors assume full responsibility for analyses and interpretation of the data obtained from CT DPH.
+
 % TODO patient age
 
 \subsection{Data normalization}
 
-Given that RSV seasons peak early in each calendar year, we designated the surveillance year as the 12-month period beginning  in July. OHCA provided us with hospitalization records aggregated into Monday-Sunday calendar weeks; we assigned the first full calendar week of July to be surveillance week 1 in each surveillance year.
-
-Due to changes in diagnostic coding, we excluded data prior to July 1996; we similarly excluded data starting after June 2013 due to incompleteness.
+We designated epidemiological years as beginning in the first full week of July, in order to accommodate the timing of RSV peaks (which span two calendar years) and the limitations of hospitalization records (which OHCA aggregated into Monday-Sunday calendar weeks). Due to changes in diagnostic coding, we excluded data prior to July 1996; we similarly excluded data after June 2013 due to incompleteness.
 
 \subsection{Choice of model}
 
-Our goal was to construct a model of annual RSV incidence that allowed us to easily estimate complex characteristics of RSV seasons, such as season onset and offset. To that end, we looked for a model that allowed easy sampling of estimated model parameters; coupling this with Monte Carlo sampling --- after transforming model parameters into response variables --- allowed us to sample arbitrary response variables.
+Our goal was to construct a model of annual RSV incidence that allowed us to obtain interval estimates of complex characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data, and used resampling to obtain interval estimates. (TODO See supplement.)
 
-We assumed that RSV incidence is the result of a Poisson process whose $\log$ can be modeled as a piecewise twice-differentiable function of time. To meet those criteria and assumptions, we chose a log-linked generalized additive model (GAM) with penalized cubic B-splines for our analysis. 
-
-% Looked for prior art on using GAM/pspline for ID epi, didn't find anything that was relevant. (Not even by Goldstein or Lipsitch.)
-
-We developed a custom R package for estimation of arbitrary characteristics of infectious disease outbreaks (as long as the outbreaks are amenable to GAM); this package is available at \href{https://github.com/airbornemint/outbreak-inference}{\nolinkurl{github.com/airbornemint/outbreak-inference}}.
+%To that end, we looked for a model that allowed easy sampling of estimated model parameters; coupling this with Monte Carlo sampling --- after transforming model parameters into response variables --- allowed us to sample arbitrary response variables.
+%
+%We assumed that RSV incidence is the result of a Poisson process whose $\log$ can be modeled as a piecewise twice-differentiable function of time. To meet those criteria and assumptions, we chose a log-linked generalized additive model (GAM) with penalized cubic B-splines for our analysis. 
+%
+%% Looked for prior work using GAM/pspline for ID epi, didn't find anything that was relevant. (Not even by Goldstein or Lipsitch.)
+%
+%We developed a custom R package for estimation of arbitrary characteristics of infectious disease outbreaks (as long as the outbreaks are amenable to GAM); this package is available at \href{https://github.com/airbornemint/outbreak-inference}{\nolinkurl{github.com/airbornemint/outbreak-inference}}.
 
 \subsection{Spatial aggregation of RSV incidence}
 
@@ -340,8 +330,6 @@ As before, these alternative regimens involved five monthly doses of palivizumab
 
 % \uselengthunit{in}\printlength{\columnwidth}
 % column width = 3.20929 in
-
-The study was approved by the Human Investigation Committees at Yale University and the CT DPH. The authors assume full responsibility for analyses and interpretation of the data obtained from CT DPH.
 
 \section{Results}
 
