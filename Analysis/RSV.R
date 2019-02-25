@@ -60,15 +60,18 @@ epiweek = function(date) {
 }
 
 # Add week-of-year, with zero = first week of January, drop first 5.5 years because of coding differences
-dataset = admissions %>%
+datasetAll = admissions %>%
   mutate(
     adate=as.Date(adate, "%d%b%Y"),
     epiyear=epiyear(adate),
     epiyday=epiyday(adate),
     epiweek=epiweek(adate)
   ) %>%
-  filter(epiyear >= 1996, epiyear <= 2013) %>%
   select(patzip, adate, weeki, rsv, epiyear, epiyday, epiweek)
+
+dataset = datasetAll %>%
+  filter(epiyear >= 1996, epiyear <= 2013)
+  
 # Add state based on zipcode and drop everything not in CT
 zipState = zipcode %>% select(zip, state)
 dataset = dataset %>%

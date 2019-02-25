@@ -4,24 +4,26 @@ output: html_notebook
 ---
 
 ```{r setup, include=FALSE, error=FALSE, warning=FALSE, message=FALSE}
-install.packages(c("dplyr", "zipcode", "reshape", "mgcv", "ggplot2", "gridExtra", "devtools", "data.table", "tikzDevice", "splitstackshape", "maps", "mapproj", "rgdal", "rgeos"))
+install.packages(c("dplyr", "zipcode", "reshape", "mgcv", "ggplot2", "gridExtra", "devtools", "data.table", "tikzDevice", "splitstackshape", "maps", "mapproj", "rgdal", "rgeos", "scales"))
 library(devtools)
 install_github("gavinsimpson/tsgam")
 install_github("kassambara/easyGgplot2")
 install_github("airbornemint/outbreak-predict")
+library(scales)
 ```
 ```{r}
 source("./RSV.R")
 ```
 
 ```{r}
-ggplot(dataset %>% 
-         group_by(weeki) %>%
+ggplot(datasetAll %>% 
+         group_by(weeki, adate) %>%
          summarize(rsv=sum(rsv)), 
-       aes(x=weeki, y=rsv)) +
+       aes(x=adate, y=rsv)) +
   geom_hline(aes(yintercept = 0)) +
   geom_line() +
-  labs(y="RSV cases/week", x="Time", title="All counties")
+  labs(y="RSV cases/week", x="Time", title="All counties") +
+  scale_x_date(labels=date_format("%Y"), date_breaks="1 year")
 
 plots = lapply(rsvCounties, function(c) {
   ggplot(dataset %>% 
