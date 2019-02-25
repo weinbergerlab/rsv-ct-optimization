@@ -1,23 +1,4 @@
-\documentclass[10pt,letter,twoside]{article}
-
-<<options, echo=FALSE>>=
-    knitr::opts_chunk$set(echo=FALSE, message=FALSE, error=FALSE)
-@
-
-<<load>>=
-knitr::read_chunk("../Analysis/RSV.R")
-knitr::read_chunk("../Paper/RSVOptimization.R")
-@
-
-<<libraries, cache=FALSE>>=
-@
-
-<<external, cache=TRUE>>=
-@
-
-<<util, warning=FALSE>>=
-@
-    
+\documentclass[10pt,letter]{article}
 \usepackage{multicol,float}
 \floatplacement{figure}{H}
 \raggedcolumns
@@ -39,7 +20,6 @@ knitr::read_chunk("../Paper/RSVOptimization.R")
 \SetWatermarkText{DRAFT 1}
 
 \input{structure.tex}
-\edef\figuresDir{\Sexpr{figuresDir}}
 
 \usepackage[bf,medium,raggedright,compact]{titlesec}
 \titleformat{\section}{\normalfont\large\bfseries\scshape}{\thesection}{1em}{}
@@ -57,6 +37,25 @@ knitr::read_chunk("../Paper/RSVOptimization.R")
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
+<<options, echo=FALSE>>=
+    knitr::opts_chunk$set(echo=FALSE, message=FALSE, error=FALSE)
+@
+
+<<load>>=
+knitr::read_chunk("../Analysis/RSV.R")
+knitr::read_chunk("../Paper/RSVOptimization.R")
+@
+
+<<libraries, cache=FALSE>>=
+@
+
+<<external, cache=TRUE>>=
+@
+
+<<util, warning=FALSE>>=
+@
+    
+\edef\figuresDir{\Sexpr{figuresDir}}
 \title{Assessment and optimization of respiratory syncytial virus prophylaxis regimens in Connecticut, \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}}
 \def\headertitle{Assessment and optimization of RSV prophylaxis regimens in Connecticut, \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}}
 
@@ -73,6 +72,7 @@ knitr::read_chunk("../Paper/RSVOptimization.R")
 
 \pagestyle{empty}
 \begin{document}
+% \SweaveOpts{concordance=TRUE}
 
 \newlength\baseparindent
 \setlength\baseparindent{\parindent}
