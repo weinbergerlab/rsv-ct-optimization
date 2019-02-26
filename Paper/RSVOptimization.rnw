@@ -1,5 +1,5 @@
 \documentclass[10pt,letter]{article}
-\usepackage{multicol,float}
+\usepackage{float}
 \floatplacement{figure}{H}
 \raggedcolumns
 
@@ -113,8 +113,6 @@ knitr::read_chunk("../Paper/RSVOptimization.R")
 
 \listoffigures
 \clearpage
-
-%\begin{multicols}{1}
 
 \section{Introduction}
 
@@ -307,13 +305,13 @@ Finally, to assess the impact of any long-term trends in RSV season timing on pr
 \end{itemize}
 
 \setcounter{figure}{3}
-\begin{figure*}[b]
+\begin{figure}[b]
 \begin{center}
 \input{\figuresDir/coverageByRegionAAPInsight.tex}
 \caption[Regional variation in the relative timing of the RSV season in Connecticut and the AAP-recommended prophylaxis regimen]{Regional variation in the relative timing of the RSV season in Connecticut and the AAP-recommended prophylaxis regimen, showing the gap between season onset and prophylaxis start date, notable particularly in Fairfield county}
 \label{fig:coverageByRegionAAPInsight}
 \end{center}
-\end{figure*}
+\end{figure}
 \setcounter{figure}{1}
 
 \begin{figure}
@@ -504,13 +502,13 @@ TODO Meanwhile, in comparison with the statewide RSV season onset and offset, th
 Statewide, our model shows that \Sexpr{regionStrategyCoverage("all", "aap", 0)} of RSV cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) occur while palivizumab, administered per the AAP guidelines, offers protection.
 
 \setcounter{figure}{4}
-\begin{figure*}
+\begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionRegimen.tex}
 \caption[Comparison of six spatially adjusted RSV prophylaxis regimens to the AAP-recommended regimen]{Comparison of six spatially adjusted RSV prophylaxis regimens to the AAP-recommended regimen, showing statewide superiority and regional non-inferiority of spatially adjusted regimens. Preventable fraction: the fraction of all RSV-associated hospitalizations occurring while the prophylaxis regimen provides protection}
 \label{fig:coverageByRegionRegimen}
 \end{center}
-\end{figure*}
+\end{figure}
 
 The AAP guidelines perform better in the low-RSV counties, where \Sexpr{regionStrategyCoverage("lowIncidence", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("lowIncidence", "aap", 0, level)}) occur during the prophylaxis interval, but worse in Fairfield county, where \Sexpr{regionStrategyCoverage("Fairfield", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("Fairfield", "aap", 0, level)}) occur during this time (Figure \ref{fig:coverageByRegionAAP}).
 
@@ -663,13 +661,13 @@ Biweekly rounding yielded regimens similarly non-inferior to the AAP recommendat
 
 However, with monthly rounding, the gains almost completely vanished, with preventable fraction not exceeding \Sexpr{bestCaseCoverage(4)} (\Sexpr{bestCaseCoverageCI(4, level)}). Furthermore, all our regimens with monthly rounding were non-superior to the AAP-recommended regimen in all regions.
 
-\begin{figure*}
+\begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRoundingRegimen.tex}
 \caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance, showing that longer rounding intervals diminish the benefits of alternative regimens over the AAP-recommended regimen. Preventable fraction: the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection}
 \label{fig:coverageByRoundingRegimen}
 \end{center}
-\end{figure*}
+\end{figure}
 
 %\columnbreak
 
@@ -772,13 +770,13 @@ Due to the non-superiority of regimens based on statewide recent-years analysis,
 \section{Discussion}
 
 \setcounter{figure}{7}
-\begin{figure*}
+\begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionRegimenWithSliding.tex}
 \caption[Comparison of prophylaxis regimens based on all-years data to those based on recent-years data]{Comparison of prophylaxis regimens based on all-years data to those based on recent-years data, showing temporal analysis adds no benefit over spatial analysis alone. Preventable fraction: fraction of RSV hospitalizations occurring while the prophylaxis regimen offers protection}
 \label{fig:coverageByRegionRegimenWithSliding}
 \end{center}
-\end{figure*}
+\end{figure}
 
 \subsection{Conclusions}
 
@@ -811,8 +809,6 @@ Similarly, we assumed the protection by palivizumab is constant at 100\% through
 In areas of Connecticut associated with a relatively high amount of interstate travel (such as urban centers near the state lines), our analysis --- by only considering residents of Connecticut --- likely underestimates RSV burden.
 
 Finally, towns that see substantial inter-county travel (for example, employment hubs near county lines) likely bias our regional analysis.
-
-%\end{multicols}
 
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
