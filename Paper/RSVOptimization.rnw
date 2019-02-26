@@ -324,7 +324,7 @@ Finally, to assess the impact of any long-term trends in RSV season timing on pr
 \end{center}
 \end{figure}
 
-We then compared those regimens to the one recommended by AAP and to the six spatially adjusted alternatives (with no calendrical rounding) discussed above.
+We then compared those regimens to the one recommended by the AAP and to the six spatially adjusted alternatives (with no calendrical rounding) discussed above.
 
 As before, these alternative regimens involved five monthly doses of palivizumab giving 24 weeks of protection. 
 
