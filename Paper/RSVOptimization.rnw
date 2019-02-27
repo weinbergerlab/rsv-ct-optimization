@@ -1,7 +1,10 @@
 \documentclass[10pt,letter]{article}
 \usepackage{float}
 \floatplacement{figure}{H}
-\raggedcolumns
+
+\usepackage[toc,page]{appendix}
+\renewcommand{\appendixpagename}{Supplements}
+\renewcommand{\appendixname}{Supplement}
 
 \usepackage{printlen}
 \usepackage{textcomp}
@@ -92,7 +95,7 @@ knitr::read_chunk("../Paper/RSVOptimization.R")
 
 \abstractsection{Background}Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in children, and leads to hospitalization rates of up to 50\% in high-risk infants. Safe and effective immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to the immunoprophylaxis regimen outside of Florida. In this study, we investigate the value of using spatial and temporal variation in RSV incidence to adjust the RSV prophylaxis regimen in Connecticut.
 
-\abstractsection{Methods}We obtained weekly ZIP-code-level counts of RSV-associated hospital admission in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We fit smoothed curves to these admission counts using a generalized additive model with cubic cyclic penalized splines, and used these curves to estimate the fraction of all RSV cases in Connecticut occurring during the period of protection offered by RSV immunoprophylaxis (``preventable fraction'') under the AAP guidelines. We then used the same model to estimate protection conferred by immunoprophylaxis regimens with alternate start dates (but unchanged duration and net pharmaceutical cost).
+\abstractsection{Methods}We obtained weekly ZIP-code-level counts of RSV-associated hospital admission in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We fit smoothed curves to these admission counts and used these curves to estimate the fraction of all RSV cases in Connecticut occurring during the period of protection offered by RSV immunoprophylaxis (``preventable fraction'') under the AAP guidelines. We then used the same model to estimate protection conferred by immunoprophylaxis regimens with alternate start dates (but unchanged duration and net pharmaceutical cost).
 
 \abstractsection{Results}Using preventable fraction to assess different immunoprophylaxis regimens, we found that regimens adjusted for county-level variation in timing of RSV seasons are superior to the current AAP-recommended regimen. We also considered the effect of rounding the timing of the first dose of prophylaxis to pragmatic calendrical boundaries (weekly, biweekly, and monthly), and found that benefits of alternative regimens over the AAP-recommended regimen persisted with biweekly rounding, but not with monthly rounding. Our best-performing pragmatic alternative to the AAP guidelines was based on the regional RSV season midpoint with biweekly rounding. In comparison to the AAP recommendation, whose preventable fraction is \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}), that alternative yielded improvement to \Sexpr{regionStrategyCoverage("all", "countyMiddle", 2)} (\Sexpr{regionStrategyCoverageCI("all", "countyMiddle", 2, level)}). We also found that alternative regimens adjusted for annual variation in the RSV season are non-superior to spatially adjusted regimens.
 
@@ -164,15 +167,7 @@ We designated epidemiological years as beginning in the first full week of July,
 
 \subsection{Choice of model}
 
-Our goal was to construct a model of annual RSV incidence that allowed us to obtain interval estimates of complex characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data, and used resampling to obtain interval estimates. (TODO See supplement.)
-
-%To that end, we looked for a model that allowed easy sampling of estimated model parameters; coupling this with Monte Carlo sampling --- after transforming model parameters into response variables --- allowed us to sample arbitrary response variables.
-%
-%We assumed that RSV incidence is the result of a Poisson process whose $\log$ can be modeled as a piecewise twice-differentiable function of time. To meet those criteria and assumptions, we chose a log-linked generalized additive model (GAM) with penalized cubic B-splines for our analysis. 
-%
-%% Looked for prior work using GAM/pspline for ID epi, didn't find anything that was relevant. (Not even by Goldstein or Lipsitch.)
-%
-%We developed a custom R package for estimation of arbitrary characteristics of infectious disease outbreaks (as long as the outbreaks are amenable to GAM); this package is available at \href{https://github.com/airbornemint/outbreak-inference}{\nolinkurl{github.com/airbornemint/outbreak-inference}}.
+Our goal was to construct a model of annual RSV incidence that allowed us to obtain interval estimates of complex characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data, and used resampling to obtain interval estimates. (See Supplement \ref{supplement:splines}.)
 
 \subsection{Spatial aggregation of RSV incidence}
 
@@ -812,6 +807,39 @@ Finally, towns that see substantial inter-county travel (for example, employment
 
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
-\printbibliography[title={Bibliography}] % Print the bibliography, section title in curly brackets
+\printbibliography[title={Bibliography}]
+
+\cleardoublepage
+\begin{appendices}
+
+\section{Interval estimation of complex outcomes using penalized basis splines}
+\begin{refsection}
+
+\label{supplement:splines}
+
+Penalized basis splines (``P-splines'') provide a smoothing mechanism with several qualities desirable in analysis of experimental data, including computational compactness and efficiency, and well-understood statistical behavior. Most importantly for our RSV analysis, the parameters of a P-spline approximation have known statistical distributions, which allows interval estimation of arbitrary outcome measures.\cite{Eilers:1996kz}
+
+A simple example of this is our estimation of RSV season onset. We begin the process by defining season onset to occur when cumulative incidence rises above \Sexpr{seasonThreshold * 100}\% of total cases, and obtaining a P-spline approximation to our data (using the \texttt{mgcv} R package). This approximation is characterized by a matrix of coefficients, each of which is normally distributed with a known mean and variance. 
+
+We randomly sample each coefficient from its distribution, thereby obtaining a specific spline that smoothly approximates our data. We calculate RSV season onset for this specific spline, and then repeat the coefficient sampling process, thereby iteratively sampling RSV season onset from its (unknown) distribution.
+
+We use the same process to estimate RSV season offset; the process can be generalized to any scalar outcome measure of an infectious disease outbreak or season. 
+
+More interestingly, the same approach can be used to estimate time-series outcomes. We use this in our computation of preventable cases of RSV. We begin by defining a preventable case of RSV to be a case of RSV that occurs while prophylaxis (under a specific set of prophylaxis guidelines) offers protection; that is, a case that would have been prevented by administration of prophylaxis under those guidelines, if the prophylaxis were 100\% effective. As before, we obtain a P-spline approximation to our data.
+
+We then sample P-spline coefficients from their distributions to obtain a specific approximation to our data, and compute the corresponding time series of preventable RSV cases. Repeating the coefficient-sampling process yields time series of preventable RSV cases sampled from their (again unknown) distribution.
+
+This process can also be generalized to any time-series outcome of an infectious disease outbreak or season.
+
+Furthermore, the two approaches can be combined to calculate complex non-linear outcomes. We use this to estimate the fraction of preventable RSV cases in an RSV season, defined as the number of preventable cases divided by the total number of cases. The preventable fraction is a non-linear function of the RSV time series; as a result, interval estimation of the preventable fraction cannot be obtained by point-wise estimation of the RSV time, followed by applying a function to point-wise estimates. Instead, estimates of the entire time series must be sampled, and the preventable fraction then calculated for each sampled time series. 
+
+Here we follow a similar process, wherein we sample coefficients from their distributions, use the resultant P-spline to calculate the all-case time series as well as the preventable-case time series, from which we then calculate the preventable fraction; the end result is that we sample the preventable fraction from its (unknown) distribution. 
+
+We developed a custom R package for estimation of arbitrary characteristics of infectious disease outbreaks or seasons (as long as they are amenable to generalized additive modeling); the package is available at \href{https://github.com/airbornemint/outbreak-inference}{\nolinkurl{github.com/airbornemint/outbreak-inference}}.
+
+\printbibliography[heading=subbibliography]
+\end{refsection}
+
+\end{appendices}
 
 \end{document}
