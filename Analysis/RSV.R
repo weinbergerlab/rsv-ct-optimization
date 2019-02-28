@@ -14,7 +14,7 @@ library(maps)
 data(zipcode)
 set.seed(0)
 
-simulations = 20
+simulations = 2000
 
 # *** Data munging helpers
 
@@ -268,6 +268,7 @@ obsByCounty = dataset %>%
 predByCounty = data.frame()
 thresholdsByCounty = data.frame()
 fixedStratUnprotectedSimByCountyRounding = data.frame()
+fixedStratDescByCountyRounding = data.frame()
 fixedStratUnprotectedByCounty = data.frame()
 
 for (c in levels(obsByCounty$county)) {
@@ -322,8 +323,37 @@ for (c in levels(obsByCounty$county)) {
         countyUnprotectedSim %>%
         mutate(county=factor(c, levels=levels(obsByCounty$county)), rounding=rounding)
       )
+    
+    fixedStratDescByCountyRounding = fixedStratDescByCountyRounding %>%
+      rbind(
+        data.frame(ppxFixedStrategyStart(c, rounding)) %>%
+        mutate(county=factor(c, levels=levels(obsByCounty$county)), rounding=rounding)
+      )
   }
 }
+
+fixedStratDescStatewide = fixedStratDescByCountyRounding %>%
+  filter(county %in% highIncidenceCounties | county == "lowIncidence") %>%
+  melt(c("county", "rounding")) %>%
+  rename(strat=variable, startWeek=value) %>%
+  group_by(rounding, strat) %>%
+  do((function(df) {
+    df = df %>% arrange(county)
+    name = paste0(sprintf("%s=%s", df$county, df$startWeek), collapse=";")
+    df = df %>% select(-county, -startWeek)
+    df = df[1,]
+    df$variable = "desc"
+    df$value = name
+    df
+  })(.)) %>%
+  ungroup() %>%
+  cast(rounding + strat ~ variable) %>%
+  mutate(
+    sliding=FALSE, 
+    county="all",
+    desc=as.character(desc),
+    county=factor(county)
+  )
 
 fixedStratUnprotectedStatewide = fixedStratUnprotectedSimByCountyRounding %>%
   filter(county %in% highIncidenceCounties | county == "lowIncidence") %>%
@@ -504,10 +534,6 @@ slidingStratUnprotectedByCounty = slidingStratUnprotectedSimByCountyYear %>%
 
 # Merge sliding and fixed strategies into one data frame
 
-stratStart = Vectorize(function(county, strat, rounding) {
-  ppxFixedStrategyStart(county, rounding)[[strat]]
-})
-
 unprotectedByCounty = fixedStratUnprotectedByCounty %>%
   mutate(sliding=FALSE) %>%
   filter(county != "all") %>%
@@ -525,21 +551,24 @@ unprotectedByCounty = fixedStratUnprotectedByCounty %>%
   select(-variable_1, -variable_2, -variable_3) %>%
   mutate(strat=as.factor(strat)) %>%
   cast(county + strat + rounding + sliding ~ variable) %>%
+  inner_join(fixedStratDescStatewide) %>%
   mutate(
-    frac.lower=1 - frac.lower,
-    frac.upper=1 - frac.upper,
-    frac.median=1 - frac.median,
-    stratRawStart = stratStart(county, as.character(strat), 0),
-    stratStart = stratStart(county, as.character(strat), rounding),
+    frac.temp = frac.lower,
+    frac.lower = 1 - frac.upper,
+    frac.upper = 1 - frac.temp,
+    frac.median = 1 - frac.median,
     strat = factor(strat, c(
       names(ppxSlidingStrategies(NULL, NULL)),
       names(ppxFixedStrategies(NULL))
     )[c(4, 5, 6, 7, 8, 9, 1, 2, 3, 10)]),
-    rounding = factor(rounding)
-  )
+    rounding = factor(rounding),
+    county = factor(county)
+  ) %>%
+  select(-frac.temp)
 
 bestCaseCoverageByRounding = unprotectedByCounty %>%
   filter(county == "all") %>%
+  select(-desc) %>%
   group_by(rounding) %>%
   filter(frac.median == max(frac.median)) %>%
   group_by(rounding) %>%

@@ -630,8 +630,9 @@ In every region, all alternative regimens based on all-years analysis are non-in
         filter(county == "all", sliding==FALSE) %>%
         arrange(rounding, strat)
 
-    data$startIdx = match(data$stratStart, data$stratStart)
+    data$startIdx = match(data$desc, data$desc)
     data$isRepeat = data$startIdx != seq(1, length(data$startIdx))
+    data$isRepeat = data$isRepeat & !data$strat == "aap" 
     
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
