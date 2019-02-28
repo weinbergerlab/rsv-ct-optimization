@@ -48,7 +48,7 @@
 
 <<load>>=
 knitr::read_chunk("../Analysis/RSV.R")
-knitr::read_chunk("../Paper/RSVOptimization.R")
+knitr::read_chunk("../Paper/Paper.R")
 @
 
 <<libraries, cache=FALSE>>=
