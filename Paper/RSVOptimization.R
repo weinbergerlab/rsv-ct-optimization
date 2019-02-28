@@ -167,7 +167,7 @@ epiWeekBreaks = sort(unique(c(monthBoundaries$min, monthBoundaries$max)))
 
 legendLabels = function(labels, rep=2) {
   as.vector(sapply(labels, function(label) {
-    sprintf("%s%s", label, strrep("\\qquad", rep))
+    ifelse(substr(label, 1, 1) == "_", paste0(rep(" ", nchar(label)), collapse=""), sprintf("%s%s", label, strrep("\\qquad", rep)))
   }))
 }
 
@@ -179,11 +179,11 @@ lightGreen = "#b2df8a"
 darkGreen = "#33a02c"
 lightRed = "#fb9a99"
 darkRed = "#e31a1c"
-lightOrange = "#fdbf6f"
+lightOrange = "#FFBF80"
 darkOrange = "#ff7f00"
 lightPurple = "#cab2d6"
 darkPurple = "#6a3d9a"
-lightBrown = "#ffff99"
+lightBrown = "#D19D82"
 darkBrown = "#b15928"
 
 # Counties which we plot (so, not individual low-incidence counties)

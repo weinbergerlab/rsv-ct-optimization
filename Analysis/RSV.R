@@ -560,7 +560,7 @@ unprotectedByCounty = fixedStratUnprotectedByCounty %>%
     strat = factor(strat, c(
       names(ppxSlidingStrategies(NULL, NULL)),
       names(ppxFixedStrategies(NULL))
-    )[c(4, 5, 6, 7, 8, 9, 1, 2, 3, 10)]),
+    )[c(10, 4, 5, 6, 7, 8, 9, 1, 2, 3)]),
     rounding = factor(rounding),
     county = factor(county)
   ) %>%

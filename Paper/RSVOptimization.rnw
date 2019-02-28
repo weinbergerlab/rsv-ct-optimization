@@ -1,4 +1,7 @@
 \documentclass[10pt,letter]{article}
+\usepackage{amssymb}
+\usepackage{wasysym}
+
 \usepackage{float}
 \floatplacement{figure}{H}
 
@@ -625,28 +628,57 @@ In every region, all alternative regimens based on all-years analysis are non-in
 <<coverageByRounding, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/coverageByRoundingRegimen.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10)
 
-    # We are going to dim some data points, because sometimes different strategies under different rounding end up producing the same prophylaxis schedule, and there is no point in showing all of them equally on the plot. To do this, we consider the left-to-right order in which strategies will appear in the plot, and dim any strategy whose schedule is the same as some strategy that appears on its left
+    # We are going to de-emphasize some data points, because sometimes different strategies under different rounding end up producing the same prophylaxis schedule, and there is no point in showing all of them equally on the plot. To do this, we consider the left-to-right order in which strategies will appear in the plot, and then de-emphasize any strategy whose schedule is the same as some strategy that appears on its left
     data = unprotectedByCounty %>% 
         filter(county == "all", sliding==FALSE) %>%
-        arrange(rounding, strat)
+        arrange(rounding, strat) %>%
+        mutate(strat=factor(strat, levels=c(levels(strat)[1], "_1", "_2", levels(strat)[2:7])))
 
     data$startIdx = match(data$desc, data$desc)
     data$isRepeat = data$startIdx != seq(1, length(data$startIdx))
     data$isRepeat = data$isRepeat & !data$strat == "aap" 
+    data$strat.isRepeat = sprintf("%s.%s", data$strat, data$isRepeat)
+    idx = order(rep(seq(1, length(levels(data$strat))), 2))
+    strat.isRepeat.levels = (c(
+      sprintf("%s.%s", levels(data$strat), FALSE), 
+      sprintf("%s.%s", levels(data$strat), TRUE)
+    ))[idx]
+    data$strat.isRepeat = factor(data$strat.isRepeat, strat.isRepeat.levels)
     
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         scale_y_continuous(labels=latexPercent, limits=c(0.90, 1.00), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
         scale_alpha_manual(guide=FALSE, breaks=c(FALSE, TRUE), values=c(1, 0.5)) + 
-        scale_color_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 6), 10)]), values=c(rep(c(darkBrown, darkOrange), each=3), darkPurple)) + 
-        scale_shape_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 6), 10)]), values=c(16, 15, 17, 16, 15, 17, 16)) + 
+        scale_color_manual(
+          name="Prophylaxis regimen", 
+          breaks=factor(sprintf("%s.%s", levels(data$strat), FALSE), levels=strat.isRepeat.levels),
+          labels=legendLabels(c(as.vector(stratLabels[10]), "_", "__", as.vector(stratLabels[1:6]))),
+          values=c(
+            darkPurple, darkPurple, 
+            NA, NA, NA, NA, 
+            rep(c(darkBrown, darkOrange), each=6)
+          ), 
+          drop=FALSE
+        ) + 
+        scale_shape_manual(
+          name="Prophylaxis regimen", 
+          breaks=factor(sprintf("%s.%s", levels(data$strat), FALSE), levels=strat.isRepeat.levels),
+          labels=legendLabels(c(as.vector(stratLabels[10]), "_", "__", as.vector(stratLabels[1:6]))),
+          values=c(
+            16, 16, 
+            16, 16, 16, 16, 
+            16, 21, 15, 22, 17, 24, 
+            16, 21, 15, 22, 17, 24
+          ), 
+          drop=FALSE
+        ) + 
         scale_x_discrete(labels=roundingLabels) + 
         geom_errorbar(
-            aes(ymin=frac.lower, ymax=frac.upper, x=rounding, color=strat, group=strat, alpha=isRepeat), 
+            aes(ymin=frac.lower, ymax=frac.upper, x=rounding, color=strat.isRepeat, group=strat.isRepeat), 
             width=.25, 
             position=position_dodge(.5)
         ) + 
-        geom_point(aes(y=frac.median, x=rounding, color=strat, shape=strat, alpha=isRepeat), position=position_dodge(.5), size=.75) +
+        geom_point(aes(y=frac.median, x=rounding, color=strat.isRepeat, shape=strat.isRepeat), position=position_dodge(.5), size=0.75, fill="white") +
         labs(x="Calendrical rounding", y="Preventable fraction") +
         guides(color=guide_legend(keywidth=3, keyheight=1, ncol=3)) + 
         theme(
@@ -666,7 +698,7 @@ However, with monthly rounding, the gains almost completely vanished, with preve
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRoundingRegimen.tex}
-\caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance, showing that longer rounding intervals diminish the benefits of alternative regimens over the AAP-recommended regimen. Preventable fraction: the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection}
+\caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance, showing that longer rounding intervals diminish the benefits of alternative regimens over the AAP-recommended regimen. Preventable fraction: the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection. Hollow plot markers ($\Circle$, $\square$, and $\triangle$) denote a prophylaxis strategy which, as a result of rounding, is identical to another.}
 \label{fig:coverageByRoundingRegimen}
 \end{center}
 \end{figure}
