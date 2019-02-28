@@ -465,7 +465,7 @@ TODO Meanwhile, in comparison with the statewide RSV season onset and offset, th
         cast(county + variable ~ part) %>%
         right_join(spanExtents, by="variable")
         
-    spanLabels = legendLabels(c("AAP-recommended prophylaxis", "RSV season"))
+    spanLabels = legendLabels(c("AAP-recommended prophylaxis", "RSV season"), leading=TRUE)
     	
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
