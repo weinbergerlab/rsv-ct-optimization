@@ -183,7 +183,7 @@ lightOrange = "#FFBF80"
 darkOrange = "#ff7f00"
 lightPurple = "#cab2d6"
 darkPurple = "#6a3d9a"
-lightBrown = "#D19D82"
+lightBrown = "#E3C0AC"
 darkBrown = "#b15928"
 
 # Counties which we plot (so, not individual low-incidence counties)
