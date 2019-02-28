@@ -171,10 +171,10 @@ legendLabels = function(labels, rep=2, leading=FALSE, trailing=TRUE) {
       paste0(rep(" ", nchar(label)), collapse="")
     } else {
       if (leading) {
-        label = sprintf("%s%s", strrep("\\qquad", rep), label)
+        label = sprintf("%s%s", strrep("\\qquad{}", rep), label)
       }
       if (trailing) {
-        label = sprintf("%s%s", label, strrep("\\qquad", rep))
+        label = sprintf("%s%s", label, strrep("\\qquad{}", rep))
       }
       label
     }
