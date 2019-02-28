@@ -551,7 +551,7 @@ unprotectedByCounty = fixedStratUnprotectedByCounty %>%
   select(-variable_1, -variable_2, -variable_3) %>%
   mutate(strat=as.factor(strat)) %>%
   cast(county + strat + rounding + sliding ~ variable) %>%
-  inner_join(fixedStratDescStatewide) %>%
+  left_join(fixedStratDescStatewide) %>%
   mutate(
     frac.temp = frac.lower,
     frac.lower = 1 - frac.upper,
