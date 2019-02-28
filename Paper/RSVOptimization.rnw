@@ -697,7 +697,7 @@ However, with monthly rounding, the gains almost completely vanished, with preve
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRoundingRegimen.tex}
-\caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance, showing that longer rounding intervals diminish the benefits of alternative regimens over the AAP-recommended regimen. Preventable fraction: the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection. Hollow plot markers ($\Circle$, $\square$, and $\triangle$) denote a prophylaxis strategy which, as a result of rounding, is identical to another.}
+\caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance, showing that longer rounding intervals diminish the benefits of alternative regimens over the AAP-recommended regimen. Preventable fraction: the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection. Hollow plot markers ($\Circle$, $\square$, and $\triangle$) denote a prophylaxis strategy which, as a result of rounding, is identical to another, and therefore does not provide additional insights.}
 \label{fig:coverageByRoundingRegimen}
 \end{center}
 \end{figure}
