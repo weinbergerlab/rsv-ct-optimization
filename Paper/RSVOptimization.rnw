@@ -1,7 +1,4 @@
 \documentclass[10pt,letter]{article}
-\usepackage{amssymb}
-\usepackage{wasysym}
-
 \usepackage{float}
 \floatplacement{figure}{H}
 
@@ -26,6 +23,8 @@
 \SetWatermarkText{DRAFT 1}
 
 \input{structure.tex}
+\usepackage{amssymb}
+\usepackage{wasysym}
 
 \usepackage[bf,medium,raggedright,compact]{titlesec}
 \titleformat{\section}{\normalfont\large\bfseries\scshape}{\thesection}{1em}{}
