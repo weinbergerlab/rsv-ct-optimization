@@ -625,21 +625,27 @@ In every region, all alternative regimens based on all-years analysis are non-in
 <<coverageByRounding, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/coverageByRoundingRegimen.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10)
 
+    # We are going to dim some data points, because sometimes different strategies under different rounding end up producing the same prophylaxis schedule, and there is no point in showing all of them equally on the plot. To do this, we consider the left-to-right order in which strategies will appear in the plot, and dim any strategy whose schedule is the same as some strategy that appears on its left
     data = unprotectedByCounty %>% 
-        filter(county == "all", sliding==FALSE)
+        filter(county == "all", sliding==FALSE) %>%
+        arrange(rounding, strat)
 
+    data$startIdx = match(data$stratStart, data$stratStart)
+    data$isRepeat = data$startIdx != seq(1, length(data$startIdx))
+    
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         scale_y_continuous(labels=latexPercent, limits=c(0.90, 1.00), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
+        scale_alpha_manual(guide=FALSE, breaks=c(FALSE, TRUE), values=c(1, 0.5)) + 
         scale_color_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 6), 10)]), values=c(rep(c(darkBrown, darkOrange), each=3), darkPurple)) + 
         scale_shape_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 6), 10)]), values=c(16, 15, 17, 16, 15, 17, 16)) + 
         scale_x_discrete(labels=roundingLabels) + 
         geom_errorbar(
-            aes(ymin=frac.lower, ymax=frac.upper, x=rounding, color=strat, group=strat), 
+            aes(ymin=frac.lower, ymax=frac.upper, x=rounding, color=strat, group=strat, alpha=isRepeat), 
             width=.25, 
             position=position_dodge(.5)
         ) + 
-        geom_point(aes(y=frac.median, x=rounding, color=strat, shape=strat), position=position_dodge(.5), size=.75) +
+        geom_point(aes(y=frac.median, x=rounding, color=strat, shape=strat, alpha=isRepeat), position=position_dodge(.5), size=.75) +
         labs(x="Calendrical rounding", y="Preventable fraction") +
         guides(color=guide_legend(keywidth=3, keyheight=1, ncol=3)) + 
         theme(

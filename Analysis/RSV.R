@@ -117,7 +117,7 @@ modelTime = seq(min(rsvTime) - 1 + eps, max(rsvTime), eps)
 
 # *** Prophyaxis assessment helpers
 
-epochRound = function(time, epoch) {
+epochRound = Vectorize(function(time, epoch) {
   if (epoch > 0) {
     # Rounding for prophylaxis strategies has phase as follows
     # For rounding=1, .5 .. 1.5 round to 1
@@ -126,56 +126,44 @@ epochRound = function(time, epoch) {
     time = epoch * round(time / epoch)
   }
   time
-}
+})
 
-evalStrategy = function(start, end, time, rounding) {
-  as.numeric((time >= epochRound(start, rounding)) & (time < epochRound(end, rounding)))
-}
-
-evalOnsetStrategy = function(start, time, rounding=0) {
-  evalStrategy(start, start + ppxDuration, time, rounding)
-}
-
-evalOffsetStrategy = function(end, time, rounding=0) {
-  evalStrategy(end - ppxDuration, end, time, rounding)
+evalStrategy = function(start, end, time) {
+  as.numeric((time >= start) & (time < end))
 }
 
 # *** Prophylaxis regimen definitions
 
-# Return a list of prophylaxis strategies for a county. If c is NULL, then it returns a list of prophylaxis strategy names
-ppxFixedStrategies = function(c=NULL, rounding=0) {
+ppxFixedStrategyStart = function(c, rounding) {
   stateOnset = stateThresholds$onset.median
   stateOffset = stateThresholds$offset.median
-
+  
   if (!is.null(c)) {
     countyOnset = (thresholdsByCounty %>% filter(county==c))$onset.median
     countyOffset = (thresholdsByCounty %>% filter(county==c))$offset.median
+  } else {
+    countyOnset = countyOffset = NA
   }
-
+  
   list(
-    stateOnset=function(time) {
-      evalOnsetStrategy(stateOnset, time, rounding)
-    },
-    stateMiddle=function(time) {
-      evalOnsetStrategy((stateOnset + stateOffset - ppxDuration) / 2, time, rounding)
-    },
-    stateOffset=function(time) {
-      evalOffsetStrategy(stateOffset, time, rounding)
-    },
-    countyOnset=function(time) {
-      evalOnsetStrategy(countyOnset, time, rounding)
-    },
-    countyMiddle=function(time) {
-      evalOnsetStrategy((countyOnset + countyOffset - ppxDuration) / 2, time, rounding)
-    },
-    countyOffset=function(time) {
-      evalOffsetStrategy(countyOffset, time, rounding)
-    },
-    aap=function(time) {
-      # Epi week 20 starts Nov 12, 13, 14, 15, 16, 17, or 18
-      evalOnsetStrategy(20, time, 0)
-    }
+    stateOnset = epochRound(stateOnset, rounding),
+    stateMiddle = epochRound((stateOnset + stateOffset - ppxDuration) / 2, rounding),
+    stateOffset = epochRound(stateOffset - ppxDuration, rounding),
+    countyOnset = epochRound(countyOnset, rounding),
+    countyMiddle = epochRound((countyOnset + countyOffset - ppxDuration) / 2, rounding),
+    countyOffset = epochRound(countyOffset - ppxDuration, rounding),
+    # Epi week 20 starts Nov 12, 13, 14, 15, 16, 17, or 18
+    aap = 20
   )
+}
+
+# Return a list of prophylaxis strategies for a county. If c is NULL, then it returns a list of prophylaxis strategy names
+ppxFixedStrategies = function(c=NULL, rounding=0) {
+  lapply(ppxFixedStrategyStart(c, rounding), function(stratStart) {
+    function(time) {
+      evalStrategy(stratStart, stratStart + ppxDuration, time)
+    }
+  })
 }
 
 ppxSlidingStrategies = function(c=NULL, y=NULL) {
@@ -186,13 +174,16 @@ ppxSlidingStrategies = function(c=NULL, y=NULL) {
 
   list(
     stateSlidingOnset=function(time) {
-      evalOnsetStrategy(stateSlidingOnset, time)
+      start = stateSlidingOnset
+      evalStrategy(start, start + ppxDuration, time)
     },
     stateSlidingMiddle=function(time) {
-      evalOnsetStrategy((stateSlidingOnset + stateSlidingOffset - ppxDuration) / 2, time)
+      start = (stateSlidingOnset + stateSlidingOffset - ppxDuration) / 2
+      evalStrategy(start, start + ppxDuration, time)
     },
     stateSlidingOffset=function(time) {
-      evalOffsetStrategy(stateSlidingOffset, time)
+      start = stateSlidingOffset - ppxDuration
+      evalStrategy(start, start + ppxDuration, time)
     }
   )
 }
@@ -513,6 +504,9 @@ slidingStratUnprotectedByCounty = slidingStratUnprotectedSimByCountyYear %>%
 
 # Merge sliding and fixed strategies into one data frame
 
+stratStart = Vectorize(function(county, strat, rounding) {
+  ppxFixedStrategyStart(county, rounding)[[strat]]
+})
 
 unprotectedByCounty = fixedStratUnprotectedByCounty %>%
   mutate(sliding=FALSE) %>%
@@ -535,6 +529,8 @@ unprotectedByCounty = fixedStratUnprotectedByCounty %>%
     frac.lower=1 - frac.lower,
     frac.upper=1 - frac.upper,
     frac.median=1 - frac.median,
+    stratRawStart = stratStart(county, as.character(strat), 0),
+    stratStart = stratStart(county, as.character(strat), rounding),
     strat = factor(strat, c(
       names(ppxSlidingStrategies(NULL, NULL)),
       names(ppxFixedStrategies(NULL))
