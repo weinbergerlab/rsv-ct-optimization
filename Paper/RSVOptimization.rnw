@@ -200,7 +200,7 @@ Our goal was to construct a model of annual RSV incidence that allowed us to obt
         geom_polygon(aes(fill=highRSV, group=group), color="white", size=.5) +
         geom_text(data=county.data, aes(label=name), size=2.2) +
         coord_map() + 
-        labs(fill="Average RSV cases per year") +
+        labs(fill="Average RSV-associated hospitalizations per year") +
         theme(
             rect=element_blank(),
             line=element_blank(),
@@ -221,7 +221,7 @@ For our spatial analysis, we aggregated RSV incidence data between \Sexpr{format
 
 We chose county-level aggregation with an eye towards using this data to inform clinical practice guidelines, which are typically based on administrative regions for reasons of administrative and implementation simplicity. 
 
-We chose to aggregate low-RSV counties into a single region because our analysis in those counties individually would have yielded results with low statistical power.
+We chose to aggregate low-RSV counties into a single region because our analysis in those counties individually yielded results with low statistical power.
 
 \begin{figure}
 \begin{center}
