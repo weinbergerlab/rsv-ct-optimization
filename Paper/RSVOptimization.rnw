@@ -301,7 +301,6 @@ Finally, to assess the impact of any long-term trends in RSV season timing on pr
     \item \textbf{By statewide recent-years offset}: prophylaxis administration in a given year begins 24 weeks before the (statewide median) offset from the preceding three years.
 \end{itemize}
 
-\setcounter{figure}{3}
 \begin{figure}[b]
 \begin{center}
 \input{\figuresDir/coverageByRegionAAPInsight.tex}
@@ -309,7 +308,6 @@ Finally, to assess the impact of any long-term trends in RSV season timing on pr
 \label{fig:coverageByRegionAAPInsight}
 \end{center}
 \end{figure}
-\setcounter{figure}{1}
 
 \begin{figure}
 \begin{center}
@@ -498,7 +496,6 @@ TODO Meanwhile, in comparison with the statewide RSV season onset and offset, th
 
 Statewide, our model shows that \Sexpr{regionStrategyCoverage("all", "aap", 0)} of RSV cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) occur while palivizumab, administered per the AAP guidelines, offers protection.
 
-\setcounter{figure}{4}
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionRegimen.tex}
@@ -758,7 +755,6 @@ Our linear regression of median RSV season onset and offset over three-year peri
 
 Season offset, on the other hand, has not been drifting earlier or later (\Sexpr{formatDriftCI(offsetByYear, level)}). 
 
-\setcounter{figure}{6}
 \begin{figure}
 \begin{center}
 \input{\figuresDir/onsetOffsetByYear.tex}
@@ -802,7 +798,6 @@ Due to the non-superiority of regimens based on statewide recent-years analysis,
 
 \section{Discussion}
 
-\setcounter{figure}{7}
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionRegimenWithSliding.tex}
