@@ -23,12 +23,12 @@
  * [x] “Data normalization paragraph”. This needs to be stated more simply. Just say that because epidemics peak cross multiple calendar years, we define the epidemiological years as running from the beginning of July to the following June. 
  * [x] Exclusions: I think the change in diagnostic coding was in 1997, so we should exclude data before July 1997 (Nope, see summary plot in RSV.Rmd)
  * [x] “Choice of model”: this is probably too technical of a description for a clinical journal. Need to state more simply that we fit a smoothing function through the seasonal data, and this allows us to calculate season onset and offset, and we can use resampling methods to calculate CI. Then we can have a supplement where we explain in mre technical detail
- * Need to be consistent about start date of data. In some places say 1995, in some 1996 (and we might want it to be 1997)
+ * [x] Need to be consistent about start date of data. In some places say 1995, in some 1996 (and we might want it to be 1997)
  * The methods section seems quite long--some of these details might want to go in a supplement
- * Figure order. It seems like maybe Fig 4 should come earlier? It is a nice visual and could help explain fig 2 and fig 3.
- * ‘’Sptially-adjusted regimens are superior’...it seems this is still true after rounding to weekly or biweekly levels, but not monthly 
+ * [x] Figure order. It seems like maybe Fig 4 should come earlier? It is a nice visual and could help explain fig 2 and fig 3.
+ * ‘’Spatially-adjusted regimens are superior’...it seems this is still true after rounding to weekly or biweekly levels, but not monthly (TODO: that subsection is about spatial adjustment without rounding)
  * ‘RSV season is shifting earlier’ This is an interesting observation--I might save it for a discussion point though--there is already a lot in the results, especially because temporally adjusting regimen doesn’t make it better.
- * It might be nice to do a back-of-the-envelope calculation for how many cases we might expect to prevent by shifting the calendar. Ie what does a 2% improvement in coverage translate to in terms of high-risk cases averted We would need an estimate of how many kids are on prophylaxis in the state and the effectiveness of a 5 dose schedule.
+ * It might be nice to do a back-of-the-envelope calculation for how many cases we might expect to prevent by shifting the calendar. Ie what does a 2% improvement in coverage translate to in terms of high-risk cases averted We would need an estimate of how many kids are on prophylaxis in the state and the effectiveness of a 5 dose schedule. (TODO where do I get this data?)
 
 # Ginny's
 
