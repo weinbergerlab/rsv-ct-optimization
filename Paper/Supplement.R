@@ -45,3 +45,4 @@ tollandParamsFull = randomMVN(coef(tollandModel), tollandModel$Vp, tollandNsimFu
 tollandPredFull = tollandParamsFull %>% tollandCalcPred(tollandNsimFull)
 tollandOnsetFull = tollandParamsFull %>% tollandCalcOnset()
 
+tollandDisplayNsim = 100

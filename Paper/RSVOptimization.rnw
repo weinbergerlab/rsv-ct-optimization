@@ -962,10 +962,11 @@ Repeating this process many times (\Sexpr{simulations}, in our main analysis) th
     tikz(sprintf("%s/tollandOnsetFull", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
     
     data = tollandPredFull
+    splineData = data %>% filter(sim < tollandDisplayNsim)
 
     ggplot(data) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="gray") +
+      geom_line(data=splineData, aes(x=time, y=rsv.cum.frac, group=sim), color="gray") +
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) + 
       geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
       geom_violinh(
@@ -986,13 +987,14 @@ Repeating this process many times (\Sexpr{simulations}, in our main analysis) th
         axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
         legend.position="bottom"
       )
-    dev.off()
+
+      dev.off()
 @
 
 \begin{figure}
 \begin{center}
 \input{\figuresDir/tollandOnsetFull}
-\caption{Distribution of approximating $P$-splines and the calculated season onset with $N=\Sexpr{simulations}$ samples, for cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut.}
+\caption{Distribution of approximating $P$-splines ($N=\Sexpr{tollandDisplayNsim}$) and season onset ($N=\Sexpr{tollandNsimFull}$), for cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut.}
 \label{fig:tollandOnsetFull}
 \end{center}
 \end{figure}
