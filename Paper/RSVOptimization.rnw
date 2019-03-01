@@ -49,6 +49,7 @@
 <<load>>=
 knitr::read_chunk("../Analysis/RSV.R")
 knitr::read_chunk("../Paper/Paper.R")
+knitr::read_chunk("../Paper/Supplement.R")
 @
 
 <<libraries, cache=FALSE>>=
@@ -850,11 +851,142 @@ Finally, towns that see substantial inter-county travel (for example, employment
 
 \label{supplement:splines}
 
+<<supplement, warning=FALSE>>=
+@
+
 Penalized basis splines (``$P$-splines'') provide a smoothing mechanism with several qualities desirable in analysis of experimental data, including computational compactness and efficiency, and well-understood statistical behavior. Most importantly for our RSV analysis, the parameters of a $P$-spline approximation have known statistical distributions, which allows interval estimation of arbitrary outcome measures.\cite{Eilers:1996kz}
 
-A simple example of this is our estimation of RSV season onset. We begin the process by defining season onset to occur when cumulative incidence rises above \Sexpr{seasonThreshold * 100}\% of total cases, and obtaining a $P$-spline approximation to our data (using the \texttt{mgcv} R package). This approximation is characterized by a matrix of coefficients, each of which is normally distributed with a known mean and variance. 
+A simple application of this is our estimation of RSV season onset. Consider, for example, RSV-associated hospitalizations in Tolland County, Connecticut in Figure \ref{fig:tollandCases}. (This is a low-incidence county, which makes it a poor candidate for our main analysis, but its large confidence intervals make it easier to visualize our methods.)
 
-We randomly sample each coefficient from its distribution, thereby obtaining a specific spline that smoothly approximates our data. We calculate RSV season onset for this specific spline, and then repeat the coefficient sampling process, thereby iteratively sampling RSV season onset from its (unknown) distribution.
+<<tollandCases, results='hide', warning=FALSE>>=
+    tikz(sprintf("%s/tollandCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+
+    ggplot(tollandObs) +
+        theme_light(base_size=plotTextBaseSize) +
+        geom_point(aes(x=time, y=rsv.cum.frac)) +
+        scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
+        theme(
+            panel.grid.major.x=element_blank(),
+            legend.title=element_blank(),
+            axis.title.y=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+            legend.position="bottom"
+        )
+
+    dev.off()
+@
+
+\begin{figure}
+\begin{center}
+\input{\figuresDir/tollandCases.tex}
+\caption{Cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, aggregated across years \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}
+\label{fig:tollandCases}
+\end{center}
+\end{figure}
+
+<<tollandPredMini, results='hide', warning=FALSE>>=
+    tikz(sprintf("%s/tollandPredMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+
+    ggplot(tollandPredMini) +
+      theme_light(base_size=plotTextBaseSize) +
+      geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac)) +
+      geom_line(aes(x=time, y=rsv.cum.frac, group=sim)) +
+      geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) + 
+      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
+      theme(
+        panel.grid.major.x=element_blank(),
+        legend.title=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+        legend.position="bottom"
+      )
+
+
+    dev.off()
+@
+
+\begin{figure}
+\begin{center}
+\input{\figuresDir/tollandPredMini}
+\caption{Cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, with five randomly sampled approximating $P$-splines.}
+\label{fig:tollandPredMini}
+\end{center}
+\end{figure}
+
+<<tollandOnsetMini, results='hide', warning=FALSE>>=
+    tikz(sprintf("%s/tollandOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+
+    ggplot(tollandPredMini) +
+      theme_light(base_size=plotTextBaseSize) +
+      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="gray") +
+      geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) + 
+      scale_y_continuous(limits=c(0, 2*seasonThreshold)) + 
+      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=c(zoomedStartWeek, zoomedEndWeek), expand=c(0, 0)) + 
+      geom_point(data=tollandOnsetMini, aes(x=onset, y=seasonThreshold)) + 
+      geom_segment(data=tollandOnsetMini, aes(x=onset, xend=onset, y=seasonThreshold, yend=0), linetype="11") + 
+      theme(
+        panel.grid.major.x=element_blank(),
+        legend.title=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+        legend.position="bottom"
+      )
+
+    dev.off()
+@
+
+\begin{figure}
+\begin{center}
+\input{\figuresDir/tollandOnsetMini}
+\caption{Five randomly sampled approximations of cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, with their corresponding season onsets.}
+\label{fig:tollandOnsetMini}
+\end{center}
+\end{figure}
+
+We begin the process by defining season onset to occur when cumulative incidence rises above \Sexpr{seasonThreshold * 100}\% of total cases, and obtaining a $P$-spline approximation to our data (using the \texttt{mgcv} R package). This approximation is characterized by a matrix of coefficients, each of which is normally distributed with a known mean and variance. 
+
+We randomly sample each coefficient from its distribution, thereby obtaining a specific spline that smoothly approximates our data. Five such randomly sampled splines are shown in Figure \ref{fig:tollandPredMini}. We then calculate RSV season onset for each sampled spline (Figure \ref{fig:tollandOnsetMini}).
+
+Repeating this process many times (\Sexpr{simulations}, in our main analysis) then allows us to estimate the distribution of RSV season onset and therefore make interval estimates. In the case of Tolland county, the result of similar season onset sampling is shown in Figure \ref{fig:tollandPredFull}.
+
+<<tollandOnsetFull, results='hide', warning=FALSE>>=
+    tikz(sprintf("%s/tollandOnsetFull", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+
+    ggplot(tollandPredFull) +
+      theme_light(base_size=plotTextBaseSize) +
+      geom_ribbon(aes(x=time, ymin=min, ymax=max), fill="gray", na.rm=FALSE) +
+      geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) + 
+      geom_violinh(
+        data=tollandOnsetFull,
+        aes(x=onset, y=seasonThreshold),
+        width=.01,
+        fill="gray", color="black",
+        trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
+      ) +
+      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
+      scale_y_continuous() +
+      coord_cartesian(xlim=c(zoomedStartWeekFull, zoomedEndWeekFull), ylim=c(0, 4*seasonThreshold)) +
+      theme(
+        panel.grid.major.x=element_blank(),
+        legend.title=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+        legend.position="bottom"
+      )
+    dev.off()
+@
+
+\begin{figure}
+\begin{center}
+\input{\figuresDir/tollandPredFull}
+\caption{Distribution of approximating $P$-splines and the calculated season onset with $N=\Sexpr{simulations}$ samples, for cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut.}
+\label{fig:tollandPredFull}
+\end{center}
+\end{figure}
 
 We use the same process to estimate RSV season offset; the process can be generalized to any scalar outcome measure of an infectious disease outbreak or season. 
 
