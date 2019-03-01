@@ -857,7 +857,7 @@ Finally, towns that see substantial inter-county travel (for example, employment
 
 Penalized basis splines (``$P$-splines'') provide a smoothing mechanism with several qualities desirable in analysis of experimental data, including computational compactness and efficiency, and well-understood statistical behavior. Most importantly for our RSV analysis, the parameters of a $P$-spline approximation have known statistical distributions, which allows interval estimation of arbitrary outcome measures.\cite{Eilers:1996kz}
 
-A simple application of this is our estimation of RSV season onset. Consider, for example, RSV-associated hospitalizations in Tolland County, Connecticut in Figure \ref{fig:tollandCases}. (This is a low-incidence county, which makes it a poor candidate for our main analysis, but its large confidence intervals make it easier to visualize our methods.)
+A simple application of this is our estimation of RSV season onset. Consider, for example, RSV-associated hospitalizations in Tolland county, Connecticut in Figure \ref{fig:tollandCases}. (This is a low-incidence county, which makes it a poor candidate for our main analysis, but its large confidence intervals make it easier to visualize our methods.)
 
 <<tollandCases, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/tollandCases.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
@@ -960,10 +960,12 @@ Repeating this process many times (\Sexpr{simulations}, in our main analysis) th
 
 <<tollandOnsetFull, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/tollandOnsetFull", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+    
+    data = tollandPredFull
 
-    ggplot(tollandPredFull) +
+    ggplot(data) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_ribbon(aes(x=time, ymin=min, ymax=max), fill="gray", na.rm=FALSE) +
+      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="gray") +
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) + 
       geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
       geom_violinh(
@@ -975,7 +977,7 @@ Repeating this process many times (\Sexpr{simulations}, in our main analysis) th
       ) +
       scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
       scale_y_continuous() +
-      coord_cartesian(xlim=c(zoomedStartWeekFull, zoomedEndWeekFull), ylim=c(0, 4*seasonThreshold)) +
+      coord_cartesian(xlim=c(zoomedStartWeek, zoomedEndWeek), ylim=c(0, 4*seasonThreshold)) +
       theme(
         panel.grid.major.x=element_blank(),
         legend.title=element_blank(),

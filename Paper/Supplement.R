@@ -18,10 +18,11 @@ tollandParamsMini = randomMVN(coef(tollandModel), tollandModel$Vp, tollandNsimMi
 tollandPredMini = tollandParamsMini %>%
   apply(1, function(params) { outbreak.calc.cum(1)(tollandModel, params, modelTime) } ) %>%
   data.frame() %>%
+  setnames(as.character(seq(1:tollandNsimMini))) %>%
   cbind(time=modelTime) %>%
   melt(c("time")) %>%
-  mutate(variable=as.numeric(substr(variable, 2, 2))) %>%
-  rename(sim=variable, rsv.cum.frac=value)
+  rename(sim=variable, rsv.cum.frac=value) %>%
+  mutate(sim=as.numeric(sim))
 
 tollandOnsetMini = tollandParamsMini %>%
   apply(1, function(params) { outbreak.calc.thresholds(seasonThreshold, 1-seasonThreshold)(tollandModel, params, modelTime) } ) %>%
@@ -37,21 +38,14 @@ tollandParamsFull = randomMVN(coef(tollandModel), tollandModel$Vp, tollandNsimFu
 tollandPredFull = tollandParamsFull %>%
   apply(1, function(params) { outbreak.calc.cum(1)(tollandModel, params, modelTime) } ) %>%
   data.frame() %>%
+  setnames(as.character(seq(1:tollandNsimFull))) %>%
   cbind(time=modelTime) %>%
   melt(c("time")) %>%
-  mutate(variable=as.numeric(substr(variable, 2, 2))) %>%
   rename(sim=variable, rsv.cum.frac=value) %>%
-  group_by(time) %>%
-  summarize(
-    min=min(rsv.cum.frac), 
-    max=max(rsv.cum.frac)
-  )
+  mutate(sim=as.numeric(sim))
 
 tollandOnsetFull = tollandParamsFull %>%
   apply(1, function(params) { outbreak.calc.thresholds(seasonThreshold, 1-seasonThreshold)(tollandModel, params, modelTime) } ) %>%
   bind_rows() %>%
   select(onset)
-
-zoomedStartWeekFull = min(monthBoundaries$min) + 5
-zoomedEndWeekFull = zoomedStartWeekFull + 21
 
