@@ -20,7 +20,7 @@ RUN echo "options(Ncpus = $(nproc --all))" >> "/usr/local/lib/R/etc/Rprofile.sit
 RUN Rscript -e "install.packages(c('docopt', 'remotes'))"
 
 # These come from CRAN
-ARG BUILD_CRAN_DEPENDENCIES="zipcode splitstackshape maps rgdal dplyr rgeos knitr reshape mgcv data.table tikzDevice sp mapproj ggplot2"
+ARG BUILD_CRAN_DEPENDENCIES="zipcode splitstackshape maps rgdal dplyr rgeos knitr reshape mgcv data.table tikzDevice sp mapproj ggplot2 ggstance"
 RUN /usr/local/lib/R/site-library/littler/examples/install2.r ${BUILD_CRAN_DEPENDENCIES}
 
 # These come from GitHub
