@@ -1,5 +1,6 @@
 # ---- supplement_libraries ----
 library(ggstance)
+library(gridExtra)
 
 # ---- supplement ----
 tollandObs = obsByCounty %>% filter(county=="Tolland")
@@ -29,8 +30,31 @@ tollandCalcOnset = function(tollandParams) {
     select(onset)
 }
 
+tollandStrat = ppxFixedStrategies("all")[["aap"]]
+
+tollandCalcFraction = function(tollandPred) {
+  tollandPred %>%
+    mutate(ppx=tollandStrat(time)) %>%
+    filter(ppx > 0) %>%
+    group_by(sim) %>%
+    do((function(df) {
+      df = df %>% arrange(time)
+      data.frame(
+        ppx.start=min(df$time),
+        ppx.end=max(df$time),
+        unprotected.start=first(df$rsv.cum.frac),
+        unprotected.end=last(df$rsv.cum.frac)
+      ) %>% mutate(
+        unprotected=unprotected.end-unprotected.start
+      )
+    })(.)) %>%
+    ungroup() %>%
+    as.data.frame()  
+}
+
 tollandParamsSingle = randomMVN(coef(tollandModel), tollandModel$Vp, 1)
 tollandPredSingle = tollandParamsSingle %>% tollandCalcPred(1)
+tollandFractionSingle = tollandPredSingle %>% tollandCalcFraction()
 
 tollandNsimMini = 5
 tollandParamsMini = randomMVN(coef(tollandModel), tollandModel$Vp, tollandNsimMini)
@@ -44,5 +68,6 @@ tollandNsimFull = simulations
 tollandParamsFull = randomMVN(coef(tollandModel), tollandModel$Vp, tollandNsimFull)
 tollandPredFull = tollandParamsFull %>% tollandCalcPred(tollandNsimFull)
 tollandOnsetFull = tollandParamsFull %>% tollandCalcOnset()
+tollandFractionFull = tollandPredFull %>% tollandCalcFraction()
 
 tollandDisplayNsim = 100

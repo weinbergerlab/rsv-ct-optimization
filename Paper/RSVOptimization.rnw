@@ -959,7 +959,7 @@ We randomly sample each coefficient from its distribution, thereby obtaining a s
 Repeating this process many times (\Sexpr{simulations}, in our main analysis) then allows us to estimate the distribution of RSV season onset and therefore make interval estimates. In the case of Tolland county, the result of such season onset sampling is shown in Figure \ref{fig:tollandOnsetFull}.
 
 <<tollandOnsetFull, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/tollandOnsetFull", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+    tikz(sprintf("%s/tollandOnsetFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
     
     data = tollandPredFull
     splineData = data %>% filter(sim < tollandDisplayNsim)
@@ -1006,6 +1006,119 @@ Furthermore, because our approach involves sampling approximations to the observ
 We take advantage of this in our estimation of the preventable fraction of RSV cases. Here we begin by defining a preventable case of RSV to be a case of RSV that occurs while prophylaxis offers protection, and we define the preventable fraction of a prophylaxis administration strategy to be the ratio of preventable cases under that prophylaxis strategy to the total cases of RSV. 
 
 As before, we then sample $P$-spline coefficients to obtain a specific $P$-spline approximation, and compute preventable fraction for each sampled $P$-spline in order to obtain the distribution of preventable fractions.
+
+<<tollandPredSingle, results='hide', warning=FALSE>>=
+    tikz(sprintf("%s/tollandPredSingle.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+      
+    data = tollandPredSingle
+    
+    thresholds = data %>%
+    	mutate(ppx=strat(time)) %>%
+    	filter(ppx > 0) %>%
+    	do((function(df) {
+    	  df = df %>% arrange(time)
+    		data.frame(
+    			ppx.start=min(df$time),
+    			ppx.end=max(df$time),
+    			unprotected.start=first(df$rsv.cum.frac),
+    			unprotected.end=last(df$rsv.cum.frac)
+    		)
+    	})(.)) %>%
+    	ungroup() %>%
+    	as.data.frame()
+
+    ggplot(data) +
+      theme_light(base_size=plotTextBaseSize) +
+      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="grey") +
+      geom_segment(data=thresholds, aes(x=ppx.start, y=unprotected.start, xend=ppx.start, yend=+Inf), linetype="11", size=.375) + 
+      geom_segment(data=thresholds, aes(x=ppx.end, y=unprotected.end, xend=ppx.end, yend=+Inf), linetype="11", size=.375) + 
+      geom_segment(data=thresholds, aes(x=ppx.start, y=unprotected.start, xend=+Inf, yend=unprotected.start), linetype="11", size=.375) + 
+      geom_segment(data=thresholds, aes(x=ppx.end, y=unprotected.end, xend=+Inf, yend=unprotected.end), linetype="11", size=.375) + 
+      geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac, size=0.5), size=0.5) +
+    	geom_rect(data=thresholds, aes(xmin=ppx.start, xmax=ppx.end, ymin=1, ymax=1.1), size=.375) + 
+    	geom_text(data=thresholds, aes(x=mean(c(ppx.start, ppx.end)), y=1.05, label="Prophylaxis window"), color="white", size=1.75) + 
+    	geom_rect(data=thresholds, aes(xmin=max(monthBoundaries$max) - 3, xmax=max(monthBoundaries$max), ymin=unprotected.start, ymax=unprotected.end), size=.375) + 
+    	geom_text(data=thresholds, aes(x=max(monthBoundaries$max) - 1.5, y=mean(c(unprotected.start, unprotected.end)), label="$\\Delta$ = preventable fraction", angle=90, lineheight=0.5), color="white", size=1.75) + 
+      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
+      theme(
+        panel.grid.major.x=element_blank(),
+        legend.title=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+        legend.position="bottom"
+      )
+
+    dev.off()
+@
+
+<<tollandPreventableFractionFull, results='hide', warning=FALSE>>=
+    tikz(sprintf("%s/tollandPreventableFractionFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+
+    data = tollandPredFull
+    splineData = data %>% filter(sim < tollandDisplayNsim)
+
+    splinePlot = ggplot(data) +
+      theme_light(base_size=plotTextBaseSize) +
+      geom_line(data=splineData, aes(x=time, y=rsv.cum.frac, group=sim), color="gray") +
+      geom_segment(data=thresholds, aes(x=ppx.start, y=-Inf, xend=ppx.start, yend=+Inf), linetype="11", size=.375) + 
+      geom_segment(data=thresholds, aes(x=ppx.end, y=-Inf, xend=ppx.end, yend=+Inf), linetype="11", size=.375) + 
+    	geom_rect(data=thresholds, aes(xmin=ppx.start, xmax=ppx.end, ymin=1, ymax=1.1), size=.375) + 
+    	geom_text(data=thresholds, aes(x=mean(c(ppx.start, ppx.end)), y=1.05, label="Prophylaxis window"), color="white", size=1.75) + 
+      geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
+      scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
+      scale_y_continuous() +
+      theme(
+        panel.grid.major.x=element_blank(),
+        legend.title=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+        legend.position="bottom"
+      )
+
+    violinPlot <- ggplot(tollandFractionFull) +
+      theme_light(base_size=plotTextBaseSize) +
+      geom_violin(
+        aes(x=0, y=unprotected),
+        width=.01,
+        fill="gray50", color="black",
+        trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
+      ) +
+      scale_x_continuous() +
+      scale_y_continuous(limits=c(0, 1)) +
+      theme(
+        panel.grid.major.x=element_blank(),
+        legend.title=element_blank(),
+        axis.title.y=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
+        legend.position="bottom"
+      ) 
+    grid.arrange(splinePlot, violinPlot, layout_matrix=rbind(c(rep(1, 4), 2)))
+
+    dev.off()
+@
+
+\begin{figure}
+\begin{center}
+\begin{subfigure}{.4\textwidth}
+    \begin{center}
+    \input{\figuresDir/tollandPredSingle}
+    \caption{Preventable fraction derived from a randomly sampled $P$-spline approximating the RSV time series.}
+    \label{fig:tollandPredMini}
+    \end{center}
+\end{subfigure}
+\begin{subfigure}{.4\textwidth}
+    \begin{center}
+    \input{\figuresDir/tollandPreventableFractionFull}
+    \caption{Distribution of approximating $P$-splines ($N=\Sexpr{tollandDisplayNsim}$) and preventable fractions ($N=\Sexpr{tollandNsimFull}$) of RSV under the AAP prophylaxis guidelines  in Tolland county, Connecticut.}
+    \label{fig:tollandOnsetMini}
+    \end{center}
+\end{subfigure}
+\end{center}
+\caption{Cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, with five randomly sampled approximating $P$-splines.}
+\end{figure}
 
 We developed a custom R package for estimation of arbitrary characteristics of infectious disease outbreaks or seasons (as long as they are amenable to generalized additive modeling); the package is available at \href{https://github.com/airbornemint/outbreak-inference}{\nolinkurl{github.com/airbornemint/outbreak-inference}}.
 
