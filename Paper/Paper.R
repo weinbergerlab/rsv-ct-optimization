@@ -1,4 +1,4 @@
-# ---- util ----
+# ---- paper ----
 library(magrittr)
 library(grid)
 library(tikzDevice)

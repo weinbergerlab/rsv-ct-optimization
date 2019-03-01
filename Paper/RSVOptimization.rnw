@@ -58,7 +58,7 @@ knitr::read_chunk("../Paper/Supplement.R")
 <<external, cache=TRUE>>=
 @
 
-<<util, warning=FALSE>>=
+<<paper, warning=FALSE>>=
 @
     
 \edef\figuresDir{\Sexpr{figuresDir}}
@@ -809,8 +809,6 @@ Due to the non-superiority of regimens based on statewide recent-years analysis,
 
 \subsection{Conclusions}
 
-% TODO figure showing prophylaxis regimens on a calendar?
-
 Our analysis confirms the existence of regional variation of RSV season timing in Connecticut (defined by RSV season onset and offset) observable at the county level.
 
 We have also shown a misalignment between the prophylaxis schedule recommended by the AAP and the timing of the RSV season throughout Connecticut, with most counties' RSV season starting before protection from the first dose of prophylaxis takes hold, and ending before protection from the last dose wanes. This misalignment is particularly notable in Fairfield County, due to its early season onset.
@@ -851,7 +849,10 @@ Finally, towns that see substantial inter-county travel (for example, employment
 
 \label{supplement:splines}
 
-<<supplement, warning=FALSE>>=
+<<supplement_libraries, cache=FALSE>>=
+@
+
+<<supplement, cache=TRUE>>=
 @
 
 Penalized basis splines (``$P$-splines'') provide a smoothing mechanism with several qualities desirable in analysis of experimental data, including computational compactness and efficiency, and well-understood statistical behavior. Most importantly for our RSV analysis, the parameters of a $P$-spline approximation have known statistical distributions, which allows interval estimation of arbitrary outcome measures.\cite{Eilers:1996kz}
@@ -863,7 +864,7 @@ A simple application of this is our estimation of RSV season onset. Consider, fo
 
     ggplot(tollandObs) +
         theme_light(base_size=plotTextBaseSize) +
-        geom_point(aes(x=time, y=rsv.cum.frac)) +
+        geom_point(aes(x=time, y=rsv.cum.frac), size=.5) +
         scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
         theme(
             panel.grid.major.x=element_blank(),
@@ -880,7 +881,7 @@ A simple application of this is our estimation of RSV season onset. Consider, fo
 \begin{figure}
 \begin{center}
 \input{\figuresDir/tollandCases.tex}
-\caption{Cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, aggregated across years \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}
+\caption{Cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, aggregated across years \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}}
 \label{fig:tollandCases}
 \end{center}
 \end{figure}
@@ -890,9 +891,9 @@ A simple application of this is our estimation of RSV season onset. Consider, fo
 
     ggplot(tollandPredMini) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac)) +
-      geom_line(aes(x=time, y=rsv.cum.frac, group=sim)) +
+      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="grey") +
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) + 
+      geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
       scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
       theme(
         panel.grid.major.x=element_blank(),
@@ -907,25 +908,18 @@ A simple application of this is our estimation of RSV season onset. Consider, fo
     dev.off()
 @
 
-\begin{figure}
-\begin{center}
-\input{\figuresDir/tollandPredMini}
-\caption{Cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, with five randomly sampled approximating $P$-splines.}
-\label{fig:tollandPredMini}
-\end{center}
-\end{figure}
-
 <<tollandOnsetMini, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/tollandOnsetMini.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
 
     ggplot(tollandPredMini) +
       theme_light(base_size=plotTextBaseSize) +
-      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="gray") +
+      geom_line(aes(x=time, y=rsv.cum.frac, group=sim), color="grey") +
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) + 
+      geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
+      geom_point(data=tollandOnsetMini, aes(x=onset, y=seasonThreshold), size=0.75, shape=17) + 
+      geom_segment(data=tollandOnsetMini, aes(x=onset, xend=onset, y=seasonThreshold, yend=0), linetype="11") + 
       scale_y_continuous(limits=c(0, 2*seasonThreshold)) + 
       scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=c(zoomedStartWeek, zoomedEndWeek), expand=c(0, 0)) + 
-      geom_point(data=tollandOnsetMini, aes(x=onset, y=seasonThreshold)) + 
-      geom_segment(data=tollandOnsetMini, aes(x=onset, xend=onset, y=seasonThreshold, yend=0), linetype="11") + 
       theme(
         panel.grid.major.x=element_blank(),
         legend.title=element_blank(),
@@ -940,17 +934,29 @@ A simple application of this is our estimation of RSV season onset. Consider, fo
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/tollandOnsetMini}
-\caption{Five randomly sampled approximations of cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, with their corresponding season onsets.}
-\label{fig:tollandOnsetMini}
+\begin{subfigure}{.4\textwidth}
+    \begin{center}
+    \input{\figuresDir/tollandPredMini}
+    \caption{Five randomly sampled $P$-splines approximating the RSV time series.}
+    \label{fig:tollandPredMini}
+    \end{center}
+\end{subfigure}
+\begin{subfigure}{.4\textwidth}
+    \begin{center}
+    \input{\figuresDir/tollandOnsetMini}
+    \caption{Season onsets derived from five randomly sampled approximating splines.}
+    \label{fig:tollandOnsetMini}
+    \end{center}
+\end{subfigure}
 \end{center}
+\caption{Cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, with five randomly sampled approximating $P$-splines.}
 \end{figure}
 
 We begin the process by defining season onset to occur when cumulative incidence rises above \Sexpr{seasonThreshold * 100}\% of total cases, and obtaining a $P$-spline approximation to our data (using the \texttt{mgcv} R package). This approximation is characterized by a matrix of coefficients, each of which is normally distributed with a known mean and variance. 
 
 We randomly sample each coefficient from its distribution, thereby obtaining a specific spline that smoothly approximates our data. Five such randomly sampled splines are shown in Figure \ref{fig:tollandPredMini}. We then calculate RSV season onset for each sampled spline (Figure \ref{fig:tollandOnsetMini}).
 
-Repeating this process many times (\Sexpr{simulations}, in our main analysis) then allows us to estimate the distribution of RSV season onset and therefore make interval estimates. In the case of Tolland county, the result of similar season onset sampling is shown in Figure \ref{fig:tollandPredFull}.
+Repeating this process many times (\Sexpr{simulations}, in our main analysis) then allows us to estimate the distribution of RSV season onset and therefore make interval estimates. In the case of Tolland county, the result of such season onset sampling is shown in Figure \ref{fig:tollandOnsetFull}.
 
 <<tollandOnsetFull, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/tollandOnsetFull", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
@@ -959,11 +965,12 @@ Repeating this process many times (\Sexpr{simulations}, in our main analysis) th
       theme_light(base_size=plotTextBaseSize) +
       geom_ribbon(aes(x=time, ymin=min, ymax=max), fill="gray", na.rm=FALSE) +
       geom_segment(aes(x=-Inf, y=seasonThreshold, xend=+Inf, yend=seasonThreshold), linetype="11", data=data.frame(), size=.375) + 
+      geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac), size=0.5) +
       geom_violinh(
         data=tollandOnsetFull,
         aes(x=onset, y=seasonThreshold),
         width=.01,
-        fill="gray", color="black",
+        fill="gray50", color="black",
         trim=FALSE, draw_quantiles=c(0.025, 0.5, 0.975)
       ) +
       scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, expand=c(0, 0)) +
@@ -982,23 +989,19 @@ Repeating this process many times (\Sexpr{simulations}, in our main analysis) th
 
 \begin{figure}
 \begin{center}
-\input{\figuresDir/tollandPredFull}
+\input{\figuresDir/tollandOnsetFull}
 \caption{Distribution of approximating $P$-splines and the calculated season onset with $N=\Sexpr{simulations}$ samples, for cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut.}
-\label{fig:tollandPredFull}
+\label{fig:tollandOnsetFull}
 \end{center}
 \end{figure}
 
 We use the same process to estimate RSV season offset; the process can be generalized to any scalar outcome measure of an infectious disease outbreak or season. 
 
-More interestingly, the same approach can be used to estimate time-series outcomes. We use this in our computation of preventable cases of RSV. We begin by defining a preventable case of RSV to be a case of RSV that occurs while prophylaxis (under a specific set of prophylaxis guidelines) offers protection; that is, a case that would have been prevented by administration of prophylaxis under those guidelines, if the prophylaxis were 100\% effective. As before, we obtain a $P$-spline approximation to our data.
+Furthermore, because our approach involves sampling approximations to the observed time series as a whole, rather than estimating the time series at isolated points in time, we are able to produce interval estimates of arbitrarily complex outcome measures. 
 
-We then sample $P$-spline coefficients from their distributions to obtain a specific approximation to our data, and compute the corresponding time series of preventable RSV cases. Repeating the coefficient-sampling process yields time series of preventable RSV cases sampled from their (again unknown) distribution.
+We take advantage of this in our estimation of the preventable fraction of RSV cases. Here we begin by defining a preventable case of RSV to be a case of RSV that occurs while prophylaxis offers protection, and we define the preventable fraction of a prophylaxis administration strategy to be the ratio of preventable cases under that prophylaxis strategy to the total cases of RSV. 
 
-This process can also be generalized to any time-series outcome of an infectious disease outbreak or season.
-
-Furthermore, the two approaches can be combined to calculate complex non-linear outcomes. We use this to estimate the fraction of preventable RSV cases in an RSV season, defined as the number of preventable cases divided by the total number of cases. The preventable fraction is a non-linear function of the RSV time series; as a result, interval estimation of the preventable fraction cannot be obtained by point-wise estimation of the RSV time, followed by applying a function to point-wise estimates. Instead, estimates of the entire time series must be sampled, and the preventable fraction then calculated for each sampled time series. 
-
-Here we follow a similar process, wherein we sample coefficients from their distributions, use the resultant $P$-spline to calculate the all-case time series as well as the preventable-case time series, from which we then calculate the preventable fraction; the end result is that we sample the preventable fraction from its (unknown) distribution. 
+As before, we then sample $P$-spline coefficients to obtain a specific $P$-spline approximation, and compute preventable fraction for each sampled $P$-spline in order to obtain the distribution of preventable fractions.
 
 We developed a custom R package for estimation of arbitrary characteristics of infectious disease outbreaks or seasons (as long as they are amenable to generalized additive modeling); the package is available at \href{https://github.com/airbornemint/outbreak-inference}{\nolinkurl{github.com/airbornemint/outbreak-inference}}.
 

@@ -1,6 +1,7 @@
-# ---- supplement ----
+# ---- supplement_libraries ----
 library(ggstance)
 
+# ---- supplement ----
 tollandObs = obsByCounty %>% filter(county=="Tolland")
 tollandModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=tollandObs)
 
@@ -30,7 +31,7 @@ tollandOnsetMini = tollandParamsMini %>%
 zoomedStartWeek = min(monthBoundaries$min) + 5
 zoomedEndWeek = zoomedStartWeek + 21
 
-tollandNsim = simulations
+tollandNsimFull = simulations
 tollandParamsFull = randomMVN(coef(tollandModel), tollandModel$Vp, tollandNsimFull)
 
 tollandPredFull = tollandParamsFull %>%
