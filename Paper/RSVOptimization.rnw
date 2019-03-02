@@ -827,7 +827,7 @@ Finally, towns that see substantial inter-county travel (for example, employment
 
 \cleardoublepage
 \begin{appendices}
-\renewcommand\thesection{\Roman{section}}
+\renewcommand\thesection{\arabic{section}}
 \renewcommand\thefigure{S\arabic{figure}}
 \setcounter{figure}{0}    
 
