@@ -514,13 +514,33 @@ This is caused by temporal misalignment between the RSV season (delineated by me
 <<coverageByRegion, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/coverageByRegionRegimen.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10)
     data = unprotectedByCounty %>% 
-        filter(county %in% countiesForPlots, rounding==0, sliding==FALSE)
+        filter(county %in% countiesForPlots, rounding==0, sliding==FALSE) %>%
+        mutate(strat=factor(strat, levels=c(levels(strat)[1], "_1", "_2", levels(strat)[2:7])))
 
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
-        scale_color_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 6), 10)]), values=c(rep(c(darkBrown, darkOrange), each=3), darkPurple)) + 
-        scale_shape_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 6), 10)]), values=c(16, 15, 17, 16, 15, 17, 16)) + 
+        scale_color_manual(
+          name="Prophylaxis regimen", 
+          labels=legendLabels(c(as.vector(stratLabels[10]), "_1", "_2", as.vector(stratLabels[1:6]))),
+          values=c(
+            darkPurple, 
+            NA, NA, 
+            rep(c(darkBrown, darkOrange), each=3), darkPurple
+          ), 
+          drop=FALSE
+        ) + 
+        scale_shape_manual(
+          name="Prophylaxis regimen", 
+          labels=legendLabels(c(as.vector(stratLabels[10]), "_1", "_2", as.vector(stratLabels[1:6]))),
+          values=c(
+            16, 
+            16, 16, 
+            16, 15, 17, 
+            16, 15, 17
+          ), 
+          drop=FALSE
+        ) + 
         geom_errorbar(
             aes(ymin=frac.lower, ymax=frac.upper, x=county, color=strat, group=strat), 
             width=.3, 
@@ -649,7 +669,7 @@ In every region, all alternative regimens based on all-years analysis are non-in
         scale_color_manual(
           name="Prophylaxis regimen", 
           breaks=factor(sprintf("%s.%s", levels(data$strat), FALSE), levels=strat.isRepeat.levels),
-          labels=legendLabels(c(as.vector(stratLabels[10]), "_", "__", as.vector(stratLabels[1:6]))),
+          labels=legendLabels(c(as.vector(stratLabels[10]), "_1", "_2", as.vector(stratLabels[1:6]))),
           values=c(
             darkPurple, darkPurple, 
             NA, NA, NA, NA, 
@@ -660,7 +680,7 @@ In every region, all alternative regimens based on all-years analysis are non-in
         scale_shape_manual(
           name="Prophylaxis regimen", 
           breaks=factor(sprintf("%s.%s", levels(data$strat), FALSE), levels=strat.isRepeat.levels),
-          labels=legendLabels(c(as.vector(stratLabels[10]), "_", "__", as.vector(stratLabels[1:6]))),
+          labels=legendLabels(c(as.vector(stratLabels[10]), "_1", "_2", as.vector(stratLabels[1:6]))),
           values=c(
             16, 16, 
             16, 16, 16, 16, 
@@ -713,13 +733,33 @@ Season offset, on the other hand, has not been drifting earlier or later (\Sexpr
 <<coverageByRegionWithSliding, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/coverageByRegionRegimenWithSliding.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10)
     data = unprotectedByCounty %>% 
-        filter(county %in% countiesForPlots, rounding==0, !grepl("county", strat))
+        filter(county %in% countiesForPlots, rounding==0, !grepl("county", strat)) %>%
+        mutate(strat=factor(strat, levels=c(levels(strat)[1], "_1", "_2", levels(strat)[2:4], levels(strat)[8:10])))
 
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
-        scale_color_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 3), seq(7, 10))]), values=c(rep(c(darkBrown, darkGreen), each=3), darkPurple)) + 
-        scale_shape_manual(name="Prophylaxis regimen", labels=legendLabels(stratLabels[c(seq(1, 3), seq(7, 10))]), values=c(16, 15, 17, 16, 15, 17, 16)) + 
+        scale_color_manual(
+          name="Prophylaxis regimen", 
+          labels=legendLabels(c(as.vector(stratLabels[10]), "_1", "_2", as.vector(stratLabels[1:3]), as.vector(stratLabels[7:9]))),
+          values=c(
+            darkPurple, 
+            NA, NA, 
+            rep(c(darkBrown, darkGreen), each=3), darkPurple
+          ), 
+          drop=FALSE
+        ) + 
+        scale_shape_manual(
+          name="Prophylaxis regimen", 
+          labels=legendLabels(c(as.vector(stratLabels[10]), "_1", "_2", as.vector(stratLabels[1:3]), as.vector(stratLabels[7:9]))),
+          values=c(
+            16, 
+            16, 16, 
+            16, 15, 17, 
+            16, 15, 17
+          ), 
+          drop=FALSE
+        ) + 
         geom_errorbar(
             aes(ymin=frac.lower, ymax=frac.upper, x=county, color=strat, group=strat), 
             width=.3, 

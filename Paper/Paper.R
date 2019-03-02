@@ -168,7 +168,7 @@ epiWeekBreaks = sort(unique(c(monthBoundaries$min, monthBoundaries$max)))
 legendLabels = function(labels, leading=0, trailing=2) {
   as.vector(sapply(labels, function(label) {
     if(substr(label, 1, 1) == "_") {
-      paste0(rep(" ", nchar(label)), collapse="")
+      paste0(rep(" ", as.numeric(substring(label, 2))), collapse="")
     } else {
       if (leading > 0) {
         label = sprintf("%s%s", strrep("\\qquad{}", leading), label)
