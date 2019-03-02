@@ -42,7 +42,7 @@ tex:
     - (cd "${TEX_OUTPUT_DIR}"; bibtex RSVOptimization; bibtex RSVOptimization1-blx)
     - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - mv RSVOptimization.pdf "${CI_PROJECT_DIR}"
+    - mv "${TEX_OUTPUT_DIR}/RSVOptimization.pdf" "${CI_PROJECT_DIR}"
   artifacts:
     paths:
       - "RSVOptimization.pdf"
