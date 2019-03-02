@@ -42,9 +42,10 @@ tex:
     - (cd "${TEX_OUTPUT_DIR}"; bibtex RSVOptimization; bibtex RSVOptimization1-blx)
     - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
+    - mv RSVOptimization.pdf "${CI_PROJECT_DIR}"
   artifacts:
     paths:
-      - "${TEX_DIR}/${TEX_OUTPUT_DIR}/RSVOptimization.pdf"
+      - "RSVOptimization.pdf"
 
 # Set up docker image for the rest of the build, keyed off commit ID
 docker-setup:
