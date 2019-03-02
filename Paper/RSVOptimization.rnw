@@ -704,65 +704,9 @@ However, with monthly rounding, the gains almost completely vanished, with preve
 
 \paragraph{RSV season onset is slowly moving earlier}
 
-<<onsetOffsetByYear, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/onsetOffsetByYear.tex", figuresDir), width=inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
-    data = stateThresholdsByWindow %>% 
-        melt(id=c("epiyear")) %>%
-        cSplit(c("variable"), c(".")) %>%
-        rename(variable=variable_1, pctile=variable_2) %>%
-        mutate(variable=factor(variable, levels=c("offset", "onset"))) %>%
-        cast(epiyear + variable ~ pctile)
-        
-    onsetOffsetAdjust = data.frame(variable=c("onset", "offset"), nudge=c(0, -1))
-
-    limits = data %>% 
-        select(variable, median) %>%
-        group_by(variable) %>%
-        summarize(mid=round(mean(range(median)))) %>%
-        inner_join(onsetOffsetAdjust, by="variable") %>%
-        mutate(mid=mid + nudge) %>%
-        mutate(min=mid - onsetOffsetRange / 2, max=mid + onsetOffsetRange / 2)
-
-    monthBarX = 1998.5 + (1998.5 - 2013.5) * 0.04
-
-    plot = ggplot(data) +
-        theme_light(base_size=plotTextBaseSize) +
-        geom_errorbar(aes(ymin=lower, ymax=upper, x=epiyear), width=.3) + 
-        geom_point(aes(y=median, x=epiyear), size=.75) +
-        geom_blank(data=limits, aes(y=min)) + 
-        geom_blank(data=limits, aes(y=max)) + 
-        facet_wrap(~variable, ncol=1, scales="free_y", labeller=onsetOffsetLabeller) +
-        scale_x_continuous(breaks=seq(1990, 2020, by=5)) +
-        scale_y_continuous(minor_breaks=seq(1, 52), breaks=epiWeekBreaks, labels=rep("\\qquad\\qquad", length(epiWeekBreaks)), sec.axis=sec_axis(trans=~., breaks=seq(1, 52))) + 
-        annotation_custom(monthGrob(4), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[4], ymax=monthBoundaries$mid[4]) + 
-        annotation_custom(monthGrob(5), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[5], ymax=monthBoundaries$mid[5]) + 
-        annotation_custom(monthGrob(9), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[9], ymax=monthBoundaries$mid[9]) + 
-        annotation_custom(monthGrob(10), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[10], ymax=monthBoundaries$mid[10]) + 
-        labs(y=NULL) + 
-        theme(
-            panel.grid.major.y=element_blank(),
-            panel.grid.minor.y=element_line(size=rel(2)),
-            axis.title.x=element_blank()
-        )
-        
-	plotGrob = ggplotGrob(plot)
-	plotGrob$layout$clip[grepl("panel", plotGrob$layout$name)] <- "off"
-	grid.draw(plotGrob)
-    
-    dev.off()
-@
-
-Our linear regression of median RSV season onset and offset over three-year periods indicates that season onset has slowly been drifting earlier (Figure \ref{fig:onsetOffsetByYear}), at a rate of \Sexpr{formatDrift(onsetByYear)} (\Sexpr{formatDriftCI(onsetByYear, level)}). It is unclear whether this is a part of a larger pattern, such as a cycle spanning decades. 
+Our linear regression of median RSV season onset and offset over three-year periods indicates that season onset has slowly been drifting earlier (Supplemental figure \ref{fig:onsetOffsetByYear}), at a rate of \Sexpr{formatDrift(onsetByYear)} (\Sexpr{formatDriftCI(onsetByYear, level)}). It is unclear whether this is a part of a larger pattern, such as a cycle spanning decades. 
 
 Season offset, on the other hand, has not been drifting earlier or later (\Sexpr{formatDriftCI(offsetByYear, level)}). 
-
-\begin{figure}
-\begin{center}
-\input{\figuresDir/onsetOffsetByYear.tex}
-\caption{Annual variability in RSV season onset and offset in Connecticut}
-\label{fig:onsetOffsetByYear}
-\end{center}
-\end{figure}
 
 \paragraph{Temporally-adjusted prophylaxis regimens are non-superior to others}
 
@@ -843,7 +787,71 @@ Finally, towns that see substantial inter-county travel (for example, employment
 
 \cleardoublepage
 \begin{appendices}
+\renewcommand\thesection{\Roman{section}}
+\renewcommand\thefigure{S\arabic{figure}}
+\setcounter{figure}{0}    
 
+\section{Supplemental figures}
+
+\label{supplement:figures}
+
+<<onsetOffsetByYear, results='hide', warning=FALSE>>=
+    tikz(sprintf("%s/onsetOffsetByYear.tex", figuresDir), width=inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
+    data = stateThresholdsByWindow %>% 
+        melt(id=c("epiyear")) %>%
+        cSplit(c("variable"), c(".")) %>%
+        rename(variable=variable_1, pctile=variable_2) %>%
+        mutate(variable=factor(variable, levels=c("offset", "onset"))) %>%
+        cast(epiyear + variable ~ pctile)
+        
+    onsetOffsetAdjust = data.frame(variable=c("onset", "offset"), nudge=c(0, -1))
+
+    limits = data %>% 
+        select(variable, median) %>%
+        group_by(variable) %>%
+        summarize(mid=round(mean(range(median)))) %>%
+        inner_join(onsetOffsetAdjust, by="variable") %>%
+        mutate(mid=mid + nudge) %>%
+        mutate(min=mid - onsetOffsetRange / 2, max=mid + onsetOffsetRange / 2)
+
+    monthBarX = 1998.5 + (1998.5 - 2013.5) * 0.04
+
+    plot = ggplot(data) +
+        theme_light(base_size=plotTextBaseSize) +
+        geom_errorbar(aes(ymin=lower, ymax=upper, x=epiyear), width=.3) + 
+        geom_point(aes(y=median, x=epiyear), size=.75) +
+        geom_blank(data=limits, aes(y=min)) + 
+        geom_blank(data=limits, aes(y=max)) + 
+        facet_wrap(~variable, ncol=1, scales="free_y", labeller=onsetOffsetLabeller) +
+        scale_x_continuous(breaks=seq(1990, 2020, by=5)) +
+        scale_y_continuous(minor_breaks=seq(1, 52), breaks=epiWeekBreaks, labels=rep("\\qquad\\qquad", length(epiWeekBreaks)), sec.axis=sec_axis(trans=~., breaks=seq(1, 52))) + 
+        annotation_custom(monthGrob(4), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[4], ymax=monthBoundaries$mid[4]) + 
+        annotation_custom(monthGrob(5), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[5], ymax=monthBoundaries$mid[5]) + 
+        annotation_custom(monthGrob(9), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[9], ymax=monthBoundaries$mid[9]) + 
+        annotation_custom(monthGrob(10), xmin=monthBarX, xmax=monthBarX, ymin=monthBoundaries$mid[10], ymax=monthBoundaries$mid[10]) + 
+        labs(y=NULL) + 
+        theme(
+            panel.grid.major.y=element_blank(),
+            panel.grid.minor.y=element_line(size=rel(2)),
+            axis.title.x=element_blank()
+        )
+        
+	plotGrob = ggplotGrob(plot)
+	plotGrob$layout$clip[grepl("panel", plotGrob$layout$name)] <- "off"
+	grid.draw(plotGrob)
+    
+    dev.off()
+@
+
+\begin{figure}
+\begin{center}
+\input{\figuresDir/onsetOffsetByYear.tex}
+\caption{Annual variability in RSV season onset and offset in Connecticut}
+\label{fig:onsetOffsetByYear}
+\end{center}
+\end{figure}
+
+\cleardoublepage
 \section{Interval estimation of complex outcomes using penalized basis splines}
 \begin{refsection}
 
@@ -1008,7 +1016,7 @@ We take advantage of this in our estimation of the preventable fraction of RSV c
 As before, we then sample $P$-spline coefficients to obtain a specific $P$-spline approximation, and compute preventable fraction for each sampled $P$-spline in order to obtain the distribution of preventable fractions.
 
 <<tollandPredSingle, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/tollandPredSingle.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+    tikz(sprintf("%s/tollandPredSingle.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
       
     data = tollandPredSingle
     
@@ -1036,9 +1044,9 @@ As before, we then sample $P$-spline coefficients to obtain a specific $P$-splin
       geom_segment(data=thresholds, aes(x=ppx.end, y=unprotected.end, xend=+Inf, yend=unprotected.end), linetype="11", size=.375) + 
       geom_point(data=tollandObs, aes(x=time, y=rsv.cum.frac, size=0.5), size=0.5) +
     	geom_rect(data=thresholds, aes(xmin=ppx.start, xmax=ppx.end, ymin=1, ymax=1.1), size=.375) + 
-    	geom_text(data=thresholds, aes(x=mean(c(ppx.start, ppx.end)), y=1.05, label="Prophylaxis window"), color="white", size=1.75) + 
+    	geom_text(data=thresholds, aes(x=mean(c(ppx.start, ppx.end)), y=1.05, label="Prophylaxis window"), color="white", size=3.5) + 
     	geom_rect(data=thresholds, aes(xmin=max(monthBoundaries$max) - 3, xmax=max(monthBoundaries$max), ymin=unprotected.start, ymax=unprotected.end), size=.375) + 
-    	geom_text(data=thresholds, aes(x=max(monthBoundaries$max) - 1.5, y=mean(c(unprotected.start, unprotected.end)), label="$\\Delta$ = preventable fraction", angle=90, lineheight=0.5), color="white", size=1.75) + 
+    	geom_text(data=thresholds, aes(x=max(monthBoundaries$max) - 1.5, y=mean(c(unprotected.start, unprotected.end)), label="$\\Delta$ = preventable fraction", angle=90, lineheight=0.5), color="white", size=3.5) + 
       scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
       theme(
         panel.grid.major.x=element_blank(),
@@ -1053,7 +1061,7 @@ As before, we then sample $P$-spline coefficients to obtain a specific $P$-splin
 @
 
 <<tollandPreventableFractionFull, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/tollandPreventableFractionFull.tex", figuresDir), width=pagePlotWidth * 0.4, height=pagePlotHeight, pointsize=10)
+    tikz(sprintf("%s/tollandPreventableFractionFull.tex", figuresDir), width=0.8*pagePlotWidth, height=2*pagePlotHeight, pointsize=10)
 
     data = tollandPredFull
     splineData = data %>% filter(sim < tollandDisplayNsim)
@@ -1101,23 +1109,18 @@ As before, we then sample $P$-spline coefficients to obtain a specific $P$-splin
 @
 
 \begin{figure}
-\begin{center}
-\begin{subfigure}{.4\textwidth}
     \begin{center}
     \input{\figuresDir/tollandPredSingle}
-    \caption{Preventable fraction derived from a randomly sampled $P$-spline approximating the RSV time series.}
+    \caption{A single estimate of the preventable fraction of RSV under the AAP prophylaxis guidelines, derived from a randomly sampled $P$-spline approximating the time series of RSV-associated hospitalizations in Tolland county, Connecticut.}
     \label{fig:tollandPredMini}
     \end{center}
-\end{subfigure}
-\begin{subfigure}{.4\textwidth}
+\end{figure}
+\begin{figure}
     \begin{center}
     \input{\figuresDir/tollandPreventableFractionFull}
-    \caption{Distribution of approximating $P$-splines ($N=\Sexpr{tollandDisplayNsim}$) and preventable fractions ($N=\Sexpr{tollandNsimFull}$) of RSV under the AAP prophylaxis guidelines  in Tolland county, Connecticut.}
+    \caption{Distribution of approximating $P$-splines ($N=\Sexpr{tollandDisplayNsim}$) and RSV preventable fractions ($N=\Sexpr{tollandNsimFull}$) under the AAP prophylaxis guidelines in Tolland county, Connecticut.}
     \label{fig:tollandOnsetMini}
     \end{center}
-\end{subfigure}
-\end{center}
-\caption{Cumulative relative incidence of RSV-associated hospitalizations in Tolland county, Connecticut, with five randomly sampled approximating $P$-splines.}
 \end{figure}
 
 We developed a custom R package for estimation of arbitrary characteristics of infectious disease outbreaks or seasons (as long as they are amenable to generalized additive modeling); the package is available at \href{https://github.com/airbornemint/outbreak-inference}{\nolinkurl{github.com/airbornemint/outbreak-inference}}.
