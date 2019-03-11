@@ -199,3 +199,14 @@ darkBrown = "#b15928"
 # Counties which we plot (so, not individual low-incidence counties)
 countiesForPlots = thresholdsByCounty$county[!thresholdsByCounty$county %in% lowIncidenceCounties]
 
+# Use this to draw legend indicators that don't take up the entire height of the key
+draw_key_vline_small = function(data, params, size) {
+  segmentsGrob(0.5, 0.125, 0.5, 0.875,
+    gp = gpar(
+      col = alpha(data$colour, data$alpha),
+      lwd = data$size * .pt,
+      lty = data$linetype,
+      lineend = "butt"
+    )
+  )    
+}
