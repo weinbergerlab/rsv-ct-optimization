@@ -39,7 +39,7 @@ tex:
     - cd "${TEX_DIR}"
     - mkdir -p "${TEX_OUTPUT_DIR}"
     - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - (cd "${TEX_OUTPUT_DIR}"; bibtex RSVOptimization; bibtex RSVOptimization1-blx)
+    - (cd "${TEX_OUTPUT_DIR}"; bibtex RSVOptimization)
     - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
     - mv "${TEX_OUTPUT_DIR}/RSVOptimization.pdf" "${CI_PROJECT_DIR}"
