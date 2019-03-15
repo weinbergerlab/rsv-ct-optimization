@@ -790,7 +790,7 @@ In areas of Connecticut associated with a relatively high amount of interstate t
 
 \subsection{Conclusion}
 
-In summary, our analysis reveals the potential for $\sim 1\%$ gain in prevented RSV cases in Connecticut using a two-week (rather than monthly) basis for prophylaxis guidelines. Practical merits of this potential gain --- including implementation cost and absolute magnitude of such gains --- require further investigation. Additionally, our method can be applied to county-level or state-level analysis of seasonal RSV patterns in other regions --- some of which are likely to show a greater relative benefit than Connecticut (due to a greater degree of misalignment between RSV season and prophylaxis window) as well as a greater absolute benefit (due to population size). 
+In summary, our analysis reveals the potential for $\sim 1\%$ gain in prevented RSV cases in Connecticut using a two-week (rather than monthly) basis for prophylaxis guidelines. Practical merits of this potential gain --- including implementation cost and absolute magnitude of such gains --- require further investigation. Additionally, the method we developed for this analysis can be applied to county-level or state-level analysis of seasonal RSV patterns in other regions, some of which are likely to show a greater relative benefit than Connecticut (due to a greater degree of misalignment between RSV season and prophylaxis window) as well as a greater absolute benefit (due to population size). 
 
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
