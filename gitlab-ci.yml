@@ -10,7 +10,7 @@ stages:
   
 variables:
   TEX_DIR: "Paper" # Relative to build root
-  TEX_OUTPUT_DIR: "build" # Relative to TEX_DIR
+  TEX_OUTPUT_DIR: "." # Relative to TEX_DIR
   OVERLEAF_ARTIFACTS_DIR: "overleaf" # Relative to build root
   KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
 
@@ -30,7 +30,7 @@ knitr:
   artifacts:
     paths:
       - "${TEX_DIR}/RSVOptimization.tex"
-      - "${TEX_DIR}/${TEX_OUTPUT_DIR}"
+      - "${TEX_DIR}/figures
 
 overleaf:
   stage: overleaf
@@ -39,9 +39,7 @@ overleaf:
   image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
-    - sed -E 's|(\\addbibresource\{)\.\./(.*\.bib\})|\1\2|g' < "${TEX_DIR}/structure.tex" > "${OVERLEAF_ARTIFACTS_DIR}/structure.tex"
-    - sed -E 's|(\\edef\\figuresDir\{)build/(.*\})|\1\2|g' < "${TEX_DIR}/RSVOptimization.tex" > "${OVERLEAF_ARTIFACTS_DIR}/RSVOptimization.tex"
-    - cp -r "${TEX_DIR}/RSVOptimization.bib" "${TEX_DIR}/${TEX_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+    - cp -r "${TEX_DIR}/RSVOptimization.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/RSVOptimization.bib" "${TEX_DIR}/${TEX_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
   artifacts:
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
