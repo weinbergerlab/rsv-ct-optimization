@@ -13,12 +13,17 @@ variables:
   TEX_OUTPUT_DIR: "." # Relative to TEX_DIR
   OVERLEAF_ARTIFACTS_DIR: "overleaf" # Relative to build root
   KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
+  
+.docker:
+  image: registry.gitlab.com/${CI_PROJECT_PATH}/commit/default:rev-${CI_COMMIT_SHORT_SHA}
+  tags:
+    - docker
 
 knitr:
+  extends: .docker
   stage: knitr
   tags:
     - docker-mem:3
-  image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -28,27 +33,25 @@ knitr:
     - cd "${TEX_DIR}"
     - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('RSVOptimization.rnw')"
   artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
     paths:
       - "${TEX_DIR}/RSVOptimization.tex"
-      - "${TEX_DIR}/figures
+      - "${TEX_DIR}/figures"
 
 overleaf:
+  extends: .docker
   stage: overleaf
-  tags:
-    - docker
-  image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
     - cp -r "${TEX_DIR}/RSVOptimization.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/RSVOptimization.bib" "${TEX_DIR}/${TEX_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
   artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
 
 tex:
+  extends: .docker
   stage: tex
-  tags:
-    - docker
-  image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   script:
     - cd "${OVERLEAF_ARTIFACTS_DIR}"
     - lualatex RSVOptimization.tex
@@ -57,6 +60,7 @@ tex:
     - lualatex RSVOptimization.tex
     - mv "RSVOptimization.pdf" "${CI_PROJECT_DIR}"
   artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
     paths:
       - "RSVOptimization.pdf"
       
