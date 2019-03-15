@@ -493,7 +493,7 @@ This is caused by temporal misalignment between the RSV season (delineated by me
 \end{center}
 \end{figure}
 
-\paragraph{Spatially adjusted regimens are superior to the AAP recommendations}
+\paragraph{Without calendarical rounding, spatially adjusted regimens are superior to the AAP recommendations}
 
 <<coverageByRegion, results='hide', warning=FALSE>>=
     GeomErrorbar$draw_key = draw_key_vline_small
@@ -554,7 +554,7 @@ This is caused by temporal misalignment between the RSV season (delineated by me
 
 Based on all-years data, the six spatially adjusted prophylaxis regimens (with no rounding of prophylaxis dates), when compared to the AAP guidelines, yield non-inferior results in all regions, and superior results statewide (Figure \ref{fig:coverageByRegionRegimen}). Statewide, the AAP guidelines offer protection to \Sexpr{regionStrategyCoverage("all", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}). The alternative regimen based on all-years statewide onset yields the smallest increase, to \Sexpr{regionStrategyCoverage("all", "stateOnset", 0)} (\Sexpr{regionStrategyCoverageCI("all", "stateOnset", 0, level)}); other alternative regimens yield similar results. Most of the increase comes from Hartford county, where the AAP guidelines protect \Sexpr{regionStrategyCoverage("Hartford", "aap", 0)} of cases (\Sexpr{regionStrategyCoverageCI("Hartford", "aap", 0, level)}), whereas the alternative regimen based on all-years regional offset generates the smallest increase, to \Sexpr{regionStrategyCoverage("Hartford", "countyOffset", 0)} (\Sexpr{regionStrategyCoverageCI("Hartford", "countyOnset", 0, level)}); other alternative regimens are comparable. In every region, all alternative regimens based on all-years analysis are non-inferior to the AAP guidelines and non-superior to each other. 
 
-\paragraph{Calendrical rounding rapidly erases gains over the AAP-recommended regimen}
+\paragraph{Calendrical rounding rapidly diminishes gains over the AAP-recommended regimen}
 
 <<calendarForRounding, results='hide', warning=FALSE>>=
     tikz(sprintf("%s/calendarForRoundingRegimen.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10)
