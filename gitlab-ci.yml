@@ -52,13 +52,12 @@ tex:
     - docker
   image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   script:
-    - cd "${TEX_DIR}"
-    - mkdir -p "${TEX_OUTPUT_DIR}"
-    - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - (cd "${TEX_OUTPUT_DIR}"; bibtex RSVOptimization)
-    - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - lualatex -output-dir="${TEX_OUTPUT_DIR}" RSVOptimization.tex
-    - mv "${TEX_OUTPUT_DIR}/RSVOptimization.pdf" "${CI_PROJECT_DIR}"
+    - cd "${OVERLEAF_ARTIFACTS_DIR}"
+    - lualatex RSVOptimization.tex
+    - bibtex RSVOptimization
+    - lualatex RSVOptimization.tex
+    - lualatex RSVOptimization.tex
+    - mv "RSVOptimization.pdf" "${CI_PROJECT_DIR}"
   artifacts:
     paths:
       - "RSVOptimization.pdf"
