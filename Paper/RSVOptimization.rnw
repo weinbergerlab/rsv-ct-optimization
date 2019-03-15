@@ -67,7 +67,7 @@ knitr::read_chunk("../Paper/Paper.R")
 \def\headertitle{Assessment and optimization of RSV prophylaxis regimens in Connecticut, \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}}
 
 \author{
-    \authorstyle{Ben Artin, MEng, MPH, MMSc\textsuperscript{1}}
+    \authorstyle{Ben Artin, MEng, MPH, MMSc\textsuperscript{1}}\\
     \authorstyle{Daniel Weinberger, PhD\textsuperscript{1}}\\
     \authorstyle{Virginia Pitzer, ScD\textsuperscript{1}}
     \newline\newline
