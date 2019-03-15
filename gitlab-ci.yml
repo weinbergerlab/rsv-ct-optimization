@@ -39,7 +39,9 @@ overleaf:
   image: registry.gitlab.com/airbornemint/rsv-ct-optimization/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
-    - cp -r "${TEX_DIR}/RSVOptimization.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/RSVOptimization.bib" "${TEX_DIR}/${TEX_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+    - sed -E 's|(\\addbibresource\{)\.\./(.*\.bib\})|\1\2|g' < "${TEX_DIR}/structure.tex" > "${OVERLEAF_ARTIFACTS_DIR}/structure.tex"
+    - sed -E 's|(\\edef\\figuresDir\{)build/(.*\})|\1\2|g' < "${TEX_DIR}/RSVOptimization.tex" > "${OVERLEAF_ARTIFACTS_DIR}/RSVOptimization.tex"
+    - cp -r "${TEX_DIR}/RSVOptimization.bib" "${TEX_DIR}/${TEX_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
   artifacts:
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
