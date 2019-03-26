@@ -48,7 +48,7 @@ regionOffset = function(c) {
 }
 
 formatThresholdCI = function(lower, upper, level) {
-  sprintf("%d\\%% CI: %.2f -- %.2f", level * 100, lower %% 52, upper %% 52)
+  sprintf("%d\\%% CI: week %.2f -- %.2f", level * 100, lower %% 52, upper %% 52)
 }
 
 regionOnsetCI = function(c, level) {
