@@ -140,7 +140,7 @@ countyLabels = c(
   `New Haven` = "New Haven county",
   `Fairfield` = "Fairfield county",
   `Hartford` = "Hartford county",
-  `lowIncidence` = "Low-RSV counties"
+  `lowIncidence` = "Low-population counties"
 )
 
 # .01 to let minor gridlines show through
@@ -196,7 +196,7 @@ darkPurple = "#6a3d9a"
 lightBrown = "#E3C0AC"
 darkBrown = "#b15928"
 
-# Counties which we plot (so, not individual low-incidence counties)
+# Counties which we plot (so, not individual low-population counties)
 countiesForPlots = thresholdsByCounty$county[!thresholdsByCounty$county %in% lowIncidenceCounties]
 
 # Use this to draw legend indicators that don't take up the entire height of the key
