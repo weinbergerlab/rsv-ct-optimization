@@ -143,6 +143,14 @@ countyLabels = c(
   `lowIncidence` = "Low-population counties"
 )
 
+countyLabelsShort = c(
+  `all` = "Statewide",
+  `New Haven` = "New Haven c.",
+  `Fairfield` = "Fairfield c.",
+  `Hartford` = "Hartford c.",
+  `lowIncidence` = "Low-population c."
+)
+
 # .01 to let minor gridlines show through
 epiWeekBreaks = c(3.01, 7.25, 11.75, 16.01, 20.25, 24.75, 29.01, 33.01, 37.5, 42.01, 46.25, 50.75)
 epiWeekLabels = c("Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun")

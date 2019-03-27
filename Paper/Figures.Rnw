@@ -81,6 +81,7 @@
         theme(
             panel.grid.major.x=element_line(size=rel(2)),
             panel.grid.minor.x=element_line(size=rel(2)),
+            panel.grid.major.y=element_blank(),
             axis.title.y=element_blank(),
             axis.ticks.y=element_blank(),
             axis.text.y=element_text(hjust=1)
@@ -104,14 +105,16 @@
         theme_light(base_size=plotTextBaseSize) +
         geom_errorbar(aes(ymax=frac.upper, ymin=frac.lower, x=county), width=.1) + 
         geom_point(aes(y=frac.median, x=county), size=.75) + 
-        scale_y_continuous(labels=latexPercent, limits=c(0.9, 1), breaks=seq(0, 1, by=.02), expand=c(0.05, 0)) +
-        scale_x_discrete(labels=countyLabels) + 
+        scale_y_continuous(labels=latexPercent, limits=c(0.88, 1), breaks=seq(0, 1, by=0.04), expand=c(0.05, 0)) +
+        scale_x_discrete(labels=countyLabelsShort) + 
         labs(y="Preventable fraction") +
         theme(
+            panel.grid.major.x=element_blank(),
             axis.title.x=element_blank(),
             axis.ticks.x=element_blank(),
-            axis.text.x=element_text(angle=30, hjust=1)
+            axis.text.x=element_text(angle=30, hjust=0.5, vjust=0.5)
         )
+
     dev.off()
 @
 
@@ -164,14 +167,14 @@
     ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         geom_ribbon(aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper, x=time), fill=grey(.25)) +
-    	geom_segment(aes(x=start, y=lineYmin, xend=start, yend=lineYmax, color=variable), data=spans, size=.375) + 
-    	geom_segment(aes(x=end, y=lineYmin, xend=end, yend=lineYmax, color=variable), data=spans, size=.375) + 
-    	geom_rect(aes(xmin=start, ymin=barYmin, xmax=end, ymax=barYmax, fill=variable, color=variable), data=spans, size=.375) + 
-    	geom_segment(aes(x=-Inf, y=unprotected.start, xend=ppx.start, yend=unprotected.start), linetype="11", data=thresholds, size=.375) + 
+    	  geom_segment(aes(x=start, y=lineYmin, xend=start, yend=lineYmax, color=variable), data=spans, size=.375) + 
+    	  geom_segment(aes(x=end, y=lineYmin, xend=end, yend=lineYmax, color=variable), data=spans, size=.375) + 
+    	  geom_rect(aes(xmin=start, ymin=barYmin, xmax=end, ymax=barYmax, fill=variable, color=variable), data=spans, size=.375) + 
+    	  geom_segment(aes(x=-Inf, y=unprotected.start, xend=ppx.start, yend=unprotected.start), linetype="11", data=thresholds, size=.375) + 
         geom_segment(aes(x=-Inf, y=unprotected.end, xend=ppx.end, yend=unprotected.end), linetype="11", data=thresholds, size=.375) + 
         geom_point(aes(x=min(monthBoundaries$min), y=unprotected.end), data=thresholds, shape=18) + 
         geom_point(aes(x=min(monthBoundaries$min), y=unprotected.start), data=thresholds, shape=18) + 
-        scale_y_continuous(labels=latexPercent, breaks=seq(0, 1, by=.2), limits=c(-0.1, 1.1), expand=c(0, 0)) +
+        scale_y_continuous(labels=latexPercent, breaks=seq(0, 1, by=.25), limits=c(-0.1, 1.1), expand=c(0, 0)) +
         scale_x_continuous(breaks=monthBoundaries$mid, labels=epiWeekLabels, limits=range(c(monthBoundaries$min, monthBoundaries$max)), expand=c(0, 0)) + 
         scale_color_manual(labels=spanLabels, values=c(darkPurple, darkRed)) +
         scale_fill_manual(labels=spanLabels, values=c(darkPurple, darkRed)) +
@@ -180,6 +183,7 @@
         labs(x=NULL, y="Cumulative indicence fraction") + 
         theme(
             panel.grid.major.x=element_blank(),
+            panel.grid.minor.x=element_blank(),
             legend.title=element_blank(),
             axis.title.y=element_blank(),
             axis.ticks.x=element_blank(),
