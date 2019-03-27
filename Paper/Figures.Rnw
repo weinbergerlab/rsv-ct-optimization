@@ -21,11 +21,11 @@
 
     ggplot(map.df, aes(x=long, y=lat)) +
         theme_light(base_size=plotTextBaseSize) +
-        scale_fill_manual(labels=legendLabels(c("$<$50", "$>$100")), values=c(lightBlue, darkBlue)) +
+        scale_fill_manual(labels=legendLabels(c("$<300,000$", "$>900,000$")), values=c(lightBlue, darkBlue)) +
         geom_polygon(aes(fill=highRSV, group=group), color="white", size=.5) +
         geom_text(data=county.data, aes(label=name), size=2.2) +
         coord_map() + 
-        labs(fill="Average RSV-associated hospitalizations per year") +
+        labs(fill="Total county population in 2010 census") +
         theme(
             rect=element_blank(),
             line=element_blank(),
