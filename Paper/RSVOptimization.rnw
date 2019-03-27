@@ -72,7 +72,7 @@
 
 % TODO make 1-week rounding primary analysis
 % TODO DPH acknowledgement
-% TODO transpose onset-offset plots
+% TODO better month labels in onset-offset plots
 
 \thispagestyle{firstpage}
 
