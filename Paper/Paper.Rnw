@@ -1,0 +1,20 @@
+<<options, echo=FALSE>>=
+    knitr::opts_chunk$set(echo=FALSE, message=FALSE, error=FALSE)
+@
+
+<<load>>=
+knitr::read_chunk("../Analysis/RSV.R")
+knitr::read_chunk("../Paper/Paper.R")
+@
+
+<<libraries, cache=FALSE>>=
+@
+
+<<external, cache=TRUE>>=
+@
+
+<<paper, warning=FALSE>>=
+@
+    
+<<figures, child='Figures.Rnw'>>=
+@
