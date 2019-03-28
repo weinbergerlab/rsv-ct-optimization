@@ -173,6 +173,10 @@ monthBoundaries = breaks.df %>%
 
 epiWeekBreaks = sort(unique(c(monthBoundaries$min, monthBoundaries$max)))
 
+onsetOffsetMonthBoundaries = data.frame(i=c(4, 5, 9, 10), variable=c("onset", "onset", "offset", "offset")) %>%
+  inner_join(monthBoundaries, by="i") %>%
+  mutate(label=epiWeekLabels[i])
+  
 legendLabels = function(labels, leading=0, trailing=2) {
   as.vector(sapply(labels, function(label) {
     if(substr(label, 1, 1) == "_") {
