@@ -88,7 +88,7 @@
 
 \abstractsection{Results}Using preventable fraction to assess different immunoprophylaxis regimens, we found that regimens adjusted for county-level variation in timing of RSV seasons are superior to the current AAP-recommended regimen. Our best alternative to the AAP guidelines was based on the county-level RSV season midpoint. In comparison to the AAP recommendation, whose preventable fraction is \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}), that alternative yielded improvement to \Sexpr{regionStrategyCoverage("all", "countyMiddle", 1)} (\Sexpr{regionStrategyCoverageCI("all", "countyMiddle", 1, level)}). 
 
-\abstractsection{Conclusion}Overall, we recommend county-level spatial analysis of RSV incidence as the starting point for RSV immunoprophylaxis optimization in Connecticut. However, the potential reduction in RSV hospitalizations should be weighed against the potential increase in implementation cost. 
+\abstractsection{Conclusion}Initiating RSV prophylaxis based on county-level data may provide marginal improvement in protection over regimens based on state-level and national data. 
 
 \abstractpara{}
 
