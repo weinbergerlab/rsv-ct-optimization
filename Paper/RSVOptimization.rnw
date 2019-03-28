@@ -250,7 +250,7 @@ Statewide, our model shows that \Sexpr{regionStrategyCoverage("all", "aap", 0)} 
 
 This is caused by temporal misalignment between the RSV season (delineated by median \Sexpr{seasonThreshold * 100}\%  onset and \Sexpr{(1 - seasonThreshold) * 100}\% offset in each county) and the timing of the AAP-recommended prophylaxis regimen (Figure \ref{fig:coverageByRegionAAPInsight}). Fairfield county, owing to its early season onset, sees disproportionately more cases before prophylaxis administration begins; on the other hand, the low-population counties, owing to their late season onset and relatively shorter RSV seasons, see almost all of their RSV cases within the prophylaxis window.
 
-\begin{figure}[b]
+\begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionAAPInsight.tex}
 \caption[County-level variation in the relative timing of the RSV season in Connecticut and the AAP-recommended prophylaxis regimen]{County-level variation in the relative timing of the RSV season in Connecticut and the AAP-recommended prophylaxis regimen, showing the gap between season onset and prophylaxis start date, notable particularly in Fairfield county}
