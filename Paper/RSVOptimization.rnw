@@ -115,8 +115,6 @@ For infants, risk factors of serious illness and hospitalization due to RSV infe
 
 A monoclonal antibody (palivizumab) is available in the US for prevention of RSV infection in high-risk infants less than 2 years old. Palivizumab is administered via intramuscular injection and requires five monthly doses, priced at \$1500-\$3000 per dose.\cite{Hampp:2011ju,Andabaka:2013dr} Palivizumab has been found to be effective in reducing hospitalizations due to RSV; in double-blinded trials in high-risk infants, it reduced the hospitalization rate by 45-55\% compared to placebo.\cite{Group:1998ih,Feltes:2003wm} It has also been found to be safe and well-tolerated in clinical trials.\cite{Group:1998ih} Owing to the high cost, the 2014 revision of the American Academy of Pediatrics (AAP) RSV prophylaxis guidelines recommends palivizumab only for high-risk infants and only during the RSV season.\cite{Anonymous:1998up,AmericanAcademyofPediatricsCommitteeonInfectiousDiseasesandCommitteeonFetusandNewborn:2003ug,AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj}
 
-% TODO cite DW/VP paper re spatial variability
-
 RSV seasonality and spatial variability have been established throughout the United States, based on the CDC's National Respiratory and Enteric Virus Surveillance System data; RSV has been found to have an annual or biennial cycle with regionally variable seasonal onset ranging from late August to mid-December and offset ranging from mid-March to late April.\cite{CentersforDiseaseControlandPreventionCDC:2011wt,CentersforDiseaseControlandPreventionCDC:2013wv,Weinberger:2015hj} The AAP acknowledges the potential significance of spatial and temporal variation in RSV incidence, but --- outside of Florida, whose RSV season leads most of the rest of the nation by approximately two months --- does not recommend local variance from nationwide prophylaxis guidelines.\cite{AmericanAcademyofPediatricsCommitteeonInfectiousDiseases:2014bj} 
 
 Previous analysis of RSV-associated hospital admissions has shown spatial variability in the timing of peak RSV incidence within Connecticut.\cite{Noveroske:y4fi3188} Epidemics tends to occur earlier in large urban areas and later in sparsely-populated rural areas. 
@@ -177,16 +175,15 @@ We chose to aggregate low-population counties into a single area because our ana
 
 \subsection{Analysis approach}
 
-Our goal was to construct a model of annual RSV incidence that allowed us to estimate characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data, and used resampling to obtain confidence intervals. This was performed using the ??? package in R (See ??? for details on the analytical method and R package.)
+Our goal was to construct a model of annual RSV incidence that allowed us to estimate characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data, and used resampling to obtain confidence intervals. This was performed using the \texttt{outbreak-inference} package in R, which we developed for this purpose. (See ??? for details on the analytical method and the R package.)
+
+% TODO ref spline paper
 
 We defined season onset as the time when cumulative incidence rises beyond \Sexpr{seasonThreshold * 100}\% of the total cumulative incidence, and season offset as the time when cumulative incidence rises beyond \Sexpr{(1 - seasonThreshold) * 100}\% of the total cumulative incidence. We aggregated our data by surveillance week across all surveillance years, and estimated RSV season onset and offset for each county.
 
 The choice of \Sexpr{seasonThreshold * 100}\% and \Sexpr{(1 - seasonThreshold) * 100}\% incidence thresholds was based on our intent to use estimates of RSV season onset and offset to evaluate alternative prophylaxis regimens (as described below), while maintaining the 5-month dosing schedule (and therefore not increasing medication cost). Incidence cutoffs other than \Sexpr{seasonThreshold * 100}\% and \Sexpr{(1 - seasonThreshold) * 100}\% were briefly investigated, but quickly ruled out because they produced prophylaxis regimens starting long prior to RSV season onset or ending long after RSV season offset, and therefore had very low preventable fractions.
 
-% TODO ref spline paper
-
 \subsection{Evaluating alternative prophylaxis regimens}
-
 
 We estimated the fraction of preventable cases at the state and county level by following the current AAP guidelines or six alternative regimens:
 
@@ -209,21 +206,19 @@ We defined the fraction of all RSV cases that is preventable by a prophylaxis re
 \item the total number of RSV-associated hospitalizations.
 \end{itemize}
 
-%TODO citation needed
+%TODO citation needed re small subgroup
 
 Given that high-risk infants are a small subgroup of the general population, we assumed that our model of RSV hospitalizations among all infants is an unbiased approximation of RSV hospitalizations among high-risk infants, and that, therefore, the preventable fraction of a prophylactic regimen is an unbiased estimate of the fraction of high-risk infants who benefit from prophylaxis.
 
 \subsection{Additional analyses}
 
-In addition to 1-week rounding of our alternative prophylaxis schedules, we calculated 2- and 4-week rounding, to assess the impact of calendrical rounding on prophylaxis performance. (Supplemental methods \ref{smethod:rounding}.)
+In addition to the 1-week rounding of our alternative prophylaxis schedules, we also calculated schedules using 2- and 4-week rounding, to assess the impact of calendrical rounding on prophylaxis performance. (Supplemental methods \ref{smethod:rounding}.)
 
-To analyze the effects of year-to-year variation between RSV seasons, we performed similar analysis, but with prophylaxis start in a given year being determined by the RSV timing of three prior years, rather than all years. (Supplemental methods \ref{smethod:seasonDrift} and \ref{smethod:temporalAdjustment}.)
+To analyze the effects of year-to-year variation between RSV seasons, we performed similar analysis, but with prophylaxis start in a given year being determined by the RSV season timing of the preceding three years, rather than all years. (Supplemental methods \ref{smethod:seasonDrift} and \ref{smethod:temporalAdjustment}.)
 
 \section{Results}
 
 \subsection{Timing of the RSV season varies within the state}
-
-
 
 \begin{figure}
 \begin{center}
@@ -259,7 +254,7 @@ This is caused by temporal misalignment between the RSV season (delineated by me
 \end{center}
 \end{figure}
 
-\subsection{Without calendrical rounding, spatially adjusted regimens are superior to the AAP recommendations}
+\subsection{Spatially adjusted regimens are superior to the AAP recommendations}
 
 \begin{figure}
 \begin{center}
@@ -269,11 +264,13 @@ This is caused by temporal misalignment between the RSV season (delineated by me
 \end{center}
 \end{figure}
 
-The six spatially-adjusted prophylaxis regimens (with no rounding of prophylaxis dates), yield results in all counties that are as good or better than the AAP guidelines. (Figure \ref{fig:coverageByRegionRegimen}). Statewide, the AAP guidelines offer protection to \Sexpr{regionStrategyCoverage("all", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}). The alternative regimen based on statewide onset yields the smallest increase, to \Sexpr{regionStrategyCoverage("all", "stateOnset", 0)} (\Sexpr{regionStrategyCoverageCI("all", "stateOnset", 0, level)}); other alternative regimens yield similar results. Most of the increase comes from Hartford county, where the AAP guidelines protect \Sexpr{regionStrategyCoverage("Hartford", "aap", 0)} of cases (\Sexpr{regionStrategyCoverageCI("Hartford", "aap", 0, level)}), whereas the alternative regimen based on county-level offset generates the smallest increase, to \Sexpr{regionStrategyCoverage("Hartford", "countyOffset", 0)} (\Sexpr{regionStrategyCoverageCI("Hartford", "countyOnset", 0, level)}); other alternative regimens are comparable. In every county, all alternative regimens are non-inferior to the AAP guidelines and non-superior to each other. 
+% TODO Update results to 1-week rounding
+
+The six spatially-adjusted prophylaxis regimens, yield results in all counties that are as good or better than the AAP guidelines. (Figure \ref{fig:coverageByRegionRegimen}). Statewide, the AAP guidelines offer protection to \Sexpr{regionStrategyCoverage("all", "aap", 0)} cases (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}). The alternative regimen based on statewide onset yields the smallest increase, to \Sexpr{regionStrategyCoverage("all", "stateOnset", 0)} (\Sexpr{regionStrategyCoverageCI("all", "stateOnset", 0, level)}); other alternative regimens yield similar results. Most of the increase comes from Hartford county, where the AAP guidelines protect \Sexpr{regionStrategyCoverage("Hartford", "aap", 0)} of cases (\Sexpr{regionStrategyCoverageCI("Hartford", "aap", 0, level)}), whereas the alternative regimen based on county-level offset generates the smallest increase, to \Sexpr{regionStrategyCoverage("Hartford", "countyOffset", 0)} (\Sexpr{regionStrategyCoverageCI("Hartford", "countyOnset", 0, level)}); other alternative regimens are comparable. In every county, all alternative regimens are non-inferior to the AAP guidelines and non-superior to each other. 
 
 \subsection{Additional results}
 
-We also applied biweekly and monthly rounding to the start and end dates of our six alternative immunoprophylaxis regimens, and found that doing so diminished or erased the benefits. (Supplemental result \ref{sresult:rounding}). Finally, we analyzed long-term trends in the RSV season onset and offset and found that the season onset may be moving earlier (Supplemental result \ref{sresult:seasonDrift}), but that accounting for that drift did not yield a significant further increase in preventable RSV cases (Supplemental result \ref{sresult:temporalAdjustment}). 
+We also applied 2-week and 4-week rounding to the start and end dates of our six alternative immunoprophylaxis regimens, and found that doing so diminished or erased the potential benefits. (Supplemental result \ref{sresult:rounding}). Finally, we analyzed long-term trends in the RSV season onset and offset and found that the season onset may be moving earlier (Supplemental result \ref{sresult:seasonDrift}), but that accounting for that drift did not yield a significant further increase in preventable RSV cases (Supplemental result \ref{sresult:temporalAdjustment}). 
 
 \section{Discussion}
 
@@ -281,11 +278,11 @@ Our analysis confirms the existence of county-level variation of RSV season timi
 
 % Separate paragraph here because seasonal variation above, prophylaxis optimization below
 
-Our effort to optimize timing of the prophylaxis regimen (without changing its duration, and therefore its pharmaceutical cost) shows a theoretical 1-2\% statewide decrease in RSV-associated hospitalizations among high-risk infants each year, primarily in counties with higher RSV burden (Fairfield, Hartford, and New Haven counties). The magnitude of that improvement declines after accounting for practicalities of clinical practice guideline implementation. Nonetheless, with clinical practice guidelines localized at the county level, and the timing of prophylaxis adjusted in each county by less than a whole month from the current AAP guidelines, we still found the potential for $\sim$1\% statewide decrease in RSV-associated hospitalizations among high risk infants. The prophylaxis regimen with which we were able to attain this improvement is the one in which prophylaxis in each county is timed relative to the midpoint of the RSV season (rounded to two weeks) in that county, which simultaneously reduces unprotected cases early in the season and ineffective prophylaxis late in the season. Increasing complexity of practice guidelines would carry with it increased cost of implementation (such as training of clinicians and other healthcare workers); it is therefore not apparent from our research alone that the potential benefits would outweigh the costs. 
+Our effort to optimize timing of the prophylaxis regimen (without changing its duration, and therefore its pharmaceutical cost) shows a potential $\sim1\%$ statewide decrease in RSV-associated hospitalizations among high-risk infants each year, primarily in counties with higher RSV burden (Fairfield, Hartford, and New Haven counties), by using clinical practice guidelines localized at the county level, and with the timing of prophylaxis adjusted in each county by less than a whole month from the current AAP guidelines. The prophylaxis regimen with which we were able to attain this improvement is the one in which prophylaxis in each county is timed relative to the midpoint of the RSV season in that county, which simultaneously reduces unprotected cases early in the season and ineffective prophylaxis late in the season. Increasing complexity of practice guidelines would carry with it increased cost of implementation (such as training of clinicians and other healthcare workers); it is therefore not apparent from our research alone that the potential benefits would outweigh the costs. 
 
 Although we found a weak statewide trend in RSV season onset becoming earlier over time, further analysis did not yield any improvements to prophylaxis based on that trend. Since temporal variation in clinical guidelines would lead to a higher implementation burden than spatial variation, we see no reason to base RSV immunoprophylaxis clinical practice guidelines on temporal variation in RSV season timing.
 
-The use of data aggregated by epidemiological weeks created a challenge for both our analysis and the interpretation of our results. In practice, clinical guidelines are typically expressed in terms of calendar weeks or months; as a result, our analysis contains errors of up to $\pm 0.5$ weeks when applied to the more natural calendar boundaries. Ideally, our analysis should be repeated with daily case counts aggregated into weeks and months that match week and month boundaries used in clinical guidelines.
+The use of data aggregated by epidemiological weeks created a challenge for both our analysis and the interpretation of our results. In practice, clinical guidelines are typically expressed in terms of calendar weeks or months; as a result, our analysis contains errors of up to $\pm 0.5$ weeks when applied to the more natural calendar boundaries of clinical guidelines. Ideally, our analysis should be repeated with daily case counts aggregated into weeks and months that match week and month boundaries used in clinical guidelines.
 
 Throughout, we assumed that RSV-associated hospitalizations are an unbiased estimate of RSV incidence in the general population; in doing so, we implicitly assumed that infectiousness and virulence of RSV are constant over time, for which we have no verification.
 
