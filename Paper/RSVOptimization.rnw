@@ -185,6 +185,8 @@ The choice of \Sexpr{seasonThreshold * 100}\% and \Sexpr{(1 - seasonThreshold) *
 
 \subsection{Evaluating alternative prophylaxis regimens}
 
+\begin{samepage}
+
 We estimated the fraction of preventable cases at the state and county level by following the current AAP guidelines or six alternative regimens:
 
 \begin{itemize}
@@ -196,6 +198,8 @@ We estimated the fraction of preventable cases at the state and county level by 
     \item \textbf{By county-level midpoint}: prophylaxis administration begins 12 weeks before the average of the county-level median RSV season onset and offset. 
     \item \textbf{By county-level offset}: prophylaxis administration begins 24 weeks before the county-level median RSV season offset. 
 \end{itemize}
+
+\end{samepage}
 
 In all these regimens, prophylaxis consists of five monthly doses of palivizumab, and protection is assumed to last 24 weeks from the first dose. We rounded each alternative regimen to the nearest week, to more closely reflect how prophylaxis guidelines might be implemented in practice. (Supplemental methods \ref{smethod:rounding}.)
 
