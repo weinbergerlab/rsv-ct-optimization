@@ -81,8 +81,8 @@ regionStrategyCoverage = function(c, s, r) {
 
 regionStrategyCoverageCI = function(c, s, r, level) {
   formatPctCI(
-    (unprotectedByCounty %>% filter(county==c, strat==s, rounding==r))$frac.upper,
     (unprotectedByCounty %>% filter(county==c, strat==s, rounding==r))$frac.lower,
+    (unprotectedByCounty %>% filter(county==c, strat==s, rounding==r))$frac.upper,
     level
   )
 }
@@ -93,8 +93,8 @@ bestCaseCoverage = function(r) {
 
 bestCaseCoverageCI = function(r, level) {
   formatPctCI(
-    (bestCaseCoverageByRounding %>% filter(rounding==r))$frac.upper,
     (bestCaseCoverageByRounding %>% filter(rounding==r))$frac.lower,
+    (bestCaseCoverageByRounding %>% filter(rounding==r))$frac.upper,
     level
   )
 }
