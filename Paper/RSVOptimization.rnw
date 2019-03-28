@@ -21,7 +21,7 @@
 \SetWatermarkHorCenter{12ex}
 \SetWatermarkVerCenter{12ex}
 \SetWatermarkLightness{.5}
-\SetWatermarkText{DRAFT 1}
+\SetWatermarkText{DRAFT 2}
 
 \input{structure.tex}
 \usepackage{amssymb}
