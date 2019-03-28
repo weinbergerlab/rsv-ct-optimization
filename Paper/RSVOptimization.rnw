@@ -70,7 +70,6 @@
 
 \maketitle
 
-% TODO make 1-week rounding primary analysis
 % TODO DPH acknowledgement
 % TODO better month labels in onset-offset plots
 
@@ -83,9 +82,9 @@
 \begin{hangparas}{\abstractindent}{1}
 \begin{onehalfspacing}
 
-\abstractsection{Background}Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in children and leads to hospitalization rates of up to 50\% in high-risk infants. Safe and effective immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. Although the current AAP guidelines acknowledge the existence of spatial and temporal variation in RSV incidence, they do not recommend spatial or temporal adjustments to the immunoprophylaxis regimen outside of Florida. In this study, we investigate the value of using spatial and temporal variation in RSV incidence to adjust the RSV prophylaxis regimen in Connecticut.
+\abstractsection{Background}Respiratory syncytial virus (RSV) causes seasonal respiratory infection with potentially serious complications in children and leads to hospitalization rates of up to 50\% in high-risk infants. Safe and effective immunoprophylaxis (palivizumab) is available, but costly. The American Academy of Pediatrics (AAP) recommends palivizumab only for infants at high risk of complications, and only during the RSV season. The current AAP guidelines do not recommend spatial or temporal adjustments to the immunoprophylaxis regimen outside of Florida. In this study, we investigate the benefits of adjusting the RSV prophylaxis regimen in Connecticut based on the spatial and temporal variation of RSV incidence.
 
-\abstractsection{Methods}We obtained weekly ZIP-code-level counts of RSV-associated hospital admission in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We fit smoothed curves to these admission counts and used these curves to estimate the fraction of all RSV cases in Connecticut occurring during the period of protection offered by RSV immunoprophylaxis (``preventable fraction'') under the AAP guidelines. We then used the same model to estimate protection conferred by immunoprophylaxis regimens with alternate start dates (but unchanged duration and net pharmaceutical cost).
+\abstractsection{Methods}We obtained weekly ZIP-code-level counts of RSV-associated hospital admission in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We fit smoothed curves to these admission counts and thus estimated the fraction of all RSV cases in Connecticut occurring during the period of protection offered by RSV immunoprophylaxis (``preventable fraction'') under the AAP guidelines. We then used the same model to estimate protection conferred by immunoprophylaxis regimens with alternate start dates (but unchanged duration).
 
 \abstractsection{Results}Using preventable fraction to assess different immunoprophylaxis regimens, we found that regimens adjusted for county-level variation in timing of RSV seasons are superior to the current AAP-recommended regimen. Our best alternative to the AAP guidelines was based on the county-level RSV season midpoint. In comparison to the AAP recommendation, whose preventable fraction is \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}), that alternative yielded improvement to \Sexpr{regionStrategyCoverage("all", "countyMiddle", 1)} (\Sexpr{regionStrategyCoverageCI("all", "countyMiddle", 1, level)}). 
 
