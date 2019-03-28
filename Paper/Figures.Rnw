@@ -37,7 +37,7 @@
 @
 
 <<seasonByRegion, results='hide'>>=
-    tikz(sprintf("%s/seasonByRegion.tex", figuresDir), width=inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
+    tikz(sprintf("%s/seasonByRegion.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
     onOffLevels = c("onset", "offset")
     
     data = thresholdsByCounty %>% 
