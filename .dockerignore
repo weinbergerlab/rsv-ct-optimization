@@ -1,0 +1,7 @@
+Dockerfile
+ct rsv time series.csv.gpg
+overleaf backprop
+renv/library
+Paper/cache
+Paper/.texpadtmp
+Analysis/.texpadtmp
