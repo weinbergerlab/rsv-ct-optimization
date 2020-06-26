@@ -36,8 +36,10 @@ knitr:
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run paper-knit
-  dependencies:
-    - ⚡️ build
+  cache:
+    key: knitr
+    paths:
+      - ${TEX_DIR}/cache
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
     paths:
@@ -45,7 +47,7 @@ knitr:
 
 overleaf:
   extends: .docker
-  stage: overleaf
+  stage: exports
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
     - cp -r "${KNITR_OUTPUT_DIR}/RSVOptimization.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/RSVOptimization.bib" "${KNITR_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
