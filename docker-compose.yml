@@ -18,6 +18,8 @@ services:
             - >
                 if [ ! -z "${DATASET_PASSWORD:-}" ] ; then
                     printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
+                else
+                    ln -s "./ct rsv time series nogpg.csv" "./ct rsv time series.csv"
                 fi
 
                 Rscript -e "
@@ -33,6 +35,8 @@ services:
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/${KNITR_OUTPUT_DIR:-knitr}"
             - "./${TEX_DIR:-Paper}/cache:/paper/cache"
+            - "./ct rsv time series.csv.gpg:/paper/ct rsv time series.csv.gpg"
+            - "./ct rsv time series.csv:/paper/ct rsv time series nogpg.csv" # This is only present for local development
        
     ############################################################
     # Commands for converting figures to PDF and EPS
