@@ -1,4 +1,5 @@
 <<map, results='hide'>>=
+    library(mapproj)
     tikz(sprintf("%s/map.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
     US.counties = readOGR(dsn="../Maps/cb_2016_us_county_5m",layer="cb_2016_us_county_5m")
     US.counties = US.counties[US.counties$STATEFP == "09",]
