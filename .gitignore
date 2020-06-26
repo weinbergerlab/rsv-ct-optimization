@@ -20,3 +20,4 @@ Analysis/plots/**/*.pdf
 /knitr
 /overleaf
 /overleaf backprop
+/Paper/RSVOptimization.run.xml
