@@ -262,14 +262,13 @@ fixedStratDescByCountyRounding = data.frame()
 fixedStratUnprotectedByCounty = data.frame()
 
 for (c in levels(obsByCounty$county)) {
-  message(paste("County:", c))
+  message(paste("Regional all-years:", c))
   countyObs = obsByCounty %>% filter(county==c)
   countyModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=countyObs)
 
   countyPred = countyModel %>%
     predict(type="response", newdata=modelTime, se.fit=TRUE)
 
-  message("Timeseries")
   countyPred = countyModel %>%
     pspline.estimate.timeseries(
       modelTime,
@@ -282,7 +281,6 @@ for (c in levels(obsByCounty$county)) {
 
   predByCounty = predByCounty %>% rbind(countyPred)
 
-  message("Thresholds")
   countyThresholds = countyModel %>%
     pspline.estimate.scalars(
       modelTime,
@@ -294,7 +292,7 @@ for (c in levels(obsByCounty$county)) {
   thresholdsByCounty = thresholdsByCounty %>% rbind(countyThresholds)
 
   for (rounding in ppxRounding) {
-    message(paste("Rounding:", as.character(rounding)))
+    message(paste("Regional all-years with rounding:", as.character(rounding)))
     # Separate simulation from confidence intervals in order to use simulation data to get statewide estimates
     countyUnprotectedSim = countyModel %>%
       pspline.sample.scalars(
@@ -411,6 +409,7 @@ statePredByWindow = data.frame()
 stateThresholdsByWindow = data.frame()
 
 for (y in rsvWindowYears) {
+  message(paste("State-wide lsiding window:", y))
 
   stateYearObs = stateObsByWindow %>% filter(epiyear==y)
   stateYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=stateYearObs)
@@ -461,7 +460,9 @@ thresholdsByCountyYear = data.frame()
 slidingStratUnprotectedSimByCountyYear = data.frame()
 
 for (c in levels(obsByCountyYear$county)) {
+  message(paste("Regional sliding window:", c))
   for (y in rsvEpiYears) {
+    message(paste("Regional sliding window:", y))
     countyYearObs = obsByCountyYear %>% filter(county==c, epiyear==y)
     countyYearModel = gam(rsv ~ s(time, k=4, bs="cp", m=3), family=poisson, data=countyYearObs)
 
