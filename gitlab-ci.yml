@@ -8,6 +8,7 @@ variables:
   TEX_DIR: "Paper"
   KNITR_OUTPUT_DIR: "knitr"
   OVERLEAF_ARTIFACTS_DIR: "overleaf"
+  COMPOSE_FILES: --file docker-compose.yml --file docker-compose-gitlab.yml
   
 .docker:
   tags:
