@@ -1,4 +1,5 @@
 <<map, results='hide'>>=
+    library(mapproj)
     tikz(sprintf("%s/map.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
     US.counties = readOGR(dsn="../Maps/cb_2016_us_county_5m",layer="cb_2016_us_county_5m")
     US.counties = US.counties[US.counties$STATEFP == "09",]
@@ -153,7 +154,7 @@
         
     spanLabels = legendLabels(c("AAP-recommended prophylaxis", "RSV season"), leading=1)
     	
-    ggplot(data) +
+    p = ggplot(data) +
         theme_light(base_size=plotTextBaseSize) +
         geom_ribbon(aes(ymin=rsv.cum.fit.lower, ymax=rsv.cum.fit.upper, x=time), fill=grey(.25)) +
     	  geom_segment(aes(x=start, y=lineYmin, xend=start, yend=lineYmax, color=variable), data=spans, size=.375) + 
@@ -179,7 +180,13 @@
             axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
             legend.position="bottom"
         )
+	p
     
+    dev.off()
+
+    tikz(sprintf("%s/coverageByRegionAAPInsight-Standalone.tex", figuresDir), width=16/3, height=3, pointsize=10, standAlone=TRUE)
+	p = p + facet_wrap(~county, ncol=3, labeller=labeller(county=countyLabels))
+	p
     dev.off()
 @
 

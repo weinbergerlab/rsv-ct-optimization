@@ -1,6 +1,0 @@
-[submodule "Analysis/outbreak-inference"]
-	path = Analysis/outbreak-inference
-	url = ../outbreak-inference.git
-[submodule "build/docker"]
-	path = build/docker
-	url = ../gitlab-docker-bootstrap.git

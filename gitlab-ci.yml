@@ -1,75 +1,71 @@
-include:
-  - project: airbornemint/gitlab-docker-bootstrap
-    file: "docker-setup.yml"
-
 stages:
-  - docker-setup
+  - tools
   - knitr
-  - overleaf
-  - tex
+  - exports
+  - pdf
   
 variables:
-  TEX_DIR: "Paper" # Relative to build root
-  TEX_OUTPUT_DIR: "." # Relative to TEX_DIR
-  OVERLEAF_ARTIFACTS_DIR: "overleaf" # Relative to build root
-  KNITR_CACHE_DIR: ".cache/knitr" # Relative to TEX_DIR
+  TEX_DIR: "Paper"
+  KNITR_OUTPUT_DIR: "knitr"
+  OVERLEAF_ARTIFACTS_DIR: "overleaf"
+  COMPOSE_FILES: --file docker-compose.yml --file docker-compose-gitlab.yml
   
 .docker:
-  image: registry.gitlab.com/${CI_PROJECT_PATH}/commit/default:rev-${CI_COMMIT_SHORT_SHA}
   tags:
-    - docker
+      - docker
+  services:
+      - docker:18.09.7-dind
+  variables:
+      DOCKER_HOST: tcp://docker:2375/
+      DOCKER_DRIVER: overlay2
+      DOCKER_TLS_CERTDIR: ""
+  image: ${CI_REGISTRY}/ci-utilities/ci-commands/gitlab-docker-compose-ci
+
+tools:
+  stage: tools
+  extends: 
+    - .docker
+  script:
+    - gitlab-docker-compose ${COMPOSE_FILES} --cache-from main paper-tools
 
 knitr:
-  extends: .docker
   stage: knitr
+  extends: 
+    - .docker
   tags:
     - docker-mem:3
-  cache:
-    key: "$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${TEX_DIR}/${KNITR_CACHE_DIR}"
   script:
-    - printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
-    - cd "${TEX_DIR}"
-    - Rscript -e "knitr::opts_chunk\$set(cache.path='${KNITR_CACHE_DIR}/'); knitr::knit('RSVOptimization.rnw')"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} run paper-knit
+  cache:
+    key: knitr
+    paths:
+      - ${TEX_DIR}/cache
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
     paths:
-      - "${TEX_DIR}/RSVOptimization.tex"
-      - "${TEX_DIR}/figures"
+      - "${KNITR_OUTPUT_DIR}"
 
 overleaf:
   extends: .docker
-  stage: overleaf
+  stage: exports
   script:
     - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
-    - cp -r "${TEX_DIR}/RSVOptimization.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/RSVOptimization.bib" "${TEX_DIR}/${TEX_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+    - cp -r "${KNITR_OUTPUT_DIR}/RSVOptimization.tex" "${TEX_DIR}/structure.tex" "${TEX_DIR}/RSVOptimization.bib" "${KNITR_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
 
-tex:
-  extends: .docker
-  stage: tex
+pdf:
+  stage: pdf
+  extends: 
+    - .docker
   script:
-    - cd "${OVERLEAF_ARTIFACTS_DIR}"
-    - lualatex RSVOptimization.tex
-    - bibtex RSVOptimization
-    - lualatex RSVOptimization.tex
-    - lualatex RSVOptimization.tex
-    - mv "RSVOptimization.pdf" "${CI_PROJECT_DIR}"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} run paper-pdf
+    - mv "${OVERLEAF_ARTIFACTS_DIR}/RSVOptimization.pdf" .
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
     paths:
       - "RSVOptimization.pdf"
-      
-
-# Set up docker image for the rest of the build, keyed off commit ID
-docker-setup:
-  extends: .docker-setup
-  stage: docker-setup
-  tags: 
-    - dind-mem:2
-  variables:
-    BUILD_DOCKER_CONTEXT: build/default

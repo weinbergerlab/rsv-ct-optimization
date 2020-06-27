@@ -16,3 +16,8 @@ Analysis/plots/**/*.pdf
 /Paper/RSVOptimization.log
 /Paper/RSVOptimization.out
 /Paper/RSVOptimization.synctex.gz
+.Rproj.user
+/knitr
+/overleaf
+/overleaf backprop
+/Paper/RSVOptimization.run.xml

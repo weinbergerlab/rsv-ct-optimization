@@ -2,7 +2,7 @@
 library(reshape)
 library(dplyr)
 library(mgcv)
-library(outbreakinference)
+library(pspline.inference)
 library(zipcode)
 library(ggplot2)
 library(easyGgplot2)
@@ -113,7 +113,7 @@ startDate = min(dataset$adate)
 endDate = max(dataset$adate)
 
 rsvTime = dataset$epiweek
-modelTime = seq(min(rsvTime) - 1 + eps, max(rsvTime), eps)
+modelTime = data.frame(time=seq(min(rsvTime) - 1 + eps, max(rsvTime), eps))
 
 # *** Prophyaxis assessment helpers
 
@@ -191,23 +191,15 @@ ppxSlidingStrategies = function(c=NULL, y=NULL) {
 # *** Prophylaxis coverage estimation
 
 # Estimate % left unprotected by prophylaxis strategy
-outbreak.calc.unprotected = function(strategies) {
-  function(model, params, time) {
-    # Get model predictions for given (randomized) param values
-    time = time + 0.5
-    predictors = model %>% predict(data.frame(time=time), type="lpmatrix")
-    fit = predictors %*% params
-
-    # Map spline fit back to data
-    fit = fit %>% model$family$linkinv()
-
+pspline.outbreak.unprotected = function(strategies) {
+  function(model, data) {
     # Calculate total # of unprotected cases for each strategy
     unprotected = as.data.frame(lapply(strategies, function(strat) {
-      sum(fit * (1 - sapply(time, strat)))
+      sum(data$rsv * (1 - sapply(data$time, strat)))
     }))
 
     # Calculate total # of cases
-    total = sum(fit)
+    total = sum(data$rsv)
 
     unprotected %>%
       rename_all(list(
@@ -235,20 +227,18 @@ stateObs = dataset %>%
 stateModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=stateObs)
 
 statePred = stateModel %>%
-  predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
+  predict(type="response", newdata=modelTime, se.fit=TRUE)
 
-statePred = modelTime %>%
+statePred = stateModel %>%
+  pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases.relative, samples=simulations) %>%
   cbind(data.frame(rsv.fit=statePred$fit, rsv.fit.se=statePred$se.fit)) %>%
-  cbind(stateModel %>%
-    outbreak.predict.timeseries(modelTime, outbreak.calc.cum(), nsim=simulations)
-  ) %>%
-  rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median)
+  rename(rsv.cum.fit.lower=rsv.cumrel.lower, rsv.cum.fit.upper=rsv.cumrel.upper, rsv.cum.fit=rsv.cumrel.median)
 
 stateThresholds = stateModel %>%
-  outbreak.predict.scalars(
+  pspline.estimate.scalars(
     modelTime,
-    outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold),
-    nsim=simulations
+    pspline.outbreak.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold),
+    samples=simulations
   )
 
 # *** Regional all-years analysis
@@ -272,47 +262,47 @@ fixedStratDescByCountyRounding = data.frame()
 fixedStratUnprotectedByCounty = data.frame()
 
 for (c in levels(obsByCounty$county)) {
+  message(paste("Regional all-years:", c))
   countyObs = obsByCounty %>% filter(county==c)
   countyModel = gam(rsv ~ s(time, k=20, bs="cp", m=3), family=poisson, data=countyObs)
 
   countyPred = countyModel %>%
-    predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
+    predict(type="response", newdata=modelTime, se.fit=TRUE)
 
-  countyPred = data.frame(time=modelTime) %>%
-    cbind(data.frame(rsv.fit=countyPred$fit, rsv.fit.se=countyPred$se.fit)) %>%
-    cbind(countyModel %>%
-            outbreak.predict.timeseries(
-              modelTime,
-              outbreak.calc.cum(),
-              nsim=simulations
-            )
+  countyPred = countyModel %>%
+    pspline.estimate.timeseries(
+      modelTime,
+      pspline.outbreak.cumcases.relative,
+      samples=simulations
     ) %>%
-    rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
+    cbind(data.frame(rsv.fit=countyPred$fit, rsv.fit.se=countyPred$se.fit)) %>%
+    rename(rsv.cum.fit.lower=rsv.cumrel.lower, rsv.cum.fit.upper=rsv.cumrel.upper, rsv.cum.fit=rsv.cumrel.median) %>%
     mutate(county=factor(c, levels=levels(obsByCounty$county)))
 
   predByCounty = predByCounty %>% rbind(countyPred)
 
   countyThresholds = countyModel %>%
-    outbreak.predict.scalars(
+    pspline.estimate.scalars(
       modelTime,
-      outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold),
-      nsim=simulations
+      pspline.outbreak.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold),
+      samples=simulations
     ) %>%
     mutate(county=factor(c, levels=levels(obsByCounty$county)))
 
   thresholdsByCounty = thresholdsByCounty %>% rbind(countyThresholds)
 
   for (rounding in ppxRounding) {
+    message(paste("Regional all-years with rounding:", as.character(rounding)))
     # Separate simulation from confidence intervals in order to use simulation data to get statewide estimates
     countyUnprotectedSim = countyModel %>%
-      outbreak.predict.scalars.sim(
+      pspline.sample.scalars(
         modelTime,
-        outbreak.calc.unprotected(ppxFixedStrategies(c, rounding)),
-        nsim=simulations
+        pspline.outbreak.unprotected(ppxFixedStrategies(c, rounding)),
+        samples=simulations
       )
 
     countyUnprotected = countyUnprotectedSim %>%
-      outbreak.predict.scalars.confints() %>%
+      pspline.confints.scalars(countyModel) %>%
       mutate(county=factor(c, levels=levels(obsByCounty$county)), rounding=rounding)
 
     fixedStratUnprotectedByCounty = fixedStratUnprotectedByCounty %>%
@@ -323,7 +313,7 @@ for (c in levels(obsByCounty$county)) {
         countyUnprotectedSim %>%
         mutate(county=factor(c, levels=levels(obsByCounty$county)), rounding=rounding)
       )
-    
+
     fixedStratDescByCountyRounding = fixedStratDescByCountyRounding %>%
       rbind(
         data.frame(ppxFixedStrategyStart(c, rounding)) %>%
@@ -349,7 +339,7 @@ fixedStratDescStatewide = fixedStratDescByCountyRounding %>%
   ungroup() %>%
   cast(rounding + strat ~ variable) %>%
   mutate(
-    sliding=FALSE, 
+    sliding=FALSE,
     county="all",
     desc=as.character(desc),
     county=factor(county)
@@ -357,16 +347,15 @@ fixedStratDescStatewide = fixedStratDescByCountyRounding %>%
 
 fixedStratUnprotectedStatewide = fixedStratUnprotectedSimByCountyRounding %>%
   filter(county %in% highIncidenceCounties | county == "lowIncidence") %>%
-  group_by(rounding, outbreak.sim) %>%
+  group_by(rounding, pspline.sample) %>%
   summarize_at(vars(contains("total"), contains(".count")), sum) %>%
-  group_by(rounding, outbreak.sim) %>%
+  group_by(rounding, pspline.sample) %>%
   do((function(df) {
     stratNames = names(ppxFixedStrategies())
     for (stratName in stratNames) {
       countName = sprintf("%s.count", stratName)
       fracName = sprintf("%s.frac", stratName)
-      df = df %>%
-        mutate_at(fracName, function(.) { df[[countName]] / df$total })
+      df[[fracName]] = df[[countName]] / df$total
     }
     df
   }) (.)) %>%
@@ -375,7 +364,7 @@ fixedStratUnprotectedStatewide = fixedStratUnprotectedSimByCountyRounding %>%
   do((function(df) {
     df %>%
       select(-rounding, -total, -matches(".count")) %>%
-      outbreak.predict.scalars.confints () %>%
+      pspline.confints.scalars (stateModel) %>%
       mutate(rounding=unique(df$rounding))
   })(.)) %>%
   ungroup() %>%
@@ -420,6 +409,7 @@ statePredByWindow = data.frame()
 stateThresholdsByWindow = data.frame()
 
 for (y in rsvWindowYears) {
+  message(paste("State-wide lsiding window:", y))
 
   stateYearObs = stateObsByWindow %>% filter(epiyear==y)
   stateYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=stateYearObs)
@@ -427,18 +417,19 @@ for (y in rsvWindowYears) {
   stateYearPred = stateYearModel %>%
     predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
 
-  stateYearPred = modelTime %>%
+  stateYearPred = stateYearModel %>%
+    pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases.relative, samples=simulations) %>%
     cbind(data.frame(rsv.fit=stateYearPred$fit, rsv.fit.se=stateYearPred$se.fit)) %>%
-    cbind(stateYearModel %>% outbreak.predict.timeseries(modelTime, outbreak.calc.cum())) %>%
-    rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
+    rename(rsv.cum.fit.lower=rsv.cumrel.lower, rsv.cum.fit.upper=rsv.cumrel.upper, rsv.cum.fit=rsv.cumrel.median) %>%
     mutate(epiyear=y)
 
   statePredByWindow = statePredByWindow %>% rbind(stateYearPred)
 
   stateYearThresholds = stateYearModel %>%
-    outbreak.predict.scalars(
+    pspline.estimate.scalars(
       modelTime,
-      outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold)
+      pspline.outbreak.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold),
+      samples=simulations
     ) %>%
     mutate(epiyear=y)
 
@@ -469,25 +460,28 @@ thresholdsByCountyYear = data.frame()
 slidingStratUnprotectedSimByCountyYear = data.frame()
 
 for (c in levels(obsByCountyYear$county)) {
+  message(paste("Regional sliding window:", c))
   for (y in rsvEpiYears) {
+    message(paste("Regional sliding window:", y))
     countyYearObs = obsByCountyYear %>% filter(county==c, epiyear==y)
     countyYearModel = gam(rsv ~ s(time, k=4, bs="cp", m=3), family=poisson, data=countyYearObs)
 
     countyYearPred = countyYearModel %>%
       predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
 
-    countyYearPred = data.frame(time=modelTime) %>%
+    countyYearPred = countyYearModel %>%
+      pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases.relative, samples=simulations) %>%
       cbind(data.frame(rsv.fit=countyYearPred$fit, rsv.fit.se=countyYearPred$se.fit)) %>%
-      cbind(countyYearModel %>% outbreak.predict.timeseries(modelTime, outbreak.calc.cum(), nsim=simulations)) %>%
-      rename(rsv.cum.fit.lower=lower, rsv.cum.fit.upper=upper, rsv.cum.fit=median) %>%
+      rename(rsv.cum.fit.lower=rsv.cumrel.lower, rsv.cum.fit.upper=rsv.cumrel.upper, rsv.cum.fit=rsv.cumrel.median) %>%
       mutate(county=factor(c, levels=levels(obsByCountyYear$county)), epiyear=y)
 
     predByCountyYear = predByCountyYear %>% rbind(countyYearPred)
 
     countyYearThresholds = countyYearModel %>%
-      outbreak.predict.scalars(
+      pspline.estimate.scalars(
         modelTime,
-        outbreak.calc.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold)
+        pspline.outbreak.thresholds(onset=seasonThreshold, offset=1 - seasonThreshold), 
+        samples=simulations
       ) %>%
       mutate(county=factor(c, levels=levels(obsByCountyYear$county)), epiyear=y)
 
@@ -495,9 +489,10 @@ for (c in levels(obsByCountyYear$county)) {
 
     if (y %in% rsvWindowYears) {
       countyYearUnprotectedSim = countyYearModel %>%
-        outbreak.predict.scalars.sim(
+        pspline.sample.scalars(
           modelTime,
-          outbreak.calc.unprotected(ppxSlidingStrategies(c, y))
+          pspline.outbreak.unprotected(ppxSlidingStrategies(c, y)), 
+          samples=simulations
         ) %>%
         mutate(county=factor(c, levels=levels(obsByCountyYear$county)), epiyear=y)
 
@@ -509,16 +504,15 @@ for (c in levels(obsByCountyYear$county)) {
 # Aggregate sliding strategies over the entire time span
 
 slidingStratUnprotectedByCounty = slidingStratUnprotectedSimByCountyYear %>%
-  group_by(county, outbreak.sim) %>%
+  group_by(county, pspline.sample) %>%
   summarize_at(vars(contains("total"), contains(".count")), sum) %>%
-  group_by(county, outbreak.sim) %>%
+  group_by(county, pspline.sample) %>%
   do((function(df) {
     stratNames = names(ppxSlidingStrategies())
     for (stratName in stratNames) {
       countName = sprintf("%s.count", stratName)
       fracName = sprintf("%s.frac", stratName)
-      df = df %>%
-        mutate_at(fracName, function(.) { df[[countName]] / df$total })
+      df[[fracName]] = df[[countName]] / df$total
     }
     df
   }) (.)) %>%
@@ -526,7 +520,7 @@ slidingStratUnprotectedByCounty = slidingStratUnprotectedSimByCountyYear %>%
   do((function(df) {
     df %>%
       select(-county, -total, -matches(".count")) %>%
-      outbreak.predict.scalars.confints () %>%
+      pspline.confints.scalars(countyModel) %>%
       mutate(county=unique(df$county))
   })(.)) %>%
   ungroup() %>%

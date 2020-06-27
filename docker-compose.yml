@@ -1,0 +1,85 @@
+version: "3.4"
+
+services:
+    ############################################################
+    # Tools for building the paper
+    paper-tools:
+        image: paper-tools:dev
+        build:
+            context: .
+            target: paper-tools
+       
+    ############################################################
+    # Commands for kniting the paper
+    paper-knit:
+        image: paper-tools:dev
+        entrypoint: ["bash", "-c"]
+        command: 
+            - >
+                if [ ! -z "${DATASET_PASSWORD:-}" ] ; then
+                    printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
+                else
+                    ln -s "./ct rsv time series nogpg.csv" "./ct rsv time series.csv"
+                fi
+
+                Rscript -e "
+                knitr::knit(
+                    '${TEX_DIR:-Paper}/RSVOptimization.rnw', 
+                    output='${KNITR_OUTPUT_DIR:-knitr}/RSVOptimization.tex'
+                )"
+
+                mv '${TEX_DIR:-Paper}/figures' '${KNITR_OUTPUT_DIR:-knitr}/figures' 
+        environment:
+            DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
+            TEX_OUTPUT_DIR: "."
+        volumes:
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/${KNITR_OUTPUT_DIR:-knitr}"
+            - "./${TEX_DIR:-Paper}/cache:/paper/cache"
+            - "./ct rsv time series.csv.gpg:/paper/ct rsv time series.csv.gpg"
+            - "./ct rsv time series.csv:/paper/ct rsv time series nogpg.csv" # This is only present for local development
+       
+    ############################################################
+    # Commands for converting figures to PDF and EPS
+    # paper-figures:
+    #     image: paper-tools:dev
+    #     environment:
+    #         KNITR_OUTPUT_DIR: "${KNITR_OUTPUT_DIR:-knitr}"
+    #     command: 
+    #         - |
+    #             cd "${KNITR_OUTPUT_DIR:-knitr}/figures" ;
+    #             find . -name "*.tex" -exec latexmk -pdf {} \;
+    #             find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
+    #             find . -name "*.tif" -exec convert -compress lzw {} {} \;
+    #     volumes:
+    #         - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+
+    ############################################################
+    # Commands for exporting paper for PLOS Comp Biol
+    # Includes inlining the bibliography
+    # paper-plos-comp-biol:
+    #     image: paper-tools:dev
+    #     command: 
+    #         - >
+    #             cd output
+
+    #             latexmk -pdflua 
+    #             -usepretex="\edef\outputvariant{ploscompbiol}" 
+    #             PSplineInference.tex
+
+    #             python3 /tex/export-plos-comp-biol.py PSplineInference.tex
+                
+    #             latexmk -pdflua 
+    #             -usepretex="\edef\outputvariant{ploscompbiol}" 
+    #             PSplineInference.tex
+    #     volumes:
+    #         - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex/output
+
+    ############################################################
+    # Commands for generating our PDF (inline images)
+    paper-pdf:
+        image: paper-tools:dev
+        command: 
+            - cd output; latexmk -pdflua RSVOptimization.tex
+        volumes:
+            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output
+
