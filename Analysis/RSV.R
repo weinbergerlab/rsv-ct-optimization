@@ -195,7 +195,7 @@ pspline.outbreak.unprotected = function(strategies) {
   function(model, data) {
     # Calculate total # of unprotected cases for each strategy
     unprotected = as.data.frame(lapply(strategies, function(strat) {
-      sum(data * (1 - sapply(time, strat)))
+      sum(data$rsv * (1 - sapply(data$time, strat)))
     }))
 
     # Calculate total # of cases
@@ -230,9 +230,9 @@ statePred = stateModel %>%
   predict(type="response", newdata=modelTime, se.fit=TRUE)
 
 statePred = stateModel %>%
-  pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases, samples=simulations) %>%
+  pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases.relative, samples=simulations) %>%
   cbind(data.frame(rsv.fit=statePred$fit, rsv.fit.se=statePred$se.fit)) %>%
-  rename(rsv.cum.fit.lower=rsv.cum.lower, rsv.cum.fit.upper=rsv.cum.upper, rsv.cum.fit=rsv.cum.median)
+  rename(rsv.cum.fit.lower=rsv.cumrel.lower, rsv.cum.fit.upper=rsv.cumrel.upper, rsv.cum.fit=rsv.cumrel.median)
 
 stateThresholds = stateModel %>%
   pspline.estimate.scalars(
@@ -272,11 +272,11 @@ for (c in levels(obsByCounty$county)) {
   countyPred = countyModel %>%
     pspline.estimate.timeseries(
       modelTime,
-      pspline.outbreak.cumcases,
+      pspline.outbreak.cumcases.relative,
       samples=simulations
     ) %>%
     cbind(data.frame(rsv.fit=countyPred$fit, rsv.fit.se=countyPred$se.fit)) %>%
-    rename(rsv.cum.fit.lower=rsv.cum.lower, rsv.cum.fit.upper=rsv.cum.upper, rsv.cum.fit=rsv.cum.median) %>%
+    rename(rsv.cum.fit.lower=rsv.cumrel.lower, rsv.cum.fit.upper=rsv.cumrel.upper, rsv.cum.fit=rsv.cumrel.median) %>%
     mutate(county=factor(c, levels=levels(obsByCounty$county)))
 
   predByCounty = predByCounty %>% rbind(countyPred)
@@ -418,9 +418,9 @@ for (y in rsvWindowYears) {
     predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
 
   stateYearPred = stateYearModel %>%
-    pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases, samples=simulations) %>%
+    pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases.relative, samples=simulations) %>%
     cbind(data.frame(rsv.fit=stateYearPred$fit, rsv.fit.se=stateYearPred$se.fit)) %>%
-    rename(rsv.cum.fit.lower=rsv.cum.lower, rsv.cum.fit.upper=rsv.cum.upper, rsv.cum.fit=rsv.cum.median) %>%
+    rename(rsv.cum.fit.lower=rsv.cumrel.lower, rsv.cum.fit.upper=rsv.cumrel.upper, rsv.cum.fit=rsv.cumrel.median) %>%
     mutate(epiyear=y)
 
   statePredByWindow = statePredByWindow %>% rbind(stateYearPred)
@@ -470,9 +470,9 @@ for (c in levels(obsByCountyYear$county)) {
       predict(type="response", newdata=data.frame(time=modelTime), se.fit=TRUE)
 
     countyYearPred = countyYearModel %>%
-      pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases, samples=simulations) %>%
+      pspline.estimate.timeseries(modelTime, pspline.outbreak.cumcases.relative, samples=simulations) %>%
       cbind(data.frame(rsv.fit=countyYearPred$fit, rsv.fit.se=countyYearPred$se.fit)) %>%
-      rename(rsv.cum.fit.lower=rsv.cum.lower, rsv.cum.fit.upper=rsv.cum.upper, rsv.cum.fit=rsv.cum.median) %>%
+      rename(rsv.cum.fit.lower=rsv.cumrel.lower, rsv.cum.fit.upper=rsv.cumrel.upper, rsv.cum.fit=rsv.cumrel.median) %>%
       mutate(county=factor(c, levels=levels(obsByCountyYear$county)), epiyear=y)
 
     predByCountyYear = predByCountyYear %>% rbind(countyYearPred)
