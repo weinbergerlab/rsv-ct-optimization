@@ -21,3 +21,5 @@ Analysis/plots/**/*.pdf
 /overleaf
 /overleaf backprop
 /Paper/RSVOptimization.run.xml
+/data/ct rsv time series.csv
+/cache

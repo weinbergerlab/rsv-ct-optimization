@@ -23,7 +23,7 @@
 \SetWatermarkLightness{.5}
 \SetWatermarkText{DRAFT 2}
 
-\input{structure.tex}
+\input{paper/structure.tex}
 \usepackage{amssymb}
 \usepackage{wasysym}
 
@@ -43,7 +43,25 @@
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \renewenvironment{knitrout}{\expandafter\comment}{\expandafter\endcomment}
 
-<<knitr, child='Paper.Rnw'>>=
+<<options, echo=FALSE>>=
+    knitr::opts_chunk$set(echo=FALSE, message=FALSE, error=FALSE)
+@
+
+<<load>>=
+knitr::read_chunk("analysis/RSV.R")
+knitr::read_chunk("paper/paper.R")
+@
+
+<<libraries, cache=FALSE>>=
+@
+
+<<external, cache=TRUE>>=
+@
+
+<<paper, warning=FALSE>>=
+@
+    
+<<figures, child='paper/figures.Rnw'>>=
 @
 
 \edef\figuresDir{\Sexpr{figuresDir}}

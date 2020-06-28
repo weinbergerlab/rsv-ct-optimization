@@ -36,11 +36,13 @@ knitr:
     - docker-mem:3
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - mv "${TEX_DIR}/cache" cache
     - docker-compose ${COMPOSE_FILES} run paper-knit
   cache:
     key: knitr
     paths:
       - ${TEX_DIR}/cache
+      - cache
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
     paths:
