@@ -14,7 +14,11 @@ library(maps)
 data(zipcode)
 set.seed(0)
 
-simulations = 2000
+if (Sys.getenv("KNITR_DRAFT_MODE", "") != "") {
+  simulations = 5
+} else {
+  simulations = 2000
+}
 
 # *** Data munging helpers
 
@@ -45,7 +49,7 @@ ppxRounding = c(0, 1, 2, 4)
 # *** Load / munge data
 
 # Load data
-admissions = fread("../ct rsv time series.csv", sep=",", header=TRUE, colClasses=c("patzip"="character"))
+admissions = fread("data/ct rsv time series.csv", sep=",", header=TRUE, colClasses=c("patzip"="character"))
 
 epiyear = function(date) {
   ifelse(month(date) > 6, year(date), year(date) - 1)
@@ -78,7 +82,7 @@ dataset = dataset %>%
   left_join(zipcode %>% select(zip, state), by=c("patzip"="zip")) %>%
   filter(state=="CT")
 # Add county based on zipcode
-countyByZip = fread("../ct counties.csv", sep=",", header=TRUE, colClasses=c("zip"="character"))
+countyByZip = fread("data/ct counties.csv", sep=",", header=TRUE, colClasses=c("zip"="character"))
 counties = countyByZip %>% select(county) %>% distinct()
 dataset = dataset %>% inner_join(countyByZip, by=c("patzip"="zip"))
 
@@ -409,7 +413,7 @@ statePredByWindow = data.frame()
 stateThresholdsByWindow = data.frame()
 
 for (y in rsvWindowYears) {
-  message(paste("State-wide lsiding window:", y))
+  message(paste("State-wide sliding window:", y))
 
   stateYearObs = stateObsByWindow %>% filter(epiyear==y)
   stateYearModel = gam(rsv ~ s(time, k=5, bs="cp", m=3), family=poisson, data=stateYearObs)

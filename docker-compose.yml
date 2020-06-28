@@ -13,30 +13,33 @@ services:
     # Commands for kniting the paper
     paper-knit:
         image: paper-tools:dev
-        entrypoint: ["bash", "-c"]
+        entrypoint: ["bash", "-e", "-c"]
         command: 
             - >
                 if [ ! -z "${DATASET_PASSWORD:-}" ] ; then
-                    printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "ct rsv time series.csv" --decrypt "ct rsv time series.csv.gpg"
+                    printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "data/ct rsv time series.csv" --decrypt "data/ct rsv time series.csv.gpg"
                 else
-                    ln -s "./ct rsv time series nogpg.csv" "./ct rsv time series.csv"
+                    ln -s "./ct rsv time series nogpg.csv" "./data/ct rsv time series.csv"
                 fi
+
+                mkdir -p paper/figures
 
                 Rscript -e "
                 knitr::knit(
-                    '${TEX_DIR:-Paper}/RSVOptimization.rnw', 
+                    'RSVOptimization.rnw', 
                     output='${KNITR_OUTPUT_DIR:-knitr}/RSVOptimization.tex'
                 )"
 
-                mv '${TEX_DIR:-Paper}/figures' '${KNITR_OUTPUT_DIR:-knitr}/figures' 
+                mv 'paper/figures' '${KNITR_OUTPUT_DIR:-knitr}/figures' 
         environment:
             DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
             TEX_OUTPUT_DIR: "."
+            KNITR_DRAFT_MODE: "${KNITR_DRAFT_MODE:-TRUE}"
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/${KNITR_OUTPUT_DIR:-knitr}"
-            - "./${TEX_DIR:-Paper}/cache:/paper/cache"
-            - "./ct rsv time series.csv.gpg:/paper/ct rsv time series.csv.gpg"
-            - "./ct rsv time series.csv:/paper/ct rsv time series nogpg.csv" # This is only present for local development
+            - "./cache:/paper/cache"
+            - "./data/ct rsv time series.csv.gpg:/paper/data/ct rsv time series.csv.gpg"
+            - "./data/ct rsv time series.csv:/paper/data/ct rsv time series nogpg.csv" # This is only present for local development
        
     ############################################################
     # Commands for converting figures to PDF and EPS

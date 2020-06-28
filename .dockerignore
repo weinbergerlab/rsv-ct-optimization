@@ -1,8 +1,10 @@
 Dockerfile
-ct rsv time series.csv.gpg
-ct rsv time series.csv
-overleaf backprop
+data/ct rsv time series.csv*
 renv/library
-Paper/cache
-Paper/.texpadtmp
-Analysis/.texpadtmp
+cache
+**/.texpadtmp
+.Rproj.user
+**/.DS_Store
+.*
+!.Rprofile
+*.yml
