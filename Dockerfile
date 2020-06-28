@@ -27,6 +27,7 @@ RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends \
 	texlive-bibtex-extra \
 	texlive-fonts-extra \
 	texlive-pictures \
+	lmodern \
 	latexmk
 
 RUN tlmgr init-usertree
