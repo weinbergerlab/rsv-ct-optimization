@@ -22,7 +22,6 @@ services:
                     ln -s "./ct rsv time series nogpg.csv" "./data/ct rsv time series.csv"
                 fi
 
-                mkdir -p figures
                 mkdir -p paper/figures
 
                 Rscript -e "
@@ -31,7 +30,7 @@ services:
                     output='${KNITR_OUTPUT_DIR:-knitr}/RSVOptimization.tex'
                 )"
 
-                mv 'figures' '${KNITR_OUTPUT_DIR:-knitr}/figures' 
+                mv 'paper/figures' '${KNITR_OUTPUT_DIR:-knitr}/figures' 
         environment:
             DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
             TEX_OUTPUT_DIR: "."
