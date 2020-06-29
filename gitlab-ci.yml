@@ -5,7 +5,7 @@ stages:
   - pdf
   
 variables:
-  TEX_DIR: "Paper"
+  TEX_DIR: "paper"
   KNITR_OUTPUT_DIR: "knitr"
   OVERLEAF_ARTIFACTS_DIR: "overleaf"
   COMPOSE_FILES: --file docker-compose.yml --file docker-compose-gitlab.yml
