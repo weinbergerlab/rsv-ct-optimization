@@ -34,6 +34,8 @@ knitr:
     - .docker
   tags:
     - docker-mem:3
+  variables:
+    KNITR_DRAFT_MODE: "FALSE"
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run paper-knit
