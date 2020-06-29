@@ -50,8 +50,9 @@ overleaf:
   extends: .docker
   stage: exports
   script:
-    - mkdir "${OVERLEAF_ARTIFACTS_DIR}"
-    - cp -r "${KNITR_OUTPUT_DIR}/RSVOptimization.tex" "${TEX_DIR}/structure.tex" "RSVOptimization.bib" "${KNITR_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+    - mkdir "${OVERLEAF_ARTIFACTS_DIR}/${TEX_DIR}"
+    - cp -r "${KNITR_OUTPUT_DIR}/RSVOptimization.tex" "RSVOptimization.bib" "${KNITR_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
+    - cp -r "${TEX_DIR}/structure.tex" "${OVERLEAF_ARTIFACTS_DIR}/${TEX_DIR}"
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
