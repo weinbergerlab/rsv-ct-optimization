@@ -14,7 +14,7 @@ library(maps)
 data(zipcode)
 set.seed(0)
 
-if (Sys.getenv("KNITR_DRAFT_MODE", "") != "") {
+if (as.logical(Sys.getenv("KNITR_DRAFT_MODE", "FALSE"))) {
   simulations = 5
 } else {
   simulations = 2000
