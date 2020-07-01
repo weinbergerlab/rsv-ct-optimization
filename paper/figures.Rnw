@@ -97,7 +97,7 @@
         geom_point(aes(y=frac.median, x=county), size=.75) + 
         scale_y_continuous(labels=latexPercent, limits=c(0.88, 1), breaks=seq(0, 1, by=0.04), expand=c(0.05, 0)) +
         scale_x_discrete(labels=countyLabelsShort) + 
-        labs(y="Preventable fraction") +
+        labs(y="Preventable fraction, median (95% CI)") +
         theme(
             panel.grid.major.x=element_blank(),
             axis.title.x=element_blank(),
@@ -228,7 +228,7 @@
             position=position_dodge(.5)
         ) + 
         geom_point(aes(y=frac.median, x=county, color=strat, shape=strat), position=position_dodge(.5), size=.75) +
-        labs(y="Preventable fraction", color="Prophylaxis regimen") +
+        labs(y="Preventable fraction, median (95% CI)", color="Prophylaxis regimen") +
         guides(color=guide_legend(keywidth=1, keyheight=1.5, ncol=3)) + 
         scale_x_discrete(labels=countyLabels) + 
         theme(
@@ -293,7 +293,7 @@
             position=position_dodge(.5)
         ) + 
         geom_point(aes(y=frac.median, x=rounding, color=strat.isRepeat, shape=strat.isRepeat), position=position_dodge(.5), size=0.75, fill="white") +
-        labs(x="Calendrical rounding", y="Preventable fraction") +
+        labs(x="Calendrical rounding", y="Preventable fraction, median (95% CI)") +
         theme(
             legend.position="bottom",
             legend.key=element_rect(fill="white"),
@@ -338,7 +338,7 @@
             position=position_dodge(.5)
         ) + 
         geom_point(aes(y=frac.median, x=county, color=strat, shape=strat), position=position_dodge(.5), size=.75) +
-        labs(y="Preventable fraction") +
+        labs(y="Preventable fraction, median (95% CI)") +
         guides(color=guide_legend(keywidth=1, keyheight=1.5, ncol=3)) + 
         scale_x_discrete(labels=countyLabels) + 
         theme(

@@ -249,7 +249,7 @@ Statewide, our model estimates that \Sexpr{regionStrategyCoverage("all", "aap", 
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionAAP.tex}
-\caption[County-level variation in the fraction of RSV hospitalizations occurring while the AAP-recommended RSV prophylaxis is active]{County-level variation in the preventable fraction of RSV hospitalizations according to AAP guidelines. The percentage of RSV hospitalizations occurring while protection by palivizumab --- administered per the AAP guidelines ---  is active is plotted for each geographic region in Connecticut. TODO Bars = 95\% CI.}
+\caption[County-level variation in the fraction of RSV hospitalizations occurring while the AAP-recommended RSV prophylaxis is active]{County-level variation in the preventable fraction of RSV hospitalizations according to AAP guidelines. The percentage of RSV hospitalizations occurring while protection by palivizumab --- administered per the AAP guidelines ---  is active is plotted for each geographic region in Connecticut.}
 \label{fig:coverageByRegionAAP}
 \end{center}
 \end{figure}
@@ -359,7 +359,7 @@ After we applied weekly, biweekly, and monthly rounding to start and end dates o
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRoundingRegimen.tex}
-\caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance. The preventable fraction (i.e. the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection) is plotted for TODO Our results show that longer rounding intervals diminish the benefits of alternative regimens over the AAP-recommended regimen. Hollow plot markers ($\raisebox{1pt}{\Circle}$, $\square$, and $\triangle$) denote a prophylaxis strategy which, as a result of rounding, is identical to another, and therefore does not provide additional benefit.}
+\caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance. The preventable fraction (i.e. the fraction of all RSV hospitalizations occurring while the prophylaxis regimen offers protection) is plotted for each prophylaxis regimen and for each rounding interval. Our results show that longer rounding intervals diminish the benefits of alternative regimens over the AAP-recommended regimen. Hollow plot markers ($\raisebox{1pt}{\Circle}$, $\square$, and $\triangle$) denote a prophylaxis strategy which, as a result of rounding, is identical to another, and therefore does not provide additional benefit.}
 \label{fig:coverageByRoundingRegimen}
 \end{center}
 \end{figure}
