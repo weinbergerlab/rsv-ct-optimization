@@ -158,9 +158,7 @@ We defined an RSV-associated hospitalization in Connecticut to be a hospital sta
     \item the hospital stay was associated with ICD-9-CM diagnosis code \texttt{079.6} (RSV), \texttt{466.11} (acute bronchiolitis due to RSV), or \texttt{480.1} (pneumonia due to RSV).
 \end{itemize}
 
-We designated epidemiological years as beginning in the first full week of July, in order to accommodate the timing of RSV peaks (which span two calendar years). Due to changes in diagnostic coding, we excluded data prior to \Sexpr{formatMonth(startDate)}; we similarly excluded data after \Sexpr{formatMonth(endDate)} due to incompleteness of data for the 2013-14 epidemiological year. Using the weekly hospitalization data, we identified \Sexpr{prettyNum(nrow(dataset), big.mark=",")} RSV-associated hospitalizations in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)} (inclusive).
-
-% TODO patient age
+We designated epidemiological years as beginning in the first full week of July, in order to accommodate the timing of RSV peaks (which span two calendar years). Due to changes in diagnostic coding, we excluded data prior to \Sexpr{formatMonth(startDate)}; we similarly excluded data after \Sexpr{formatMonth(endDate)} due to incompleteness of data for the 2013-14 epidemiological year. Using the weekly hospitalization data, we identified \Sexpr{prettyNum(nrow(dataset %>% filter(rsv==1)), big.mark=",")} RSV-associated hospitalizations among \Sexpr{prettyNum(nrow(dataset), big.mark=",")} total hospitalizations of patients <2 years old in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)} (inclusive).
 
 The study was approved by the Human Investigation Committees at Yale University and the CT DPH. The authors assume full responsibility for analyses and interpretation of the data obtained from CT DPH.
 
