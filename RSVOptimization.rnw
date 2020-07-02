@@ -185,7 +185,7 @@ We chose county-level aggregation with an eye towards using this data to inform 
 
 \subsection{Analysis approach}
 
-Our goal was to construct a model of annual RSV incidence that allowed us to estimate characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data and used resampling to obtain confidence intervals. This was performed using the \texttt{pspline.inference} package in R, which we developed for this purpose.\cite{methods,package}
+Our goal was to construct a model of annual RSV incidence that allowed us to estimate characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data and used resampling to obtain confidence intervals. This was performed using the \texttt{pspline.inference} package in R, which we developed for this purpose.\cite{psplineInferencePackage,methods}
 
 We defined season onset as the time when cumulative incidence rises beyond \Sexpr{seasonThreshold * 100}\% of the total cumulative incidence, and season offset as the time when cumulative incidence rises beyond \Sexpr{(1 - seasonThreshold) * 100}\% of the total cumulative incidence for an epidemiological year. We aggregated our data by surveillance week across all surveillance years, and estimated RSV season onset and offset for each county.
 
