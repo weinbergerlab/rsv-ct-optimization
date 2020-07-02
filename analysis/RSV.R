@@ -93,9 +93,6 @@ totalRSVByCounty = dataset %>%
   arrange(total_rsv) %>%
   mutate(county=factor(county, county))
 
-totalRSV = sum(dataset$rsv)
-totalYears = max(dataset$epiyear) - min(dataset$epiyear) + 1
-
 rsvCounties = totalRSVByCounty$county
 rsvEpiYears = sort(unique(dataset$epiyear))
 rsvEpiWeekRange = sort(unique(dataset$epiweek))
