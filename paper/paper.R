@@ -116,9 +116,11 @@ latexPercent = function(f) {
   sprintf("%.0f\\%%", f * 100)
 }
 
-onsetOffsetLabeller = labeller(
-  variable=c(`onset` = "RSV season onset, median (95\\% CI)", `offset` = "RSV season offset, median (95\\% CI)")
-)
+onsetOffsetLabeller = as_labeller(function(labels) {
+  sapply(labels, function(label) {
+    list(`onset` = "RSV season onset, median (95\\% CI)", `offset` = "RSV season offset, median (95\\% CI)")[[label]]
+  })
+})
 
 roundingLabels = c(`0` = "No rounding", `1` = "Weekly rounding", `2` = "Biweekly rounding", `4` = "Monthly rounding")
 
@@ -173,10 +175,13 @@ monthBoundaries = breaks.df %>%
 
 epiWeekBreaks = sort(unique(c(monthBoundaries$min, monthBoundaries$max)))
 
+onOffLevels = c("onset", "offset")
+
 onsetOffsetMonthBoundaries = data.frame(i=c(4, 5, 9, 10), variable=c("onset", "onset", "offset", "offset")) %>%
   inner_join(monthBoundaries, by="i") %>%
-  mutate(label=epiWeekLabels[i])
-  
+  mutate(label=epiWeekLabels[i]) %>%
+  mutate(variable=factor(variable, levels=onOffLevels))
+
 legendLabels = function(labels, leading=0, trailing=2) {
   as.vector(sapply(labels, function(label) {
     if(substr(label, 1, 1) == "_") {
