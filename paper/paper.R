@@ -227,3 +227,6 @@ draw_key_vline_small = function(data, params, size) {
     )
   )    
 }
+
+totalRSV = sum(dataset$rsv)
+totalYears = max(dataset$epiyear) - min(dataset$epiyear) + 1
