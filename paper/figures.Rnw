@@ -174,7 +174,6 @@
             panel.grid.major.x=element_blank(),
             panel.grid.minor.x=element_blank(),
             legend.title=element_blank(),
-            axis.title.y=element_blank(),
             axis.ticks.x=element_blank(),
             axis.text.x=element_text(angle=90, hjust=0.5, vjust=0.5),
             legend.position="bottom"
