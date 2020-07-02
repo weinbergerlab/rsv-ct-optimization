@@ -232,7 +232,7 @@ To analyze the effects of year-to-year variation between RSV seasons, we perform
 
 \subsection{Timing of the RSV season varies within the state}
 
-Statewide, the median onset of the RSV season is at week \Sexpr{regionOnset("all")} (\Sexpr{regionOnsetCI("all", level)}), and offset is at week \Sexpr{regionOffset("all")} (\Sexpr{regionOffsetCI("all", level)}).  Fairfield county had the the earliest RSV season, with a median onset at week \Sexpr{regionOnset("Fairfield")} (\Sexpr{regionOnsetCI("Fairfield", level)}). Fairfield also had the latest median offset at week \Sexpr{regionOffset("Fairfield")} (\Sexpr{regionOffsetCI("Fairfield", level)}). Meanwhile, the RSV season in the low-population counties had the latest onset at week \Sexpr{regionOnset("lowIncidence")} (\Sexpr{regionOnsetCI("all", level)}); the season offset in these counties was not different from the statewide median (Figure \ref{fig:seasonByRegion}).
+Statewide, the median onset of the RSV season is at week \Sexpr{regionOnset("all")} (\Sexpr{regionOnsetCI("all", level)}), and offset is at week \Sexpr{regionOffset("all")} (\Sexpr{regionOffsetCI("all", level)}). The earliest season onset occurred in Fairfield county, with median at week \Sexpr{regionOnset("Fairfield")} (\Sexpr{regionOnsetCI("Fairfield", level)}). The latest season offset also occurrent in Fairfield county, with median at week \Sexpr{regionOffset("Fairfield")} (\Sexpr{regionOffsetCI("Fairfield", level)}). Meanwhile, the latest season onset occurred in the low-population counties, with median at week \Sexpr{regionOnset("lowIncidence")} (\Sexpr{regionOnsetCI("all", level)}); the season offset in these counties was not different from the statewide median (Figure \ref{fig:seasonByRegion}).
 
 \begin{figure}
 \begin{center}
