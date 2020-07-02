@@ -117,7 +117,7 @@ latexPercent = function(f) {
 }
 
 onsetOffsetLabeller = labeller(
-  variable=c(`onset` = "RSV season onset, median (95% CI)", `offset` = "RSV season offset, median (95% CI)")
+  variable=c(`onset` = "RSV season onset, median (95\\% CI)", `offset` = "RSV season offset, median (95\\% CI)")
 )
 
 roundingLabels = c(`0` = "No rounding", `1` = "Weekly rounding", `2` = "Biweekly rounding", `4` = "Monthly rounding")
