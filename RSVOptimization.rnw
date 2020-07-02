@@ -147,7 +147,7 @@ Motivated by the AAP's recognition of the significance of spatial variation in f
 
 \subsection{Source of data}
 
-We obtained data consisting of all hospitalizations among children <2 years old in Connecticut from 1996 to 2013 from the Connecticut State Inpatient Database through the Connecticut Department of Public Health (CT DPH). Relevant variables in the data were ZIP code of residence, patient age, ICD-9 defined diagnoses (up to 10 diagnoses per hospital admission), and week and year of hospital admission.
+We obtained data consisting of all hospitalizations among children <2 years old in Connecticut from 1996 to 2013 from the Connecticut State Inpatient Database through the Connecticut Department of Public Health (CT DPH). The relevant variables in the data were ZIP code of residence, patient age, ICD-9 defined diagnoses (up to 10 diagnoses per hospital admission), and week and year of hospital admission.
 
 \subsection{Definitions}
 
