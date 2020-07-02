@@ -143,12 +143,12 @@ countyLabels = c(
   `lowIncidence` = "Low-population counties"
 )
 
-countyLabelsShort = c(
+countyLabelsCompact = c(
   `all` = "Statewide",
-  `New Haven` = "New Haven c.",
-  `Fairfield` = "Fairfield c.",
-  `Hartford` = "Hartford c.",
-  `lowIncidence` = "Low-population c."
+  `New Haven` = "\\begin{tabular}{c}New Haven \\\\ county\\end{tabular}",
+  `Fairfield` = "\\begin{tabular}{c}Fairfield \\\\ county\\end{tabular}",
+  `Hartford` = "\\begin{tabular}{c}Hartford \\\\ county\\end{tabular}",
+  `lowIncidence` = "\\begin{tabular}{c}Low-population \\\\ counties\\end{tabular}"
 )
 
 # .01 to let minor gridlines show through

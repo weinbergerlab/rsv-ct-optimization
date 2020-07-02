@@ -195,7 +195,7 @@ The choice of \Sexpr{seasonThreshold * 100}\% and \Sexpr{(1 - seasonThreshold) *
 
 \begin{samepage}
 
-We estimated the fraction of preventable cases at the state and county level by following the current AAP guidelines or six alternative regimens:
+We compared the current AAP guidelines with six alternative prophylaxis regimens:
 
 \begin{itemize}
     \item \textbf{By current AAP national guidelines}: These guidelines recommend RSV prophylaxis with 5 monthly doses of palivizumab, starting in November, for all high-risk infants in their first year of life; in the second year of life, palivizumab is only recommended for some subgroups. For simplicity, we assumed that protection by palivizumab begins on November 15th. 
@@ -214,8 +214,8 @@ In all these regimens, prophylaxis consists of five monthly doses of palivizumab
 We defined the fraction of all RSV cases that is preventable by a prophylaxis regimen (``preventable fraction'') to be the ratio of 
 
 \begin{itemize}
-\item the number of RSV-associated hospitalizations that occur while the prophylaxis regimen offers protection to those who receive prophylaxis as scheduled, and
-\item the total number of RSV-associated hospitalizations.
+\item the number of RSV-associated hospitalizations that occur in a given region (state or county) while the prophylaxis regimen offers protection to those who receive prophylaxis as scheduled, and
+\item the total number of RSV-associated hospitalizations that occur in the same region during a single epidemiologic year.
 \end{itemize}
 
 %TODO citation needed re small subgroup
