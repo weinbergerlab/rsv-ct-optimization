@@ -366,15 +366,10 @@
     },
     "pspline.inference": {
       "Package": "pspline.inference",
-      "Version": "0.10",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "pspline.inference",
-      "RemoteUsername": "airbornemint",
-      "RemoteRef": "v0.10",
-      "RemoteSha": "07399591e4a4dcbc33a6fdc32c4f935ef6838739",
-      "Hash": "4aa9ea08b6eeef947bb7fc3d50f82590"
+      "Version": "0.23",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "58c2318c0353ac34e4076f5626498810"
     },
     "purrr": {
       "Package": "purrr",
