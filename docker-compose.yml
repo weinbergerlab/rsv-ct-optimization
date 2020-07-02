@@ -28,6 +28,7 @@ services:
 
                 mv 'paper/figures' '${KNITR_OUTPUT_DIR:-knitr}/figures' 
         environment:
+            CI_JOB_TOKEN: "${CI_JOB_TOKEN:-}"
             DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
             TEX_OUTPUT_DIR: "."
             KNITR_DRAFT_MODE: "${KNITR_DRAFT_MODE:-TRUE}"
