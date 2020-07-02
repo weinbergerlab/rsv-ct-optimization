@@ -183,7 +183,7 @@ We chose county-level aggregation with an eye towards using this data to inform 
 
 \subsection{Analysis approach}
 
-Our goal was to construct a model of annual RSV incidence that allowed us to estimate characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data and used resampling to obtain confidence intervals. This was performed using the \texttt{pspline.inference} package in R, which we developed for this purpose.\cite{methods,package}
+Our goal was to construct a model of annual RSV incidence that allowed us to estimate characteristics of RSV seasons, such as season onset, season offset, and preventable fraction of a prophylaxis regimen. To that end, we fit smooth curves through annual RSV hospitalization data and used resampling to obtain confidence intervals. This was performed using the \texttt{pspline.inference} package in R, which we developed for this purpose.\cite{psplineInferencePackage,methods}
 
 We defined season onset as the time when cumulative incidence rises beyond \Sexpr{seasonThreshold * 100}\% of the total cumulative incidence, and season offset as the time when cumulative incidence rises beyond \Sexpr{(1 - seasonThreshold) * 100}\% of the total cumulative incidence for an epidemiological year. We aggregated our data by surveillance week across all surveillance years, and estimated RSV season onset and offset for each county.
 
@@ -193,7 +193,7 @@ The choice of \Sexpr{seasonThreshold * 100}\% and \Sexpr{(1 - seasonThreshold) *
 
 \begin{samepage}
 
-We estimated the fraction of preventable cases at the state and county level by following the current AAP guidelines or six alternative regimens:
+We compared the current AAP guidelines with six alternative prophylaxis regimens:
 
 \begin{itemize}
     \item \textbf{By current AAP national guidelines}: These guidelines recommend RSV prophylaxis with 5 monthly doses of palivizumab, starting in November, for all high-risk infants in their first year of life; in the second year of life, palivizumab is only recommended for some subgroups. For simplicity, we assumed that protection by palivizumab begins on November 15th. 
@@ -212,8 +212,8 @@ In all these regimens, prophylaxis consists of five monthly doses of palivizumab
 We defined the fraction of all RSV cases that is preventable by a prophylaxis regimen (``preventable fraction'') to be the ratio of 
 
 \begin{itemize}
-\item the number of RSV-associated hospitalizations that occur while the prophylaxis regimen offers protection to those who receive prophylaxis as scheduled, and
-\item the total number of RSV-associated hospitalizations.
+\item the number of RSV-associated hospitalizations that occur in a given region (state or county) while the prophylaxis regimen offers protection to those who receive prophylaxis as scheduled, and
+\item the total number of RSV-associated hospitalizations that occur in the same region during a single epidemiologic year.
 \end{itemize}
 
 %TODO citation needed re small subgroup
@@ -252,14 +252,12 @@ Statewide, our model estimates that \Sexpr{regionStrategyCoverage("all", "aap", 
 \end{center}
 \end{figure}
 
-% Separate paragraph because observation above, cause below
-
-This is caused by temporal misalignment between the RSV season (delineated by median \Sexpr{seasonThreshold * 100}\%  onset and \Sexpr{(1 - seasonThreshold) * 100}\% offset in each county) and the timing of the AAP-recommended prophylaxis regimen (Figure \ref{fig:coverageByRegionAAPInsight}). Fairfield county, owing to its early season onset, sees disproportionately more cases before prophylaxis administration begins; on the other hand, the low-population counties, owing to their late season onset and relatively shorter RSV seasons, see almost all of their RSV cases within the prophylaxis window.
+The county-to-county to variation in the protected fraction of the AAP-recommended prophylaxis is caused by temporal misalignment between the RSV season (delineated by median \Sexpr{seasonThreshold * 100}\% onset and \Sexpr{(1 - seasonThreshold) * 100}\% offset in each county) and the timing of the AAP-recommended prophylaxis regimen (Figure \ref{fig:coverageByRegionAAPInsight}). Fairfield county, owing to its early season onset, sees disproportionately more cases before prophylaxis administration begins; on the other hand, the low-population counties, owing to their late season onset and relatively shorter RSV seasons, see almost all of their RSV cases within the prophylaxis window.
 
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionAAPInsight.tex}
-\caption[County-level variation in the relative timing of the RSV season in Connecticut and the AAP-recommended prophylaxis regimen]{County-level variation in the relative timing of the RSV season in Connecticut and the AAP-recommended prophylaxis regimen, showing the gap between season onset and prophylaxis start date, notable particularly in Fairfield county}
+\caption[County-level variation in the relative timing of the RSV season in Connecticut and the AAP-recommended prophylaxis regimen]{County-level variation in the relative timing of the RSV season in Connecticut and the AAP-recommended prophylaxis regimen. Comparison of the RSV season (red bar) and the prophylaxis window (purple bar) shows the misalignment between the two, notable particularly in Fairfield county.}
 \label{fig:coverageByRegionAAPInsight}
 \end{center}
 \end{figure}
@@ -271,7 +269,7 @@ The six spatially-adjusted prophylaxis regimens yield results in all counties th
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionRegimen.tex}
-\caption[Comparison of six spatially adjusted RSV prophylaxis regimens to the AAP-recommended regimen]{Comparison of six spatially adjusted RSV prophylaxis regimens to the AAP-recommended regimen, showing statewide superiority and county-level non-inferiority of spatially adjusted regimens. Preventable fraction: the fraction of all RSV-associated hospitalizations occurring while the prophylaxis regimen provides protection}
+\caption[Comparison of six spatially adjusted RSV prophylaxis regimens to the AAP-recommended regimen]{Comparison of six spatially adjusted RSV prophylaxis regimens to the AAP-recommended regimen. Spatially adjusted propxylaxis regimens are either non-inferior (for county-level analysis) or superior (for statewide analysis) to the AAP-recommended regimen. Preventable fraction: the fraction of all RSV-associated hospitalizations occurring while the prophylaxis regimen provides protection}
 \label{fig:coverageByRegionRegimen}
 \end{center}
 \end{figure}
@@ -370,7 +368,7 @@ Our linear regression of median RSV season onset and offset over three-year peri
 \begin{figure}
 \begin{center}
 \input{\figuresDir/onsetOffsetByYear.tex}
-\caption{Annual variability in RSV season onset and offset in Connecticut.}
+\caption{Annual variability in RSV season onset and offset in Connecticut. While season offset has been stable, season onset has shown a statistically significant drift toward an earliear RSV season.}
 \label{fig:onsetOffsetByYear}
 \end{center}
 \end{figure}
@@ -383,7 +381,7 @@ Compared to our county-level all-years analysis, the three regimens based on sta
 \begin{figure}
 \begin{center}
 \input{\figuresDir/coverageByRegionRegimenWithSliding.tex}
-\caption[Comparison of prophylaxis regimens based on all-years data to those based on recent-years data]{Comparison of prophylaxis regimens based on all-years data to those based on recent-years data, showing temporal analysis adds no benefit over spatial analysis alone. Preventable fraction: fraction of RSV hospitalizations occurring while the prophylaxis regimen offers protection}
+\caption[Comparison of prophylaxis regimens based on all-years data to those based on recent-years data]{Comparison of prophylaxis regimens based on all-years data to those based on recent-years data. Recent-years analysis analysis adds no benefit over all-years analysis, for either statewide or county-level analysis. Preventable fraction: fraction of RSV hospitalizations occurring while the prophylaxis regimen offers protection}
 \label{fig:coverageByRegionRegimenWithSliding}
 \end{center}
 \end{figure}
