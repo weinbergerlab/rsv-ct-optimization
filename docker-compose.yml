@@ -16,11 +16,7 @@ services:
         entrypoint: ["bash", "-e", "-c"]
         command: 
             - >
-                if [ ! -z "${DATASET_PASSWORD:-}" ] ; then
-                    printenv DATASET_PASSWORD | gpg --batch --passphrase-fd 0 -o "data/ct rsv time series.csv" --decrypt "data/ct rsv time series.csv.gpg"
-                else
-                    ln -s "./ct rsv time series nogpg.csv" "./data/ct rsv time series.csv"
-                fi
+                source data/fetch-data.sh
 
                 mkdir -p paper/figures
 
@@ -38,8 +34,8 @@ services:
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/${KNITR_OUTPUT_DIR:-knitr}"
             - "./cache:/paper/cache"
-            - "./data/ct rsv time series.csv.gpg:/paper/data/ct rsv time series.csv.gpg"
-            - "./data/ct rsv time series.csv:/paper/data/ct rsv time series nogpg.csv" # This is only present for local development
+            - "${DATA_FETCH_COMMAND:-./data/fetch-dev-data.sh}:/paper/data/fetch-data.sh"
+            - "./data/ct rsv time series.csv:/paper/data/rsv.csv" # This is only present for local development
        
     ############################################################
     # Commands for converting figures to PDF and EPS
