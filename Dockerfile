@@ -47,7 +47,8 @@ FROM tex AS paper-tools
 WORKDIR /paper
 
 RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends \
-	gpg
+	gpg \
+	git-lfs
 
 COPY .Rprofile .Rprofile
 COPY renv renv
