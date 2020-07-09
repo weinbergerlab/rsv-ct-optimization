@@ -1,50 +1,12 @@
 \documentclass[10pt,letter]{article}
-\usepackage{verbatim}
-\usepackage{float}
-\floatplacement{figure}{H}
+%%% end knitr preamble
 
-\usepackage[toc,page]{appendix}
-\renewcommand{\appendixpagename}{Supplements}
-\renewcommand{\appendixname}{Supplements}
+% Do some things differently depending on which variant we're compiling
+\input{paper/preamble.tex}
 
-\usepackage{printlen}
-\usepackage{textcomp}
-\usepackage{setspace}
-
-\usepackage[hidelinks]{hyperref}
-\usepackage[svgnames]{xcolor} % Must go before tikz and before structure.tex
-\usepackage{tikz}
-\usepackage{draftwatermark}
-\SetWatermarkScale{1}
-\SetWatermarkAngle{45}
-\SetWatermarkFontSize{4ex}
-\SetWatermarkHorCenter{12ex}
-\SetWatermarkVerCenter{12ex}
-\SetWatermarkLightness{.5}
-\SetWatermarkText{DRAFT 3}
-
-\input{paper/structure.tex}
-\usepackage{amssymb}
-\usepackage{wasysym}
-
-\usepackage[bf,medium,raggedright,compact]{titlesec}
-\titleformat{\section}{\normalfont\large\bfseries\scshape}{\thesection}{1em}{}
-\titleformat{\subsection}{\normalfont\normalsize\bfseries}{}{0em}{}
-\setcounter{secnumdepth}{3}
-
-\usepackage{hanging}
-\usepackage{graphicx}
-
-\newlength\abstractindent
-\setlength\abstractindent{1in}
-\newcommand{\abstractsection}[1]{\hangpara{\abstractindent}{1}\makebox[1in][l]{\textbf{\textsc{#1}}}}
-\newcommand{\abstractpara}{\hskip\abstractindent\hskip\baseparindent}
-
-\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
-\renewenvironment{knitrout}{\expandafter\comment}{\expandafter\endcomment}
-
+%%% begin knitr output
 <<options, echo=FALSE>>=
-    knitr::opts_chunk$set(echo=FALSE, message=FALSE, error=FALSE)
+    knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, error=FALSE)
 @
 
 <<load>>=
@@ -63,6 +25,7 @@ knitr::read_chunk("paper/paper.R")
     
 <<figures, child='paper/figures.Rnw'>>=
 @
+%%% end knitr output
 
 \edef\figuresDir{\Sexpr{figuresDir}}
 \title{Assessment and optimization of respiratory syncytial virus prophylaxis regimens in Connecticut, \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}}

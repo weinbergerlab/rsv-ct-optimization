@@ -40,18 +40,16 @@ services:
        
     ############################################################
     # Commands for converting figures to PDF and EPS
-    # paper-figures:
-    #     image: paper-tools:dev
-    #     environment:
-    #         KNITR_OUTPUT_DIR: "${KNITR_OUTPUT_DIR:-knitr}"
-    #     command: 
-    #         - |
-    #             cd "${KNITR_OUTPUT_DIR:-knitr}/figures" ;
-    #             find . -name "*.tex" -exec latexmk -pdf {} \;
-    #             find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
-    #             find . -name "*.tif" -exec convert -compress lzw {} {} \;
-    #     volumes:
-    #         - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+    paper-figures:
+        image: paper-tools:dev
+        command: 
+            - |
+                cd knitr/figures
+                find . -name "*.tex" -exec latexmk -pdf {} \;
+                find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
+                find . -name "*.tif" -exec convert -compress lzw {} {} \;
+        volumes:
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/knitr"
 
     ############################################################
     # Commands for exporting paper for PLOS Comp Biol
@@ -76,6 +74,23 @@ services:
 
     ############################################################
     # Commands for generating our PDF (inline images)
+    # Commands for exporting for AAP Pediatrics
+    paper-aap-pediatrics:
+        image: paper-tools:dev
+        command: 
+            - |
+                mkdir -p output/paper
+                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
+                cp -r paper/structure.tex paper/preamble*.tex paper/rtf.sed output/paper
+                cd output
+                # latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
+
+                sed -E -i -f paper/rtf.sed RSVOptimization.tex
+
+                pandoc --verbose --from latex+latex_macros --to rtf --standalone --output RSVOptimization.rtf RSVOptimization.tex
+        volumes:
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
+            - "./${REVIEW_ARTIFACTS_DIR:-rsv-optimization}:/paper/output"
     paper-pdf:
         image: paper-tools:dev
         command: 

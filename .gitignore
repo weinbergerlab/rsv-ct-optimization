@@ -23,3 +23,4 @@ Analysis/plots/**/*.pdf
 /Paper/RSVOptimization.run.xml
 /data/ct rsv time series.csv
 /cache
+/rsv-optimization

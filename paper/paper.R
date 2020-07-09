@@ -14,7 +14,13 @@ figuresDir = paste0(texOutputDir, "/figures")
 if (!dir.exists(figuresDir)) {
   dir.create(figuresDir, recursive=TRUE)
 }
-options(tikzMetricsDictionary=paste0(texOutputDir, '/tikzDictionary.dat'))
+options(
+  tikzMetricsDictionary=paste0(texOutputDir, '/tikzDictionary.dat'),
+  tikzDocumentDeclaration='\\documentclass[tikz]{standalone}',
+  tikzLatexPackages=c(
+    "\\usepackage{tikz}\n"
+  )
+)
 
 inlinePlotWidth = 3.1
 inlinePlotHeight = 2.5

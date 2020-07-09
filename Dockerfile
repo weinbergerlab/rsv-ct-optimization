@@ -56,4 +56,8 @@ COPY renv renv
 RUN Rscript -e "renv::install('devtools')"
 COPY renv.lock renv.lock
 RUN Rscript -e "renv::restore()"
+
+RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends pandoc
 COPY . .
+
+ENTRYPOINT ["/bin/bash", "-e", "-c"]
