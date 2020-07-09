@@ -7,6 +7,7 @@ stages:
 variables:
   KNITR_OUTPUT_DIR: "knitr"
   OVERLEAF_ARTIFACTS_DIR: "overleaf"
+  REVIEW_ARTIFACTS_DIR: rsv-optimization
   COMPOSE_FILES: --file docker-compose.yml --file docker-compose-gitlab.yml
   
 .docker:
@@ -57,6 +58,18 @@ overleaf:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
+
+aap-pediatrics:
+  extends: .docker
+  stage: exports
+  script:
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} run paper-figures
+    - docker-compose ${COMPOSE_FILES} run paper-aap-pediatrics
+  artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
+    paths:
+      - "${REVIEW_ARTIFACTS_DIR}"
 
 pdf:
   stage: pdf
