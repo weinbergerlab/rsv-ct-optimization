@@ -70,7 +70,7 @@ services:
                 cd output
                 # latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
 
-                sed -E -i -f paper/rtf.sed RSVOptimization.tex
+                python3 paper/export-aap-pediatrics.py output/RSVOptimization.tex
 
                 pandoc --verbose --from latex+latex_macros --to rtf --standalone --output RSVOptimization.rtf RSVOptimization.tex
         volumes:
