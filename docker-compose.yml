@@ -40,8 +40,6 @@ services:
             - |
                 cd knitr/figures
                 find . -name "*.tex" -exec latexmk -pdf {} \;
-                find . -name "*.pdf" -exec pdftocairo -png -r 600 -singlefile {} \;
-                find . -name "*.png" -exec convert -compress lzw {} {} \;
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
 
