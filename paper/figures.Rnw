@@ -1,6 +1,6 @@
 <<map, results='hide'>>=
     library(mapproj)
-    tikz(sprintf("%s/map.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
+    tikz(sprintf("%s/map.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10, standAlone=TRUE)
     US.counties = readOGR(dsn="../data/maps/cb_2016_us_county_5m",layer="cb_2016_us_county_5m")
     US.counties = US.counties[US.counties$STATEFP == "09",]
     county.data = US.counties@data %>%
@@ -38,7 +38,7 @@
 @
 
 <<seasonByRegion, results='hide'>>=
-    tikz(sprintf("%s/seasonByRegion.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
+    tikz(sprintf("%s/seasonByRegion.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10, standAlone=TRUE)
     
     data = thresholdsByCounty %>% 
         filter(county %in% countiesForPlots) %>%
@@ -84,7 +84,7 @@
 @
 
 <<coverageByRegionAAP, results='hide'>>=
-    tikz(sprintf("%s/coverageByRegionAAP.tex", figuresDir), width=inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
+    tikz(sprintf("%s/coverageByRegionAAP.tex", figuresDir), width=inlinePlotWidth, height=inlinePlotHeight, pointsize=10, standAlone=TRUE)
     
     data = unprotectedByCounty %>% 
         filter(strat=="aap", rounding==0) %>% 
@@ -108,7 +108,7 @@
 @
 
 <<coverageByRegionAAPInsight, results='hide'>>=
-    tikz(sprintf("%s/coverageByRegionAAPInsight.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight, pointsize=10)
+    tikz(sprintf("%s/coverageByRegionAAPInsight.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight, pointsize=10, standAlone=TRUE)
 
     strat = ppxFixedStrategies("all")[["aap"]]
     
@@ -191,7 +191,7 @@
 <<coverageByRegion, results='hide', warning=FALSE>>=
     GeomErrorbar$draw_key = draw_key_vline_small
 
-    tikz(sprintf("%s/coverageByRegionRegimen.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10)
+    tikz(sprintf("%s/coverageByRegionRegimen.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10, standAlone=TRUE)
     data = unprotectedByCounty %>% 
         filter(county %in% countiesForPlots, rounding==0, sliding==FALSE) %>%
         mutate(strat=factor(strat, levels=c(levels(strat)[1], "_1", "_2", levels(strat)[2:7])))
@@ -238,7 +238,7 @@
 @
 
 <<coverageByRounding, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/coverageByRoundingRegimen.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10)
+    tikz(sprintf("%s/coverageByRoundingRegimen.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10, standAlone=TRUE)
 
     # We are going to de-emphasize some data points, because sometimes different strategies under different rounding end up producing the same prophylaxis schedule, and there is no point in showing all of them equally on the plot. To do this, we consider the left-to-right order in which strategies will appear in the plot, and then de-emphasize any strategy whose schedule is the same as some strategy that appears on its left
     data = unprotectedByCounty %>% 
@@ -301,7 +301,7 @@
 @
 
 <<coverageByRegionWithSliding, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/coverageByRegionRegimenWithSliding.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10)
+    tikz(sprintf("%s/coverageByRegionRegimenWithSliding.tex", figuresDir), width=pagePlotWidth, height=pagePlotHeight * 1.5, pointsize=10, standAlone=TRUE)
     data = unprotectedByCounty %>% 
         filter(county %in% countiesForPlots, rounding==0, !grepl("county", strat)) %>%
         mutate(strat=factor(strat, levels=c(levels(strat)[1], "_1", "_2", levels(strat)[2:4], levels(strat)[8:10])))
@@ -348,7 +348,7 @@
 @
 
 <<onsetOffsetByYear, results='hide', warning=FALSE>>=
-    tikz(sprintf("%s/onsetOffsetByYear.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10)
+    tikz(sprintf("%s/onsetOffsetByYear.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10, standAlone=TRUE)
     data = stateThresholdsByWindow %>% 
         melt(id=c("epiyear")) %>%
         cSplit(c("variable"), c(".")) %>%
