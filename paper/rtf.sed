@@ -1,6 +1,6 @@
 # Change preamble to RTF
 s|paper/preamble\.tex|paper/preamble-rtf.tex|
-# Drop figures (for now)
+# Drop figures
 s|\\input\{\\figuresDir/(.*)\.tex\}||
 # Delete knitr preamble
 s/^(\\documentclass[^\\]*)\\.*$/\1/
