@@ -15,25 +15,19 @@ services:
         image: paper-tools:dev
         entrypoint: ["bash", "-e", "-c"]
         command: 
-            - >
+            - |
                 source data/fetch-data.sh
-
                 mkdir -p paper/figures
-
-                Rscript -e "
-                knitr::knit(
-                    'RSVOptimization.rnw', 
-                    output='${KNITR_OUTPUT_DIR:-knitr}/RSVOptimization.tex'
-                )"
-
-                mv 'paper/figures' '${KNITR_OUTPUT_DIR:-knitr}/figures' 
+                Rscript -e "knitr::knit('RSVOptimization.rnw', output='knitr/RSVOptimization.tex')"
+                rm -rf knitr/figures
+                mv 'paper/figures' 'knitr/figures' 
         environment:
             CI_JOB_TOKEN: "${CI_JOB_TOKEN:-}"
             DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
             TEX_OUTPUT_DIR: "."
             KNITR_DRAFT_MODE: "${KNITR_DRAFT_MODE:-TRUE}"
         volumes:
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/${KNITR_OUTPUT_DIR:-knitr}"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
             - "./cache:/paper/cache"
             - "${DATA_FETCH_COMMAND:-./data/fetch-dev-data.sh}:/paper/data/fetch-data.sh"
             - "./data/ct rsv time series.csv:/paper/data/rsv.csv" # This is only present for local development
@@ -73,7 +67,19 @@ services:
     #         - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex/output
 
     ############################################################
-    # Commands for generating our PDF (inline images)
+    # Commands for exporting for overleaf
+    paper-overleaf:
+        image: paper-tools:dev
+        command: 
+            - |
+                mkdir -p output/paper
+                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
+                cp -r paper/structure.tex paper/preamble*.tex output/paper
+        volumes:
+            - "./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
+
+    ############################################################
     # Commands for exporting for AAP Pediatrics
     paper-aap-pediatrics:
         image: paper-tools:dev
@@ -91,10 +97,16 @@ services:
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
             - "./${REVIEW_ARTIFACTS_DIR:-rsv-optimization}:/paper/output"
+
+    ############################################################
+    # Commands for generating our PDF
     paper-pdf:
         image: paper-tools:dev
         command: 
-            - cd output; latexmk -pdflua RSVOptimization.tex
+            - |
+                cd output
+                latexmk -pdflua RSVOptimization.tex
         volumes:
             - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output
+
 
