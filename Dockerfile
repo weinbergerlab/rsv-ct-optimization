@@ -37,6 +37,7 @@ RUN tlmgr --usermode option repository http://ftp.math.utah.edu/pub/tex/historic
 ARG TEX_PACKAGES=xcharter
 RUN tlmgr install ${TEX_PACKAGES} || tlmgr install ${TEX_PACKAGES}
 RUN updmap-user
+RUN luaotfload-tool -u
 
 ENTRYPOINT ["/bin/bash", "-c"]
 
