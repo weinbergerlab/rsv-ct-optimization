@@ -69,7 +69,8 @@ aap-pediatrics:
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
-      - "${REVIEW_ARTIFACTS_DIR}"
+      - ${REVIEW_ARTIFACTS_DIR}/*.rtf
+      - ${REVIEW_ARTIFACTS_DIR}/Fig*.pdf
 
 pdf:
   stage: pdf
