@@ -93,7 +93,6 @@ knitr::read_chunk("paper/paper.R")
 
 \thispagestyle{firstpage}
 
-\clearpage
 \endgroup
 
 \section*{\centerline{Abstract}}
