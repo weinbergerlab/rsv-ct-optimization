@@ -46,6 +46,27 @@ tex = re.sub(r'(?s)(?=\\phantomsection.*\\addcontentsline\{toc\}\{section\}\{Bib
 # Correct figure references
 tex = re.sub(r'\\ref\{(fig:.*?)\}', lambda m: str(labels.index(m.group(1)) + 1), tex)
 
+# Inline the bibliography
+tex = re.sub(r'\\bibliography\{(.*)\}', lambda f: open(f'output/{f.group(1)}.bbl').read(), tex)
+tex = re.sub(r'(?s)\\begin\{thebibliography\}\{.*?\}(.*)\\end\{thebibliography\}', r'\\section*{References}\n\1\n', tex)
+
+# Rewrite citations by turning each into superscript number
+# First identify them and figure out the order
+citeRE = r'\\cite\{(.*?)\}'
+citations = []
+for citeM in re.finditer(citeRE, tex):
+	for cite in citeM.group(1).split(','):
+		if cite not in citations:
+			citations.append(cite)
+
+for idx, cite in enumerate(citations):
+	citationRE = fr'(\\cite\{{(?:[^\{{\}}]+,)?){ re.escape(cite) }((?:,[^\{{\}}]*?)?\}})'
+	tex = re.sub(citationRE, lambda m: f'{ m.group(1) }{ idx + 1 }{ m.group(2) }', tex)
+	bibRE = fr'(\\bibitem\{{){ re.escape(cite) }(\}})'
+	tex = re.sub(bibRE, lambda m: f'[{ idx + 1 }]', tex)
+
+tex = re.sub(citeRE, r'\\textsuperscript{\1}', tex)
+
 # Misc
 tex = tex.replace(r'\raisebox{1pt}{\Circle}', r'\Circle')
 
