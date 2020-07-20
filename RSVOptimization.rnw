@@ -40,9 +40,9 @@ knitr::read_chunk("paper/paper.R")
 \postauthor{
 	\vspace{10pt}
     \titlesection{Affiliations}{\textsuperscript{a}Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University}
+    \corremail{Address correspondence to}{Ben Artin, ben@artins.org}
     \vspace{10pt} % Space before the rule
 	\par{\HorRule} % Horizontal rule after the title
-    \corremail{Address correspondence to}{Ben Artin, ben@artins.org}
     \corrfull{Address correspondence to}{Ben Artin, 350 George St, Room 2-xxx, New Haven CT, 06519, ben@artins.org, +1 (617) 953 7243}
     \frontmatter{Short title}{Optimization of RSV prophylaxis in Connecticut}
     \frontmatter{Conflict of interest disclosures}{The authors have no conflicts of interest to disclose.}
