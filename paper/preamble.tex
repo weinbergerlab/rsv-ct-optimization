@@ -34,8 +34,10 @@
 
 \usepackage{hanging}
 \usepackage{graphicx}
+\usepackage{indentfirst}
 
-\newcommand{\abstractsection}[1]{\textbf{\textsc{#1:}}}
+\newcommand{\abstractsection}[2]{\par\vspace{0.5\baselineskip}\noindent\textbf{\textsc{#1:}} #2}
+\newcommand{\titlesection}[2]{\par\vspace{0.5\baselineskip}\noindent\textbf{\textsc{#1:}} #2}
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \renewenvironment{knitrout}{\expandafter\comment}{\expandafter\endcomment}
