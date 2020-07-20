@@ -34,10 +34,7 @@
 \usepackage{hanging}
 \usepackage{graphicx}
 
-\newlength\abstractindent
-\setlength\abstractindent{1in}
-\newcommand{\abstractsection}[1]{\hangpara{\abstractindent}{1}\makebox[1in][l]{\textbf{\textsc{#1}}}}
-\newcommand{\abstractpara}{\hskip\abstractindent\hskip\baseparindent}
+\newcommand{\abstractsection}[1]{\textbf{\textsc{#1:}}}
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \renewenvironment{knitrout}{\expandafter\comment}{\expandafter\endcomment}
