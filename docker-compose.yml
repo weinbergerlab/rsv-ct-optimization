@@ -64,7 +64,7 @@ services:
             - |
                 mkdir -p output/paper
                 cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
-                cp -r paper/structure.tex paper/preamble*.tex paper/rtf.sed output/paper
+                cp -r paper/structure.tex paper/preamble*.tex paper/export-aap-pediatrics.py output/paper
                 pushd output
                 # latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
                 popd
