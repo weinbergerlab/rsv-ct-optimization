@@ -104,8 +104,8 @@ knitr::read_chunk("paper/paper.R")
 %\listoftables
 %\clearpage
 
-\listoffigures
-\clearpage
+% \listoffigures
+% \clearpage
 
 \section{Introduction}
 
