@@ -1,6 +1,6 @@
 ############################################################
 # R with packages and libraries we need
-FROM rocker/r-ver AS r
+FROM rocker/r-ver:4.0.2 AS r
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 ### Setup apt packages needed to build the image
