@@ -77,7 +77,6 @@ knitr::read_chunk("paper/paper.R")
 \endgroup
 
 \section*{\centerline{Abstract}}
-\begin{onehalfspacing}
 
 \abstractsection{Background and Objectives}{RSV causes seasonal respiratory infection, with hospitalization rates of up to 50\% in high-risk infants. Palivizumab provides safe and effective, yet costly, immunoprophylaxis. The AAP recommends palivizumab only for high-risk infants and only during the RSV season. Outside of Florida, the current guidelines do not recommend regional adjustments to the timing of the immunoprophylaxis regimen. We investigate the benefits of adjusting the RSV prophylaxis regimen in Connecticut based on spatial variation in the timing of RSV incidence.}
 
@@ -85,7 +84,6 @@ knitr::read_chunk("paper/paper.R")
 
 \abstractsection{Results}{The fraction of RSV hospitalizations preventable by the AAP guidelines varies by county because of variations in epidemic timing. Prophylaxis regimens adjusted for state- or county-level  variation in the timing of RSV seasons are modestly superior to the AAP-recommended regimen. The best alternative strategy yielded a preventable fraction of \Sexpr{regionStrategyCoverage("all", "countyMiddle", 1)} (\Sexpr{regionStrategyCoverageCI("all", "countyMiddle", 1, level)}), compared to \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) for the AAP recommendation.}
 
-\end{onehalfspacing}
 \abstractsection{Conclusions}{Initiating RSV prophylaxis based on state-level data may improve protection compared with the standard AAP recommendations. In Connecticut, county-level recommendations would provide only a modest additional benefit while adding complexity.}
 
 \clearpage
@@ -97,6 +95,8 @@ knitr::read_chunk("paper/paper.R")
 
 % \listoffigures
 % \clearpage
+
+\doublespace
 
 \section{Introduction}
 
