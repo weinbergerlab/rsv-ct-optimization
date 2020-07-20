@@ -39,6 +39,9 @@ RUN tlmgr install ${TEX_PACKAGES} || tlmgr install ${TEX_PACKAGES}
 RUN updmap-user
 RUN luaotfload-tool -u
 
+# This package is not in TexLive 2019
+COPY paper/biblatex2bibitem.sty /root/texmf/tex/latex/biblatex2bibitem/
+
 ENTRYPOINT ["/bin/bash", "-c"]
 
 ############################################################
