@@ -270,7 +270,7 @@ In summary, our analysis reveals the potential for a $\sim 1\%$ gain in preventa
 
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
-\printbibliography[title={Bibliography}]
+\bibliography{RSVOptimization}
 
 \cleardoublepage
 \begin{appendices}
