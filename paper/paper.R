@@ -74,11 +74,11 @@ regionOffsetCI = function(c, level) {
 }
 
 formatPct = function(pct) {
-  sprintf("%.2f\\%%", pct * 100)
+  sprintf("%.1f\\%%", pct * 100)
 }
 
 formatPctCI = function(lower, upper, level) {
-  sprintf("%d\\%% CI: %.2f -- %.2f\\%%", level * 100, lower * 100, upper * 100)
+  sprintf("%d\\%% CI: %.1f -- %.1f\\%%", level * 100, lower * 100, upper * 100)
 }
 
 regionStrategyCoverage = function(c, s, r) {
