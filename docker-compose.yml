@@ -66,7 +66,7 @@ services:
                 cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
                 cp -r paper/structure.tex paper/preamble*.tex paper/export-aap-pediatrics.py output/paper
                 pushd output
-                # latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
+                latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
                 popd
 
                 python3 paper/export-aap-pediatrics.py output/RSVOptimization.tex
