@@ -15,7 +15,7 @@ tex = open(sys.argv[1]).read()
 # Get the figure names (in order) and rename the images
 # Also pull out captions and labels to build list of figures and update references later
 figRE = r'(?s)\\begin\{figure\}.*?\\end\{figure\}'
-graphicRE = r'\\input\{\\figuresDir/(.*)\.tex\}'
+graphicRE = r'\\includestandalone\{\\figuresDir/(.*)\}'
 captionRE = r'\\caption(?:\[(.*)\])?\{(.*)\}'
 labelRE = r'\\label\{(.*)\}'
 
@@ -31,7 +31,7 @@ for figIdx, figM in enumerate(re.finditer(figRE, tex)):
 # Change preamble to RTF
 tex = tex.replace(r'paper/preamble.tex', r'paper/preamble-rtf.tex')
 # Drop graphics from figures
-tex = re.sub(r'\\input\{\\figuresDir/(.*)\.tex\}', r'', tex)
+tex = re.sub(graphicRE, r'', tex)
 # Delete knitr preamble
 tex = re.sub(r'(?s)(\\documentclass[^\\]*)\\[^\n]*\n.*%%% end knitr preamble', r'\1\n', tex)
 
