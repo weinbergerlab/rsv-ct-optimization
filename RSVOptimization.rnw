@@ -37,23 +37,30 @@ knitr::read_chunk("paper/paper.R")
     \authorstyle{Daniel Weinberger, PhD\textsuperscript{a}}
 }
 
-\postauthor{
-	\vspace{10pt}
+\newcommand\affiliations{
     \titlesection{Affiliations}{\textsuperscript{a}Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University}
     \corremail{Address correspondence to}{Ben Artin, ben@artins.org}
-    \vspace{10pt} % Space before the rule
-	\par{\HorRule} % Horizontal rule after the title
+}
+
+\newcommand\frontmatter{
     \corrfull{Address correspondence to}{Ben Artin, 350 George St, Room 2-xxx, New Haven CT, 06519, ben@artins.org, +1 (617) 953 7243}
-    \frontmatter{Short title}{Optimization of RSV prophylaxis in Connecticut}
-    \frontmatter{Conflict of interest disclosures}{The authors have no conflicts of interest to disclose.}
-    \frontmatter{Funding}{}
-    \frontmatter{Role of funder}{The NIH had no role in the design and conduct of the study. CT DPH had no role in the design and conduct of the study.}
-    \frontmatter{Clinical trial registration}{Not applicable.}
-    \frontmatter{Abbreviations}{RSV: respiratory syncytial virus; AAP: American Academy of Pediatrics; CT DPH: Connecticut Department of Public Health}
-    \frontmatter{Table of contents summary}{We used Connecticut RSV hospitalization data to propose an adjusted RSV prophylaxis schedule and compare it to the AAP-recommended prophylaxis schedule.}
-    \frontmatter{What's known on this subject}{RSV is a seasonal respiratory infection, and a major cause of mortality and morbidity in high-risk infants worldwide. RSV chemoprophylaxys is expensive. In the US, the prophylaxys schedule recommendation is published by the AAP. The AAP recommens the same schedule for all states other than Florida.}
-    \frontmatter{What this study adds}{We present a method for optimizing the RSV prophylaxis schedule on a regional basis, and show that our method offers only a modest benefit when applied to the state of Connecticut, with no additional benefit when applied to counties within Connecticut.}
-    \frontmatter{Contributors}{Ben Artin implemented and published the R tools used in the analysis, carried out the analysis, drafted the initial manuscript, and reviewed and revised the manuscript. Daniel Weinberger obtained the data from CT DPH, proposed the study design, conceptualized the analytic approach, and reviewed and revised the manuscript. Virginia Pitzer reviewed and revised the manuscript. All author approved the final manuscript as submitted and agree to be accountable for all aspects of the work.}
+    \frontmattersection{Short title}{Optimization of RSV prophylaxis in Connecticut}
+    \frontmattersection{Conflict of interest disclosures}{The authors have no conflicts of interest to disclose.}
+    \frontmattersection{Funding}{}
+    \frontmattersection{Role of funder}{The NIH had no role in the design and conduct of the study. CT DPH had no role in the design and conduct of the study.}
+    \frontmattersection{Clinical trial registration}{Not applicable.}
+    \frontmattersection{Abbreviations}{RSV: respiratory syncytial virus; AAP: American Academy of Pediatrics; CT DPH: Connecticut Department of Public Health}
+    \frontmattersection{Table of contents summary}{We used Connecticut RSV hospitalization data to propose an adjusted RSV prophylaxis schedule and compare it to the AAP-recommended prophylaxis schedule.}
+    \frontmattersection{What's known on this subject}{RSV is a seasonal respiratory infection, and a major cause of mortality and morbidity in high-risk infants worldwide. RSV chemoprophylaxys is expensive. In the US, the prophylaxys schedule recommendation is published by the AAP. The AAP recommens the same schedule for all states other than Florida.}
+    \frontmattersection{What this study adds}{We present a method for optimizing the RSV prophylaxis schedule on a regional basis, and show that our method offers only a modest benefit when applied to the state of Connecticut, with no additional benefit when applied to counties within Connecticut.}
+    \frontmattersection{Contributors}{Ben Artin implemented and published the R tools used in the analysis, carried out the analysis, drafted the initial manuscript, and reviewed and revised the manuscript. Daniel Weinberger obtained the data from CT DPH, proposed the study design, conceptualized the analytic approach, and reviewed and revised the manuscript. Virginia Pitzer reviewed and revised the manuscript. All author approved the final manuscript as submitted and agree to be accountable for all aspects of the work.}
+}
+
+\postauthor{
+	\vspace{10pt}
+    \affiliations
+    \vspace{10pt}
+    \par{\HorRule}
 }
 
 \date{}
@@ -61,19 +68,13 @@ knitr::read_chunk("paper/paper.R")
 \pagestyle{empty}
 \begin{document}
 
-\newlength\baseparindent
-\setlength\baseparindent{\parindent}
-\begingroup
-\setlength\parindent{0em}
-
 \maketitle
+\makefrontmatter
 
 % TODO DPH acknowledgement
 % TODO better month labels in onset-offset plots
 
 \thispagestyle{firstpage}
-
-\endgroup
 
 \section*{\centerline{Abstract}}
 
