@@ -46,7 +46,7 @@ knitr::read_chunk("paper/paper.R")
     \corrfull{Address correspondence to}{Ben Artin, 350 George St, Room 2-xxx, New Haven CT, 06519, ben@artins.org, +1 (617) 953 7243}
     \frontmattersection{Short title}{\headertitle}
     \frontmattersection{Conflict of interest disclosures}{The authors have no conflicts of interest to disclose.}
-    \frontmattersection{Funding}{This stuy was funded by the NIH grant R01AI137093.}
+    \frontmattersection{Funding}{This study was funded by the NIH/NIAID grant R01AI137093.}
     \frontmattersection{Role of funder}{The NIH had no role in the design and conduct of the study.}
     \frontmattersection{IRB approval}{This study was approved by the IRB at Yale School of Medicine and the HIC at the Connecticut Department of Public Health.}
     \frontmattersection{Data sharing}{The data can be requested through the Connecticut Department of Public Health. The analysis code is available at \url{https://github.com/weinbergerlab/rsv-ct-optimization}.}
