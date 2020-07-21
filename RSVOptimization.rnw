@@ -43,7 +43,7 @@ knitr::read_chunk("paper/paper.R")
 }
 
 \newcommand\frontmatter{
-    \corrfull{Address correspondence to}{Ben Artin, 350 George St, Room 2-xxx, New Haven CT, 06519, ben@artins.org, +1 (617) 953 7243}
+    \corrfull{Address correspondence to}{Ben Artin, 350 George St, Room C323, New Haven CT, 06519, ben@artins.org, +1 (617) 953 7243}
     \frontmattersection{Short title}{\headertitle}
     \frontmattersection{Conflict of interest disclosures}{The authors have no conflicts of interest to disclose.}
     \frontmattersection{Funding}{This study was funded by the NIH/NIAID grant R01AI137093.}
