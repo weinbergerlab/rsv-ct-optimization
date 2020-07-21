@@ -28,8 +28,8 @@ knitr::read_chunk("paper/paper.R")
 %%% end knitr output
 
 \edef\figuresDir{\Sexpr{figuresDir}}
-\title{Assessment and optimization of respiratory syncytial virus prophylaxis regimens in Connecticut, \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}}
-\def\headertitle{Evaluating the benefit of initiating RSV prophylaxis based on state- and county-level data}
+\title{Assessment and optimization of respiratory syncytial virus prophylaxis in Connecticut, \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}}
+\def\headertitle{Optimization of RSV prophylaxis in Connecticut}
 
 \author{
     \authorstyle{Ben Artin, MEng, MPH, MMSc\textsuperscript{a}}\\
@@ -44,7 +44,7 @@ knitr::read_chunk("paper/paper.R")
 
 \newcommand\frontmatter{
     \corrfull{Address correspondence to}{Ben Artin, 350 George St, Room 2-xxx, New Haven CT, 06519, ben@artins.org, +1 (617) 953 7243}
-    \frontmattersection{Short title}{Optimization of RSV prophylaxis in Connecticut}
+    \frontmattersection{Short title}{\headertitle}
     \frontmattersection{Conflict of interest disclosures}{The authors have no conflicts of interest to disclose.}
     \frontmattersection{Funding}{}
     \frontmattersection{Role of funder}{The NIH had no role in the design and conduct of the study. CT DPH had no role in the design and conduct of the study.}
