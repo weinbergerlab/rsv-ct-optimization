@@ -64,14 +64,14 @@ services:
             - |
                 mkdir -p output/paper
                 cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
-                cp -r paper/structure.tex paper/preamble*.tex paper/export-aap-pediatrics.py output/paper
+                cp -r paper/structure.tex paper/preamble*.tex paper/export-aap-pediatrics.py paper/template.rtf output/paper 
                 pushd output
                 latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
                 popd
 
                 python3 paper/export-aap-pediatrics.py output/RSVOptimization.tex
 
-                pandoc --verbose --from latex+latex_macros --filter paper/filter-aap-pediatrics.py --to rtf --standalone --output output/RSVOptimization.rtf output/RSVOptimization.tex
+                pandoc --verbose --from latex+latex_macros --filter paper/filter-aap-pediatrics.py --to rtf --standalone --template paper/template.rtf --output output/RSVOptimization.rtf output/RSVOptimization.tex
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
             - "./${REVIEW_ARTIFACTS_DIR:-rsv-optimization}:/paper/output"
