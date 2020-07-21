@@ -71,7 +71,7 @@ services:
 
                 python3 paper/export-aap-pediatrics.py output/RSVOptimization.tex
 
-                pandoc --verbose --from latex+latex_macros --to rtf --standalone --output output/RSVOptimization.rtf output/RSVOptimization.tex
+                pandoc --verbose --from latex+latex_macros --filter paper/filter-aap-pediatrics.py --to rtf --standalone --output output/RSVOptimization.rtf output/RSVOptimization.tex
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
             - "./${REVIEW_ARTIFACTS_DIR:-rsv-optimization}:/paper/output"

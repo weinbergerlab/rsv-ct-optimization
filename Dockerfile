@@ -65,6 +65,11 @@ RUN Rscript -e "renv::install('devtools')"
 COPY renv.lock renv.lock
 RUN Rscript -e "renv::restore()"
 
+RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends \
+	python3-pip
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+RUN pip3 install pandocfilters
+
 COPY . .
 
 ENTRYPOINT ["/bin/bash", "-e", "-c"]
