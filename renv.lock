@@ -366,10 +366,10 @@
     },
     "pspline.inference": {
       "Package": "pspline.inference",
-      "Version": "0.23",
+      "Version": "1.0.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "58c2318c0353ac34e4076f5626498810"
+      "Hash": "c3f9a0ae0e30213eb70d1a9352823ee1"
     },
     "purrr": {
       "Package": "purrr",
