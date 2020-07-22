@@ -65,8 +65,8 @@ for idx, cite in enumerate(citations):
 
 tex = re.sub(citeRE, r'\\textsuperscript{\1}', tex)
 
-# Encode page breaks so that filter can output rtf page breaks later
-tex = re.sub(r'\\clear(double)?page', r'[[clearpage]]', tex)
+# Encode page breaks and spacing so that filter can output rtf commands later
+tex = re.sub(r'\\(clear(?:double)?page|(:?double|single)spacing)', lambda m: rf'[[{m.group(1)}]]', tex)
 
 # Misc
 tex = tex.replace(r'\raisebox{1pt}{\Circle}', r'\Circle')
