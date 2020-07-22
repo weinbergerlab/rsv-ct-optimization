@@ -99,7 +99,7 @@ knitr::read_chunk("paper/paper.R")
 % \listoffigures
 % \clearpage
 
-\doublespace
+\doublespacing
 
 \section{Introduction}
 
@@ -272,6 +272,8 @@ In areas of Connecticut associated with a relatively high amount of interstate t
 
 In summary, our analysis reveals the potential for a $\sim 1\%$ gain in preventable RSV cases in Connecticut when a locally-tailored two-week (rather than monthly) prophylaxis guideline is used in place of the established AAP guidelines. At an average of $\Sexpr{prettyNum(totalRSV / totalYears, digits=3)}$ RSV-associated hospitalizations per year in children under 2 years old in Connecticut, this corresponds to $\sim \Sexpr{prettyNum(totalRSV / totalYears / 100, digits=3)}$ hospitalizations prevented per year, and an unknown number of prevented cases not necessitating hospitalization. Practical aspects of this potential gain --- such as implementation cost --- require further investigation. Additionally, the method we developed for this analysis can be applied to county-level or state-level analysis of seasonal RSV patterns in other regions, some of which are likely to show a greater relative benefit (due to a greater degree of misalignment between the RSV season and the AAP guidelines' prophylaxis window) as well as a greater absolute benefit (due to population size) than Connecticut. 
 
+\singlespacing
+
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
 \bibliography{RSVOptimization}
@@ -284,6 +286,7 @@ In summary, our analysis reveals the potential for a $\sim 1\%$ gain in preventa
 \renewcommand{\thesubsection}{S\arabic{section}.\arabic{subsection}}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
 
+\doublespacing
 \section{Supplemental methods}
 
 \subsection{Accommodating implementation complexity}
