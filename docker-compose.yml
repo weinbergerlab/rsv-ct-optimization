@@ -63,10 +63,11 @@ services:
         command: 
             - |
                 mkdir -p output/paper
-                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
+                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures paper/aap-pediatrics-cover.tex output
                 cp -r paper/structure.tex paper/preamble*.tex paper/export-aap-pediatrics.py paper/template.rtf output/paper 
                 pushd output
                 latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
+                latexmk -pdflua aap-pediatrics-cover.tex
                 popd
 
                 python3 paper/export-aap-pediatrics.py output/RSVOptimization.tex
