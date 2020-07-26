@@ -274,6 +274,8 @@ In summary, our analysis reveals the potential for a $\sim 1\%$ gain in preventa
 
 \singlespacing
 
+\listoffigures
+
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
 \bibliography{RSVOptimization}
@@ -327,41 +329,45 @@ We then compared those regimens to the one recommended by the AAP and to the six
 \subsection{County-level recommendations are most useful when rounded to the nearest 1- or 2-week period}
 \label{sresult:rounding}
 
-After we applied weekly, biweekly, and monthly rounding to start and end dates of our six alternative immunoprophylaxis regimens, we found that longer rounding intervals diminished the benefit of tailoring the guidelines to local data (Supplemental figure \ref{fig:coverageByRoundingRegimen}). With weekly rounding, our regimens were non-inferior to the AAP recommendation, and produced an increase in preventable fraction from \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) under the AAP guidelines to \Sexpr{bestCaseCoverage(1)} (\Sexpr{bestCaseCoverageCI(1, level)}) statewide.  Biweekly rounding yielded regimens that were similarly non-inferior to the AAP recommendation, with an increase in the preventable fraction to \Sexpr{bestCaseCoverage(2)} (\Sexpr{bestCaseCoverageCI(2, level)}) statewide. However, with monthly rounding, the gains almost completely vanished, with the preventable fraction not exceeding \Sexpr{bestCaseCoverage(4)} (\Sexpr{bestCaseCoverageCI(4, level)}). Furthermore, all our regimens with monthly rounding were non-superior to the AAP-recommended regimen in all counties.
+After we applied weekly, biweekly, and monthly rounding to start and end dates of our six alternative immunoprophylaxis regimens, we found that longer rounding intervals diminished the benefit of tailoring the guidelines to local data (Supplemental figure \ref{suppfig:coverageByRoundingRegimen}). With weekly rounding, our regimens were non-inferior to the AAP recommendation, and produced an increase in preventable fraction from \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) under the AAP guidelines to \Sexpr{bestCaseCoverage(1)} (\Sexpr{bestCaseCoverageCI(1, level)}) statewide.  Biweekly rounding yielded regimens that were similarly non-inferior to the AAP recommendation, with an increase in the preventable fraction to \Sexpr{bestCaseCoverage(2)} (\Sexpr{bestCaseCoverageCI(2, level)}) statewide. However, with monthly rounding, the gains almost completely vanished, with the preventable fraction not exceeding \Sexpr{bestCaseCoverage(4)} (\Sexpr{bestCaseCoverageCI(4, level)}). Furthermore, all our regimens with monthly rounding were non-superior to the AAP-recommended regimen in all counties.
 
-\begin{figure}
+\begin{supplementalfigure}
 \begin{center}
 \includestandalone{\figuresDir/coverageByRoundingRegimen}
 \caption[The effect of calendrical rounding of start and end of spatially adjusted RSV prophylaxis regimens on their performance]{The effect of calendrical rounding on prophylaxis regimens. The fraction of RSV hospitalizations occurring while a regimen offers protection is shown for each regimen and rounding interval. Longer rounding intervals diminish the advantage over the AAP-recommended regimen. Hollow plot markers ($\raisebox{1pt}{\Circle}$, $\square$, and $\triangle$) denote regimens which, due to rounding, are identical to others.}
-\label{fig:coverageByRoundingRegimen}
+\label{suppfig:coverageByRoundingRegimen}
 \end{center}
-\end{figure}
+\end{supplementalfigure}
 
 \subsection{RSV season onset is slowly moving earlier}
 \label{sresult:seasonDrift}
 
-Our linear regression of median RSV season onset and offset over three-year periods indicates that season onset has slowly been drifting earlier (Supplemental figure \ref{fig:onsetOffsetByYear}), at a rate of \Sexpr{formatDrift(onsetByYear)} (\Sexpr{formatDriftCI(onsetByYear, level)}). It is unclear whether this is a part of a larger pattern, such as a cycle spanning decades. Season offset, on the other hand, has not been drifting earlier or later (\Sexpr{formatDriftCI(offsetByYear, level)}). 
+Our linear regression of median RSV season onset and offset over three-year periods indicates that season onset has slowly been drifting earlier (Supplemental figure \ref{suppfig:onsetOffsetByYear}), at a rate of \Sexpr{formatDrift(onsetByYear)} (\Sexpr{formatDriftCI(onsetByYear, level)}). It is unclear whether this is a part of a larger pattern, such as a cycle spanning decades. Season offset, on the other hand, has not been drifting earlier or later (\Sexpr{formatDriftCI(offsetByYear, level)}). 
 
-\begin{figure}
+\begin{supplementalfigure}
 \begin{center}
 \includestandalone{\figuresDir/onsetOffsetByYear}
 \caption{Annual variability in RSV season onset and offset in Connecticut. While season offset has been stable, season onset has shown a statistically significant drift toward an earliear RSV season.}
-\label{fig:onsetOffsetByYear}
+\label{suppfig:onsetOffsetByYear}
 \end{center}
-\end{figure}
+\end{supplementalfigure}
 
 \subsection{Temporally-adjusted prophylaxis regimens are non-superior to others}
 \label{sresult:temporalAdjustment}
 
-Compared to our county-level all-years analysis, the three regimens based on statewide recent-years analysis produced non-superior results everywhere and inferior results in the low-population counties (Supplemental figure \ref{fig:coverageByRegionRegimenWithSliding}). Due to the non-superiority of regimens based on statewide recent-years analysis, we did not evaluate regimens based on county-level recent-years data. 
+Compared to our county-level all-years analysis, the three regimens based on statewide recent-years analysis produced non-superior results everywhere and inferior results in the low-population counties (Supplemental figure \ref{suppfig:coverageByRegionRegimenWithSliding}). Due to the non-superiority of regimens based on statewide recent-years analysis, we did not evaluate regimens based on county-level recent-years data. 
 
-\begin{figure}
+\begin{supplementalfigure}
 \begin{center}
 \includestandalone{\figuresDir/coverageByRegionRegimenWithSliding}
 \caption[Comparison of prophylaxis regimens based on all-years data to those based on recent-years data]{Comparison of prophylaxis regimens based on all-years data to those based on recent-years data. Recent-years analysis analysis adds no benefit over all-years analysis, for either statewide or county-level analysis. Preventable fraction: fraction of RSV hospitalizations occurring while the prophylaxis regimen offers protection}
-\label{fig:coverageByRegionRegimenWithSliding}
+\label{suppfig:coverageByRegionRegimenWithSliding}
 \end{center}
-\end{figure}
+\end{supplementalfigure}
+
+\singlespacing
+\listofsupplementalfigures
+\doublespacing
 
 \end{appendices}
 
