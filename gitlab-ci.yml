@@ -71,7 +71,7 @@ aap-pediatrics:
     paths:
       - ${REVIEW_ARTIFACTS_DIR}/*.rtf
       - ${REVIEW_ARTIFACTS_DIR}/*-cover.pdf
-      - ${REVIEW_ARTIFACTS_DIR}/figures/Fig*.pdf
+      - ${REVIEW_ARTIFACTS_DIR}/figures/*Fig*.pdf
 
 pdf:
   stage: pdf
