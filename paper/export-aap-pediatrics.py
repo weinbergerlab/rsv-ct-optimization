@@ -22,12 +22,18 @@ labelRE = r'\\label\{(.*)\}'
 captions = {}
 labels = {}
 
-for figIdx, figM in enumerate(re.finditer(figRE, tex)):
+for figM in re.finditer(figRE, tex):
 	m = re.search(graphicRE, figM.group(0))
 	figType = figM.group(1)
-	shutil.copy(f'output/figures/{ m.group(1) }.pdf', f'output/figures/Fig{ figIdx + 1 }.pdf')
-	captions.setdefault(figType, []).append(re.search(captionRE, figM.group(0)).group(2))
-	labels.setdefault(figType, []).append(re.search(labelRE, figM.group(0)).group(1))
+	captions.setdefault(figType, [])
+	labels.setdefault(figType, [])
+
+	figIdx = len(captions[figType]) + 1
+	figName = f"Fig{ figIdx }.pdf" if figType == 'figure' else f"SuppFig{ figIdx }.pdf"
+	shutil.copy(f'output/figures/{ m.group(1) }.pdf', f'output/figures/{ figName }')
+
+	captions[figType].append(re.search(captionRE, figM.group(0)).group(2))
+	labels[figType].append(re.search(labelRE, figM.group(0)).group(1))
 
 # Change preamble to RTF
 tex = tex.replace(r'paper/preamble.tex', r'paper/preamble-rtf.tex')
