@@ -84,7 +84,7 @@
 @
 
 <<coverageByRegionAAP, results='hide'>>=
-    tikz(sprintf("%s/coverageByRegionAAP.tex", figuresDir), width=inlinePlotWidth, height=inlinePlotHeight, pointsize=10, standAlone=TRUE)
+    tikz(sprintf("%s/coverageByRegionAAP.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10, standAlone=TRUE)
     
     data = unprotectedByCounty %>% 
         filter(strat=="aap", rounding==0) %>% 
@@ -101,7 +101,7 @@
             panel.grid.major.x=element_blank(),
             axis.title.x=element_blank(),
             axis.ticks.x=element_blank(),
-            axis.text.x=element_text(angle=30, hjust=0.5, vjust=0.5)
+            axis.text.x=element_text(hjust=0.5, vjust=0.5)
         )
 
     dev.off()
