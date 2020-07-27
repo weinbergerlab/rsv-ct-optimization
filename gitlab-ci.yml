@@ -5,9 +5,9 @@ stages:
   - pdf
   
 variables:
-  TEX_DIR: "paper"
   KNITR_OUTPUT_DIR: "knitr"
   OVERLEAF_ARTIFACTS_DIR: "overleaf"
+  REVIEW_ARTIFACTS_DIR: rsv-optimization
   COMPOSE_FILES: --file docker-compose.yml --file docker-compose-gitlab.yml
   
 .docker:
@@ -52,13 +52,26 @@ overleaf:
   extends: .docker
   stage: exports
   script:
-    - mkdir -p "${OVERLEAF_ARTIFACTS_DIR}/${TEX_DIR}"
-    - cp -r "${KNITR_OUTPUT_DIR}/RSVOptimization.tex" "RSVOptimization.bib" "${KNITR_OUTPUT_DIR}/figures" "${OVERLEAF_ARTIFACTS_DIR}"
-    - cp -r "${TEX_DIR}/structure.tex" "${OVERLEAF_ARTIFACTS_DIR}/${TEX_DIR}"
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} run paper-overleaf
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
+
+aap-pediatrics:
+  extends: .docker
+  stage: exports
+  script:
+    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
+    - docker-compose ${COMPOSE_FILES} run paper-figures
+    - docker-compose ${COMPOSE_FILES} run paper-aap-pediatrics
+  artifacts:
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
+    paths:
+      - ${REVIEW_ARTIFACTS_DIR}/*.rtf
+      - ${REVIEW_ARTIFACTS_DIR}/*-cover.pdf
+      - ${REVIEW_ARTIFACTS_DIR}/figures/Fig*.pdf
 
 pdf:
   stage: pdf

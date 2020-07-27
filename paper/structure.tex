@@ -29,6 +29,7 @@
 
 \usepackage[hang, small, labelfont=bf, up, textfont=it]{caption} % Custom captions under/above tables and figures
 \usepackage{subcaption}
+\DeclareCaptionType{supplementalfigure}[Supplemental Figure][List of supplemental figures]
 
 \usepackage{booktabs} % Horizontal rules in tables
 
@@ -102,7 +103,7 @@
 %	TITLE SECTION
 %----------------------------------------------------------------------------------------
 
-\newcommand{\authorstyle}[1]{{\large\usefont{OT1}{phv}{b}{n}\color{DarkRed}#1}} % Authors style (Helvetica)
+\newcommand{\authorstyle}[1]{{\noindent\large\usefont{OT1}{phv}{b}{n}\color{DarkRed}#1}} % Authors style (Helvetica)
 
 \newcommand{\institution}[1]{{\footnotesize\usefont{OT1}{phv}{m}{sl}\color{Black}#1}} % Institutions style (Helvetica)
 
@@ -112,7 +113,7 @@
 
 \pretitle{
 	\vspace{-30pt} % Move the entire title section up
-	% \HorRule\vspace{10pt} % Horizontal rule before the title
+	\HorRule\vspace{10pt} % Horizontal rule before the title
 	\fontsize{32}{36}\usefont{OT1}{phv}{b}{n}\selectfont % Helvetica
 	\color{DarkRed} % Text colour for the title and author(s)
 	\raggedright
@@ -153,11 +154,4 @@
 %	BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
-\usepackage[backend=bibtex,style=nejm,sorting=none,autocite=superscript,articledoi=true,url=false]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
-%\usepackage[backend=bibtex,style=authoryear,natbib=true]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
-\usepackage[nottoc]{tocbibind}
-
-\addbibresource{RSVOptimization.bib} % The filename of the bibliography
-\renewcommand{\cite}[1]{\autocite{#1}}
-
-\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+\bibliographystyle{ama}

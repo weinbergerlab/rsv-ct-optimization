@@ -37,6 +37,11 @@ RUN tlmgr --usermode option repository http://ftp.math.utah.edu/pub/tex/historic
 ARG TEX_PACKAGES=xcharter
 RUN tlmgr install ${TEX_PACKAGES} || tlmgr install ${TEX_PACKAGES}
 RUN updmap-user
+RUN luaotfload-tool -u
+
+# AMA citation style from CTAN contrib
+COPY paper/ama.bst /root/texmf/bibtex/bst/
+RUN kpsewhich ama.bst
 
 ENTRYPOINT ["/bin/bash", "-c"]
 
@@ -48,7 +53,10 @@ WORKDIR /paper
 
 RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends \
 	gpg \
-	git-lfs
+	git-lfs \
+	pandoc \
+	poppler-utils \
+	imagemagick
 
 COPY .Rprofile .Rprofile
 COPY renv renv
@@ -56,4 +64,12 @@ COPY renv renv
 RUN Rscript -e "renv::install('devtools')"
 COPY renv.lock renv.lock
 RUN Rscript -e "renv::restore()"
+
+RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends \
+	python3-pip
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+RUN pip3 install pandocfilters
+
 COPY . .
+
+ENTRYPOINT ["/bin/bash", "-e", "-c"]

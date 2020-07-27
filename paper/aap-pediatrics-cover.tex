@@ -1,0 +1,89 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thin Formal Letter
+% LaTeX Template
+% Version 2.0 (7/2/17)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Author:
+% Vel (vel@LaTeXTemplates.com)
+%
+% Originally based on an example on WikiBooks 
+% (http://en.wikibooks.org/wiki/LaTeX/Letters) but rewritten as of v2.0
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[10pt]{letter} % 10pt font size default, 11pt and 12pt are also possible
+
+\usepackage{geometry} % Required for adjusting page dimensions
+
+%\longindentation=0pt % Un-commenting this line will push the closing "Sincerely," to the left of the page
+
+\geometry{
+	paper=letterpaper, % Change to letterpaper for US letter
+	top=1in, % Top margin
+	bottom=1in, % Bottom margin
+	left=2in, % Left margin
+	right=2in, % Right margin
+	%showframe, % Uncomment to show how the type block is set on the page
+}
+
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+\usepackage[utf8]{inputenc} % Required for inputting international characters
+
+\usepackage{stix} % Use the Stix font by default
+
+\usepackage{microtype} % Improve justification
+\usepackage{url}
+
+%----------------------------------------------------------------------------------------
+%	YOUR NAME & ADDRESS SECTION
+%----------------------------------------------------------------------------------------
+
+\signature{Ben Artin} % Your name for the signature at the bottom
+
+\address{Ben Artin \\ ben@artins.org \\ 350 College St Rm C323 \\ New Haven, CT 06519} % Your address and phone number
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	ADDRESSEE SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{letter}{} % Name/title of the addressee
+
+%----------------------------------------------------------------------------------------
+%	LETTER CONTENT SECTION
+%----------------------------------------------------------------------------------------
+
+\opening{\textbf{Dear \textit{Pediatrics} editor,}}
+
+I am pleased to submit an original research article titled \textit{Assessment and optimization of respiratory syncytial virus prophylaxis in Connecticut, 1996-2013} by Ben Artin, Virginia E. Pitzer, an Daniel M. Weinberger for consideration for publication in \textit{Pediatrics}. The American Academyc of Pediatrics makes recommendations about when to start prophylaxis against RSV. Aside from Florida, the recommended start date is the same for the entire US. Using county-level data from Connecticut, we considered whether a recommended start date that varies by state or county would provide any benefit compared with the national recommendation. We find that a state-specific prophylaxis regimen would confer a modest improvement over the current AAP-recommended regimen. This general approach could be used to evaluate the timing of prophylaxis in other states as well.
+
+We believe that this manuscript is appropriate for publication by \textit{Pediatrics} because of the impact of RSV on infant hospitalizations, mortality, and morbidity, as well as the role of your audience in implementing RSV prophylaxis guidelines. 
+
+This manuscript has not been published elsewhere and is not under consideration for publication elsewhere. Should it be published in \textit{Pediatrics}, it will not be published elsewhere without the editors' consent. Preprint is available on medRxiv at \url{https://doi.org/10.1101/2020.07.13.20152215}. All authors have participated in the concept and design, analysis and interpretation of data, and drafting or revising of the manuscript, have approved the manuscript as submitted, and are responsible for the reported research.
+
+Our conflicts of interest are: Virginia E. Pitzer has received reimbursement from Merck and Pfizer for travel expenses to Scientific Input Engagements related to RSV vaccines. Daniel M. Weinberger has received consulting fees from Pfizer, Merck, GSK, and Affinivax for topics unrelated to this manuscript and is the Principal Investigator on a research grant from Pfizer on an unrelated topic. Ben Artin reports no relevant conflicts.
+
+Thank you for your consideration!
+
+\vspace{2\parskip} % Extra whitespace for aesthetics
+\closing{Sincerely,}
+\vspace{2\parskip} % Extra whitespace for aesthetics
+
+%----------------------------------------------------------------------------------------
+
+\end{letter}
+ 
+\end{document}

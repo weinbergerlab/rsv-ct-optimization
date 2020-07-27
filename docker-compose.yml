@@ -15,71 +15,77 @@ services:
         image: paper-tools:dev
         entrypoint: ["bash", "-e", "-c"]
         command: 
-            - >
+            - |
                 source data/fetch-data.sh
-
                 mkdir -p paper/figures
-
-                Rscript -e "
-                knitr::knit(
-                    'RSVOptimization.rnw', 
-                    output='${KNITR_OUTPUT_DIR:-knitr}/RSVOptimization.tex'
-                )"
-
-                mv 'paper/figures' '${KNITR_OUTPUT_DIR:-knitr}/figures' 
+                Rscript -e "knitr::knit('RSVOptimization.rnw', output='knitr/RSVOptimization.tex')"
+                rm -rf knitr/figures
+                mv 'paper/figures' 'knitr/figures' 
         environment:
             CI_JOB_TOKEN: "${CI_JOB_TOKEN:-}"
             DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
             TEX_OUTPUT_DIR: "."
             KNITR_DRAFT_MODE: "${KNITR_DRAFT_MODE:-TRUE}"
         volumes:
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/${KNITR_OUTPUT_DIR:-knitr}"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
             - "./cache:/paper/cache"
             - "${DATA_FETCH_COMMAND:-./data/fetch-dev-data.sh}:/paper/data/fetch-data.sh"
             - "./data/ct rsv time series.csv:/paper/data/rsv.csv" # This is only present for local development
        
     ############################################################
-    # Commands for converting figures to PDF and EPS
-    # paper-figures:
-    #     image: paper-tools:dev
-    #     environment:
-    #         KNITR_OUTPUT_DIR: "${KNITR_OUTPUT_DIR:-knitr}"
-    #     command: 
-    #         - |
-    #             cd "${KNITR_OUTPUT_DIR:-knitr}/figures" ;
-    #             find . -name "*.tex" -exec latexmk -pdf {} \;
-    #             find . -name "*.pdf" -exec pdftocairo -tiff -r 600 -singlefile {} \;
-    #             find . -name "*.tif" -exec convert -compress lzw {} {} \;
-    #     volumes:
-    #         - "./${KNITR_OUTPUT_DIR:-knitr}:/tex/${KNITR_OUTPUT_DIR:-knitr}"
+    # Commands for converting figures to PDF and TIFF
+    paper-figures:
+        image: paper-tools:dev
+        command: 
+            - |
+                cd knitr/figures
+                find . -name "*.tex" -exec latexmk -pdf {} \;
+        volumes:
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
 
     ############################################################
-    # Commands for exporting paper for PLOS Comp Biol
-    # Includes inlining the bibliography
-    # paper-plos-comp-biol:
-    #     image: paper-tools:dev
-    #     command: 
-    #         - >
-    #             cd output
-
-    #             latexmk -pdflua 
-    #             -usepretex="\edef\outputvariant{ploscompbiol}" 
-    #             PSplineInference.tex
-
-    #             python3 /tex/export-plos-comp-biol.py PSplineInference.tex
-                
-    #             latexmk -pdflua 
-    #             -usepretex="\edef\outputvariant{ploscompbiol}" 
-    #             PSplineInference.tex
-    #     volumes:
-    #         - ./${REVIEW_ARTIFACTS_DIR:-pspline.inference}:/tex/output
+    # Commands for exporting for overleaf
+    paper-overleaf:
+        image: paper-tools:dev
+        command: 
+            - |
+                mkdir -p output/paper
+                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
+                cp -r paper/structure.tex paper/preamble*.tex output/paper
+        volumes:
+            - "./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output"
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
 
     ############################################################
-    # Commands for generating our PDF (inline images)
+    # Commands for exporting for AAP Pediatrics
+    paper-aap-pediatrics:
+        image: paper-tools:dev
+        command: 
+            - |
+                mkdir -p output/paper
+                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures paper/aap-pediatrics-cover.tex output
+                cp -r paper/structure.tex paper/preamble*.tex paper/export-aap-pediatrics.py paper/template.rtf output/paper 
+                pushd output
+                latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
+                latexmk -pdflua aap-pediatrics-cover.tex
+                popd
+
+                python3 paper/export-aap-pediatrics.py output/RSVOptimization.tex
+
+                pandoc --verbose --from latex+latex_macros --filter paper/filter-aap-pediatrics.py --to rtf --standalone --template paper/template.rtf --output output/RSVOptimization.rtf output/RSVOptimization.tex
+        volumes:
+            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
+            - "./${REVIEW_ARTIFACTS_DIR:-rsv-optimization}:/paper/output"
+
+    ############################################################
+    # Commands for generating our PDF
     paper-pdf:
         image: paper-tools:dev
         command: 
-            - cd output; latexmk -pdflua RSVOptimization.tex
+            - |
+                cd output
+                latexmk -pdflua RSVOptimization.tex
         volumes:
             - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output
+
 
