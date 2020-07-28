@@ -93,12 +93,6 @@ knitr::read_chunk("paper/paper.R")
 
 \pagestyle{fancy}
 
-%\listoftables
-%\clearpage
-
-% \listoffigures
-% \clearpage
-
 \doublespacing
 
 \section{Introduction}
