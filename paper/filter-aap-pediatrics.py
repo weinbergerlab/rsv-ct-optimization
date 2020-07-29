@@ -7,7 +7,7 @@ doublespace = False
 def filter(key, value, format, meta):
   global doublespace
   if value in ("[[clearpage]]", "[[cleardoublepage]]"):
-    return RawInline("rtf", r"\page")
+    return RawInline("openxml", r'<w:r><w:br w:type="page"/></w:r>')
   elif value == "[[doublespacing]]":
     doublespace = True
     return []
@@ -16,7 +16,7 @@ def filter(key, value, format, meta):
     return []
   elif key == 'Para':
     return Para([
-      RawInline("rtf", r"\sl480\slmult1") if doublespace else RawInline("rtf", r"\sl240\slmult1")
+      RawInline("openxml", r'<w:pPr><w:spacing w:line="480" w:lineRule="auto"/></w:pPr>') if doublespace else RawInline("openxml", r'<w:pPr><w:spacing w:line="240" w:lineRule="auto"/></w:pPr>')
     ] + value)
 
 if __name__ == "__main__":
