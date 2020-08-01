@@ -181,6 +181,27 @@ FUNCTION {or}
   if$
 }
 
+STRINGS {z}
+
+FUNCTION {remove.dots}
+{ 'z :=
+   ""
+   { z empty$ not }
+   { z #1 #2 substring$
+     duplicate$ "\." =
+       { z #3 global.max$ substring$ 'z :=  * }
+       { pop$
+         z #1 #1 substring$
+         z #2 global.max$ substring$ 'z :=
+         duplicate$ "." = 'pop$
+           { * }
+         if$
+       }
+     if$
+   }
+   while$
+}
+
 FUNCTION {new.block.checka}
 { empty$
     'skip$
@@ -238,7 +259,9 @@ FUNCTION {format.names}
   numnames 'namesleft :=
   { namesleft #0 > }
 
-  {s nameptr "{ll~}{ff}" format.name$ 't :=
+  {s nameptr "{ll~}{f}" format.name$ 
+    remove.dots
+    't :=
     namesleft #1 >
     {t * ", " * }
     {t}

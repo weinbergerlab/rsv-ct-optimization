@@ -55,7 +55,7 @@ knitr::read_chunk("paper/paper.R")
     \frontmattersection{What's known on this subject}{RSV is a seasonal respiratory infection, and a major cause of mortality and morbidity in high-risk infants worldwide. RSV chemoprophylaxys is expensive. In the US, the AAP recommends the same schedule for all states other than Florida.}
     \frontmattersection{What this study adds}{We present a method for optimizing the RSV prophylaxis schedule on a regional basis, and show that our method offers only a modest benefit when applied to Connecticut, with no additional benefit when applied to counties within Connecticut.}
     \clearpage
-    \frontmattersection{Contributors}{Ben Artin implemented and published the R tools used in the analysis, carried out the analysis, drafted the initial manuscript, and reviewed and revised the manuscript. Daniel M. Weinberger obtained the data from CT DPH, proposed the study design, conceptualized the analytic approach, and reviewed and revised the manuscript. Virginia E. Pitzer reviewed and revised the manuscript. All authors approved the final manuscript as submitted and agree to be accountable for all aspects of the work.}
+    \frontmattersection{Contributors}{Ben Artin implemented and published the R tools used in the analysis, carried out the analysis, drafted the initial manuscript, and reviewed and revised the manuscript. Daniel M. Weinberger obtained the data from CT DPH, proposed the study design, conceptualized the analytic approach, and reviewed and revised the manuscript. Virginia E. Pitzer reviewed and revised the analytic approach, and reviewed and revised the manuscript. All authors approved the final manuscript as submitted and agree to be accountable for all aspects of the work.}
     \clearpage
 }
 
