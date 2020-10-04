@@ -39,9 +39,9 @@ RUN tlmgr install ${TEX_PACKAGES} || tlmgr install ${TEX_PACKAGES}
 RUN updmap-user
 RUN luaotfload-tool -u
 
-# AMA citation style from CTAN contrib
-COPY paper/ama.bst /root/texmf/bibtex/bst/
-RUN kpsewhich ama.bst
+# Nature citation style from journal
+COPY paper/naturemag-doi.bst /root/texmf/bibtex/bst/
+RUN kpsewhich naturemag-doi.bst
 
 ENTRYPOINT ["/bin/bash", "-c"]
 

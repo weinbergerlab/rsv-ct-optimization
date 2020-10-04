@@ -1,4 +1,4 @@
-\documentclass[10pt,letter]{article}
+\documentclass[10pt,letter]{wlscirep}
 %%% end knitr preamble
 
 % Do some things differently depending on which variant we're compiling
@@ -29,71 +29,29 @@ knitr::read_chunk("paper/paper.R")
 
 \edef\figuresDir{\Sexpr{figuresDir}}
 \title{Assessment and optimization of respiratory syncytial virus prophylaxis in Connecticut, \Sexpr{formatYear(startDate)}-\Sexpr{formatYear(endDate)}}
-\def\headertitle{Optimization of RSV prophylaxis in Connecticut}
 
-\author{
-    \authorstyle{Ben Artin, MEng, MPH, MMSc\textsuperscript{a}}\\
-    \authorstyle{Virginia E. Pitzer, ScD\textsuperscript{a}}\\
-    \authorstyle{Daniel M. Weinberger, PhD\textsuperscript{a}}
-}
+\author[1,*]{Ben Artin, MEng, MPH, MMSc}
+\author[1]{Virginia E. Pitzer, ScD}
+\author[1]{Daniel M. Weinberger, PhD}
+\affil[1]{Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University}
+\affil[*]{ben@artins.org}
 
-\newcommand\affiliations{
-    \titlesection{Affiliations}{\textsuperscript{a}Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University}
-    \corremail{Address correspondence to}{Ben Artin, ben@artins.org}
-}
+\begin{abstract}
 
-\newcommand\frontmatter{
-    \corrfull{Address correspondence to}{Ben Artin, 350 George St, Room C323, New Haven CT, 06519, ben@artins.org, +1 (617) 953 7243}
-    \frontmattersection{Short title}{\headertitle}
-    \frontmattersection{Conflict of interest disclosures}{Virginia E. Pitzer has received reimbursement from Merck and Pfizer for travel expenses to Scientific Input Engagements related to RSV vaccines. Daniel M. Weinberger has received consulting fees from Pfizer, Merck, GSK, and Affinivax for topics unrelated to this manuscript and is the Principal Investigator on a research grant from Pfizer on an unrelated topic. Ben Artin reports no relevant conflicts.}
-    \frontmattersection{Funding}{This study was funded by the NIH/NIAID grant R01AI137093.}
-    \frontmattersection{Role of funder}{The NIH had no role in the design and conduct of the study.}
-    \frontmattersection{IRB approval}{This study was approved by the IRB at Yale School of Medicine and the HIC at the Connecticut Department of Public Health.}
-    \frontmattersection{Data sharing}{Deidentified hospitalization data can be requested from the Connecticut Department of Public Health. The analysis code is available at \url{https://github.com/weinbergerlab/rsv-ct-optimization}.}
-    \frontmattersection{Abbreviations}{RSV: respiratory syncytial virus; AAP: American Academy of Pediatrics; CT DPH: Connecticut Department of Public Health}
-    \frontmattersection{Article summary}{We used Connecticut RSV hospitalization data to propose an adjusted RSV prophylaxis schedule and compare it to the AAP-recommended prophylaxis schedule.}
-    \frontmattersection{What's known on this subject}{RSV is a seasonal respiratory infection, and a major cause of mortality and morbidity in high-risk infants worldwide. RSV chemoprophylaxys is expensive. In the US, the AAP recommends the same schedule for all states other than Florida.}
-    \frontmattersection{What this study adds}{We present a method for optimizing the RSV prophylaxis schedule on a regional basis, and show that our method offers only a modest benefit when applied to Connecticut, with no additional benefit when applied to counties within Connecticut.}
-    \clearpage
-    \frontmattersection{Contributors}{Ben Artin implemented and published the R tools used in the analysis, carried out the analysis, drafted the initial manuscript, and reviewed and revised the manuscript. Daniel M. Weinberger obtained the data from CT DPH, proposed the study design, conceptualized the analytic approach, and reviewed and revised the manuscript. Virginia E. Pitzer reviewed and revised the analytic approach, and reviewed and revised the manuscript. All authors approved the final manuscript as submitted and agree to be accountable for all aspects of the work.}
-    \clearpage
-}
+\abstractsection{Background and Objectives}{RSV causes seasonal respiratory infection, with hospitalization rates of up to 50\% in high-risk infants. Palivizumab provides safe and effective, yet costly, immunoprophylaxis. The AAP recommends palivizumab only for high-risk infants and only during the RSV season. Outside of Florida, the current guidelines do not recommend regional adjustments to the timing of the immunoprophylaxis regimen. Our hypothesis is that adjusting the RSV prophylaxis regimen in Connecticut based on spatial variation in the timing of RSV incidence can reduce the disease burden compared to the current AAP-recommended prophylaxis regimen.}
+\abstractsection{Methods}{We obtained weekly RSV-associated hospital admissions by ZIP-code in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We estimated the fraction of all Connecticut RSV cases occurring during the period of protection offered by immunoprophylaxis (``preventable fraction'') under the AAP guidelines. We then used the same model to estimate protection conferred by immunoprophylaxis regimens with alternate start dates, but unchanged duration.}
+\abstractsection{Results}{The fraction of RSV hospitalizations preventable by the AAP guidelines varies by county because of variations in epidemic timing. Prophylaxis regimens adjusted for state- or county-level variation in the timing of RSV seasons are modestly superior to the AAP-recommended regimen. The best alternative strategy yielded a preventable fraction of \Sexpr{regionStrategyCoverage("all", "stateMiddle", 1)} (\Sexpr{regionStrategyCoverageCI("all", "stateMiddle", 1, level)}), compared to \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) for the AAP recommendation.}
+\abstractsection{Conclusions}{Initiating RSV prophylaxis based on state-level data may improve protection compared with the AAP recommendations. In Connecticut, county-level recommendations would provide only a modest additional benefit while adding complexity.}
 
-\postauthor{
-	\vspace{10pt}
-    \affiliations
-    \vspace{10pt}
-    \par{\HorRule}
-}
+\end{abstract}
 
-\date{}
-
-\pagestyle{empty}
 \begin{document}
 
 \maketitle
-\makefrontmatter
 
-% TODO DPH acknowledgement
-% TODO better month labels in onset-offset plots
-
-\thispagestyle{firstpage}
-
-\section*{\centerline{Abstract}}
-
-\abstractsection{Background and Objectives}{RSV causes seasonal respiratory infection, with hospitalization rates of up to 50\% in high-risk infants. Palivizumab provides safe and effective, yet costly, immunoprophylaxis. The AAP recommends palivizumab only for high-risk infants and only during the RSV season. Outside of Florida, the current guidelines do not recommend regional adjustments to the timing of the immunoprophylaxis regimen. Our hypothesis is that adjusting the RSV prophylaxis regimen in Connecticut based on spatial variation in the timing of RSV incidence can reduce the disease burden compared to the current AAP-recommended prophylaxis regimen.}
-
-\abstractsection{Methods}{We obtained weekly RSV-associated hospital admissions by ZIP-code in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We estimated the fraction of all Connecticut RSV cases occurring during the period of protection offered by immunoprophylaxis (``preventable fraction'') under the AAP guidelines. We then used the same model to estimate protection conferred by immunoprophylaxis regimens with alternate start dates, but unchanged duration.}
-
-\abstractsection{Results}{The fraction of RSV hospitalizations preventable by the AAP guidelines varies by county because of variations in epidemic timing. Prophylaxis regimens adjusted for state- or county-level variation in the timing of RSV seasons are modestly superior to the AAP-recommended regimen. The best alternative strategy yielded a preventable fraction of \Sexpr{regionStrategyCoverage("all", "stateMiddle", 1)} (\Sexpr{regionStrategyCoverageCI("all", "stateMiddle", 1, level)}), compared to \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) for the AAP recommendation.}
-
-\abstractsection{Conclusions}{Initiating RSV prophylaxis based on state-level data may improve protection compared with the AAP recommendations. In Connecticut, county-level recommendations would provide only a modest additional benefit while adding complexity.}
+\thispagestyle{empty}
 
 \clearpage
-
-\pagestyle{fancy}
-
-\doublespacing
 
 \section{Introduction}
 
@@ -250,8 +208,6 @@ We also applied 2-week and 4-week rounding to the start and end dates of our six
 
 Our analysis confirms the existence of county-level variation of RSV season timing in Connecticut (defined by RSV season onset and offset) observable at the county level. We have also shown a misalignment between the prophylaxis schedule recommended by the AAP and the timing of the RSV season throughout Connecticut, with most counties' RSV season starting before protection from the first dose of prophylaxis is administered, and ending before protection from the last dose wanes. This misalignment is particularly notable in Fairfield County due to its early season onset.
 
-% Separate paragraph here because seasonal variation above, prophylaxis optimization below
-
 Our effort to optimize timing of the prophylaxis regimen (without changing its duration and therefore its pharmaceutical cost) shows a potential $\sim1\%$ statewide decrease in RSV-associated hospitalizations among high-risk infants each year, primarily in counties with higher RSV burden (Fairfield, Hartford, and New Haven counties). The prophylaxis regimen with which we were able to attain the best improvement is the one in which prophylaxis in each county is timed relative to the midpoint of the RSV season in that county, which simultaneously reduces unprotected cases early in the season and ineffective prophylaxis late in the season. Nevertheless, all of the alternative regimens yielded similar results, with the timing of prophylaxis adjusted in each county or statewide by less than a whole month from the current AAP guidelines. Increasing complexity of practice guidelines would carry with it increased cost of implementation (such as training of clinicians and other healthcare workers); it is therefore not apparent from our research alone that the potential benefits would outweigh the costs. 
 
 Although we found a weak statewide trend in RSV season onset becoming earlier over time, further analysis did not yield any improvements to the preventable fraction of the prophylaxis regimen based on that trend. Since temporal variation in clinical guidelines would lead to a higher implementation burden than spatial variation, we see no reason to base RSV immunoprophylaxis clinical practice guidelines on temporal variation in RSV season timing.
@@ -266,23 +222,29 @@ In areas of Connecticut associated with a relatively high amount of interstate t
 
 In summary, our analysis reveals the potential for a $\sim 1\%$ gain in preventable RSV cases in Connecticut when a locally-tailored two-week (rather than monthly) prophylaxis guideline is used in place of the established AAP guidelines. At an average of $\Sexpr{prettyNum(totalRSV / totalYears, digits=3)}$ RSV-associated hospitalizations per year in children under 2 years old in Connecticut, this corresponds to $\sim \Sexpr{prettyNum(totalRSV / totalYears / 100, digits=3)}$ hospitalizations prevented per year, and an unknown number of prevented cases not necessitating hospitalization. Practical aspects of this potential gain --- such as implementation cost --- require further investigation. Additionally, the method we developed for this analysis can be applied to county-level or state-level analysis of seasonal RSV patterns in other regions, some of which are likely to show a greater relative benefit (due to a greater degree of misalignment between the RSV season and the AAP guidelines' prophylaxis window) as well as a greater absolute benefit (due to population size) than Connecticut. 
 
-\singlespacing
-
-\listoffigures
-
 \phantomsection
 \addcontentsline{toc}{section}{Bibliography}
 \bibliography{RSVOptimization}
+
+\section*{Author contributions statement}
+
+B.A. implemented and published the R tools used in the analysis, carried out the analysis, drafted the initial manuscript, and reviewed and revised the manuscript. D.M.W. obtained the data from CT DPH, proposed the study design, conceptualized the analytic approach, and reviewed and revised the manuscript. V.E.P. reviewed and revised the analytic approach, and reviewed and revised the manuscript. All authors approved the final manuscript as submitted and agree to be accountable for all aspects of the work.
+
+\section*{Additional information}
+
+\textbf{Competing interests:} Virginia E. Pitzer has received reimbursement from Merck and Pfizer for travel expenses to Scientific Input Engagements related to RSV vaccines. Daniel M. Weinberger has received consulting fees from Pfizer, Merck, GSK, and Affinivax for topics unrelated to this manuscript and is the Principal Investigator on a research grant from Pfizer on an unrelated topic. Ben Artin reports no relevant conflicts.
+
+\listoffigures
 
 \cleardoublepage
 \begin{appendices}
 \renewcommand\thesection{\arabic{section}}
 \renewcommand\thefigure{S\arabic{figure}}
 \setcounter{figure}{0}
+\renewcommand{\thesection}{S\arabic{section}}
 \renewcommand{\thesubsection}{S\arabic{section}.\arabic{subsection}}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1em}{}
 
-\doublespacing
 \section{Supplemental methods}
 
 \subsection{Accommodating implementation complexity}
@@ -359,9 +321,7 @@ Compared to our county-level all-years analysis, the three regimens based on sta
 \end{center}
 \end{supplementalfigure}
 
-\singlespacing
 \listofsupplementalfigures
-\doublespacing
 
 \end{appendices}
 

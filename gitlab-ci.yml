@@ -59,17 +59,17 @@ overleaf:
     paths:
       - "${OVERLEAF_ARTIFACTS_DIR}"
 
-aap-pediatrics:
+nature-scirep:
   extends: .docker
   stage: exports
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
     - docker-compose ${COMPOSE_FILES} run paper-figures
-    - docker-compose ${COMPOSE_FILES} run paper-aap-pediatrics
+    - docker-compose ${COMPOSE_FILES} run paper-nature-scirep
   artifacts:
     name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
     paths:
-      - ${REVIEW_ARTIFACTS_DIR}/*.docx
+      - ${REVIEW_ARTIFACTS_DIR}/*.pdf
       - ${REVIEW_ARTIFACTS_DIR}/*-cover.pdf
       - ${REVIEW_ARTIFACTS_DIR}/figures/*Fig*.pdf
 

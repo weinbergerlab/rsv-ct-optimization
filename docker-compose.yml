@@ -52,27 +52,31 @@ services:
                 mkdir -p output/paper
                 cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
                 cp -r paper/structure.tex paper/preamble*.tex output/paper
+                cp -r paper/*.cls paper/*.sty paper/*.ldf output
         volumes:
             - "./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output"
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
 
     ############################################################
     # Commands for exporting for AAP Pediatrics
-    paper-aap-pediatrics:
+    paper-nature-scirep:
         image: paper-tools:dev
         command: 
             - |
                 mkdir -p output/paper
-                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures paper/aap-pediatrics-cover.tex output
-                cp -r paper/structure.tex paper/preamble*.tex paper/export-aap-pediatrics.py paper/reference.docx output/paper 
+                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
+                cp paper/nature-scirep-cover.tex output
+                cp -r paper/structure.tex paper/preamble*.tex paper/export-nature-scirep.py output/paper 
+                cp -r paper/*.cls paper/*.sty paper/*.ldf output
                 pushd output
-                latexmk -pdflua -usepretex="\edef\outputvariant{aappediatrics}" RSVOptimization.tex
-                latexmk -pdflua aap-pediatrics-cover.tex
+                latexmk -pdflua RSVOptimization.tex
+                popd
+                python3 paper/export-nature-scirep.py output/RSVOptimization.tex
+                pushd output
+                latexmk -pdflua RSVOptimization.tex
+                latexmk -pdflua nature-scirep-cover.tex
                 popd
 
-                python3 paper/export-aap-pediatrics.py output/RSVOptimization.tex
-
-                pandoc --verbose --from latex+latex_macros --filter paper/filter-aap-pediatrics.py --to docx --standalone --reference-doc paper/reference.docx --output output/RSVOptimization.docx output/RSVOptimization.tex
         volumes:
             - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
             - "./${REVIEW_ARTIFACTS_DIR:-rsv-optimization}:/paper/output"
