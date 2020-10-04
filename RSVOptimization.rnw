@@ -1,7 +1,7 @@
 \documentclass[10pt,letter]{wlscirep}
 %%% end knitr preamble
 
-% Do some things differently depending on which variant we're compiling
+% Packages and options
 \input{paper/preamble.tex}
 
 %%% begin knitr output
@@ -141,8 +141,6 @@ We defined the fraction of all RSV cases that is preventable by a prophylaxis re
 \item the number of RSV-associated hospitalizations that occur in a given region (state or county) while the prophylaxis regimen offers protection to those who receive prophylaxis as scheduled, and
 \item the total number of RSV-associated hospitalizations that occur in the same region during a single epidemiologic year.
 \end{itemize}
-
-%TODO citation needed re small subgroup
 
 Given that high-risk infants are a small subgroup of the general population, we assumed that our model of RSV hospitalizations among all infants is an unbiased approximation of RSV hospitalizations among high-risk infants, and therefore that the preventable fraction of a prophylactic regimen is an unbiased estimate of the fraction of high-risk infants who benefit from prophylaxis.
 

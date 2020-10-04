@@ -51,7 +51,7 @@ services:
             - |
                 mkdir -p output/paper
                 cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
-                cp -r paper/structure.tex paper/preamble*.tex output/paper
+                cp -r paper/preamble*.tex output/paper
                 cp -r paper/*.cls paper/*.sty paper/*.ldf output
         volumes:
             - "./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output"
@@ -66,7 +66,7 @@ services:
                 mkdir -p output/paper
                 cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
                 cp paper/nature-scirep-cover.tex output
-                cp -r paper/structure.tex paper/preamble*.tex paper/export-nature-scirep.py output/paper 
+                cp -r paper/preamble*.tex paper/export-nature-scirep.py output/paper 
                 cp -r paper/*.cls paper/*.sty paper/*.ldf output
                 pushd output
                 latexmk -pdflua RSVOptimization.tex
