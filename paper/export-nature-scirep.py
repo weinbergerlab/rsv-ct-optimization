@@ -36,17 +36,17 @@ for figM in re.finditer(figRE, tex):
 # Delete knitr preamble
 tex = re.sub(r'(?s)(\\documentclass[^\\]*)\\[^\n]*\n.*%%% end knitr preamble', r'\1\n', tex)
 
-# Migrate figure captions to end of main/supplemental text
+# Migrate figure captions to end of main/supplementary text
 tex = re.sub(figRE, '', tex)
 lof = r"\section{List of figures}" + '\n\n'.join(fr"\textbf{{Figure {idx + 1}: }}{caption}" for (idx, caption) in enumerate(captions['figure']))
 tex = re.sub(r'\\listoffigures', lambda m: lof, tex)
 
-supplof = r"\section{List of supplemental figures}" + '\n\n'.join(fr"\textbf{{Supplemental figure {idx + 1}: }}{caption}" for (idx, caption) in enumerate(captions['supplementalfigure']))
-tex = re.sub(r'\\listofsupplementalfigures', lambda m: supplof, tex)
+supplof = r"\section{List of supplementary figures}" + '\n\n'.join(fr"\textbf{{Supplementary figure {idx + 1}: }}{caption}" for (idx, caption) in enumerate(captions['supplementaryfigure']))
+tex = re.sub(r'\\listofsupplementaryfigures', lambda m: supplof, tex)
 
 # Correct figure references
 tex = re.sub(r'\\ref\{(fig:.*?)\}', lambda m: str(labels['figure'].index(m.group(1)) + 1), tex)
-tex = re.sub(r'\\ref\{(suppfig:.*?)\}', lambda m: str(labels['supplementalfigure'].index(m.group(1)) + 1), tex)
+tex = re.sub(r'\\ref\{(suppfig:.*?)\}', lambda m: str(labels['supplementaryfigure'].index(m.group(1)) + 1), tex)
 
 # Inline the bibliography
 tex = re.sub(r'\\bibliography\{(.*)\}', lambda f: open(f'output/{f.group(1)}.bbl').read(), tex)
