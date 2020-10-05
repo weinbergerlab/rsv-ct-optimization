@@ -1,3 +1,9 @@
+<<dir.create, results='hide', cache=FALSE>>=
+if (!dir.exists(figuresDir)) {
+  dir.create(figuresDir, recursive=TRUE)
+}
+@
+
 <<map, results='hide'>>=
     library(mapproj)
     tikz(sprintf("%s/map.tex", figuresDir), width=1.5*inlinePlotWidth, height=inlinePlotHeight, pointsize=10, standAlone=TRUE)

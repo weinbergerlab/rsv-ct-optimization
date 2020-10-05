@@ -1,0 +1,97 @@
+# Build utils
+
+def knitr(name, srcs, outs, pass_env):
+    src_main = srcs[0]
+    out_main = outs[0]
+    return genrule(
+        name = name,
+        srcs = srcs,
+        outs = outs,
+        tools = ["Rscript"],
+        cmd = f"""ln -s /knitr_cache ./cache; Rscript -e 'renv::load("/renv"); knitr::knit("{src_main}", output="{out_main}")' """,
+        pass_env = pass_env,
+    )
+
+def tex_to_pdf(name, input, srcs=[], deps=[], outs=[]):
+    output = splitext(input)[0] + ".pdf"
+    return genrule(
+        name = name,
+        srcs = srcs,
+        outs = [output] + outs,
+        tools = ["latexmk"],
+        cmd = f"latexmk -cd -pdf {input}",
+        deps = deps,
+    )
+
+# Knit paper and output figures
+knitr(
+    name = "paper_tex",
+    srcs = [
+        'RSVOptimization.rnw', 
+        'analysis/RSV.R', 
+        'paper/paper.R', 
+        'paper/figures.Rnw', 
+        'data/ct rsv time series.csv',
+        'data/ct counties.csv',
+        'data/maps',
+    ],
+    outs = [
+        'paper/RSVOptimization-knit.tex',
+        "paper/figures/map.tex",
+        "paper/figures/seasonByRegion.tex",
+        "paper/figures/coverageByRegionAAP.tex",
+        "paper/figures/coverageByRegionAAPInsight.tex",
+        "paper/figures/coverageByRegionAAPInsight-Standalone.tex",
+        "paper/figures/coverageByRegionRegimen.tex",
+        "paper/figures/coverageByRoundingRegimen.tex",
+        "paper/figures/coverageByRegionRegimenWithSliding.tex",
+        "paper/figures/onsetOffsetByYear.tex",
+    ],
+    pass_env = ['TEX_OUTPUT_DIR', 'KNITR_DRAFT_MODE'],
+)
+
+# Figures
+# figures = ?
+
+# SciRep
+
+# paper_tex_scirep = custom_target('adapt-scirep',
+# 	command: [
+# 		python3, 'paper/export-nature-scirep.py', '@INPUT', '@OUTPUT@'
+# 	],
+# 	input: 'RSVOptimization-knit.tex',
+# 	output: 'RSVOptimization.tex',
+# )
+
+tex_to_pdf(
+    name = 'paper_pdf', 
+    input = "paper/RSVOptimization-knit.tex",
+    srcs = [
+        "paper/wlscirep.cls",
+        "paper/jabbrv.sty",
+        "paper/jabbrv-ltwa-all.ldf",
+        "paper/jabbrv-ltwa-en.ldf",
+        "paper/preamble.tex",
+        "paper/RSVOptimization.bib",
+        "paper/naturemag-doi.bst",
+    ],
+    deps = [
+        ":paper_tex",
+    ]
+)
+
+# mkdir -p output/paper
+# cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
+# cp paper/nature-scirep-cover.tex output
+# cp -r paper/preamble*.tex paper/export-nature-scirep.py output/paper 
+# cp -r paper/*.cls paper/*.sty paper/*.ldf output
+# pushd output
+# latexmk -pdflua RSVOptimization.tex
+# popd
+# python3 paper/export-nature-scirep.py output/RSVOptimization.tex
+# pushd output
+# latexmk -pdflua RSVOptimization.tex
+# latexmk -pdflua nature-scirep-cover.tex
+# popd
+
+# # Overleaf PDF

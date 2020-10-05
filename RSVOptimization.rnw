@@ -2,7 +2,7 @@
 %%% end knitr preamble
 
 % Packages and options
-\input{paper/preamble.tex}
+\input{preamble.tex}
 
 %%% begin knitr output
 <<options, echo=FALSE>>=

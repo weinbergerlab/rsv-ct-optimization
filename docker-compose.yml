@@ -1,95 +1,21 @@
 version: "3.4"
 
 services:
-    ############################################################
-    # Tools for building the paper
-    paper-tools:
-        image: paper-tools:dev
+    paper:
+        image: build-tools:dev
         build:
             context: .
-            target: paper-tools
-       
-    ############################################################
-    # Commands for kniting the paper
-    paper-knit:
-        image: paper-tools:dev
-        entrypoint: ["bash", "-e", "-c"]
+            target: build-tools
         command: 
             - |
-                source data/fetch-data.sh
-                mkdir -p paper/figures
-                Rscript -e "knitr::knit('RSVOptimization.rnw', output='knitr/RSVOptimization.tex')"
-                rm -rf knitr/figures
-                mv 'paper/figures' 'knitr/figures' 
+                ~/.please/plz build --show_all_output :paper_pdf
         environment:
             CI_JOB_TOKEN: "${CI_JOB_TOKEN:-}"
             DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
             TEX_OUTPUT_DIR: "."
             KNITR_DRAFT_MODE: "${KNITR_DRAFT_MODE:-TRUE}"
         volumes:
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
-            - "./cache:/paper/cache"
+            - "${BUILD_DIR:-.}:/paper"
+            - "./cache:/knitr_cache"
             - "${DATA_FETCH_COMMAND:-./data/fetch-dev-data.sh}:/paper/data/fetch-data.sh"
-            - "./data/ct rsv time series.csv:/paper/data/rsv.csv" # This is only present for local development
-       
-    ############################################################
-    # Commands for converting figures to PDF and TIFF
-    paper-figures:
-        image: paper-tools:dev
-        command: 
-            - |
-                cd knitr/figures
-                find . -name "*.tex" -exec latexmk -pdf {} \;
-        volumes:
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
-
-    ############################################################
-    # Commands for exporting for overleaf
-    paper-overleaf:
-        image: paper-tools:dev
-        command: 
-            - |
-                mkdir -p output/paper
-                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
-                cp -r paper/preamble*.tex output/paper
-                cp -r paper/*.cls paper/*.sty paper/*.ldf output
-        volumes:
-            - "./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output"
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
-
-    ############################################################
-    # Commands for exporting for AAP Pediatrics
-    paper-nature-scirep:
-        image: paper-tools:dev
-        command: 
-            - |
-                mkdir -p output/paper
-                cp -r knitr/RSVOptimization.tex RSVOptimization.bib knitr/figures output
-                cp paper/nature-scirep-cover.tex output
-                cp -r paper/preamble*.tex paper/export-nature-scirep.py output/paper 
-                cp -r paper/*.cls paper/*.sty paper/*.ldf output
-                pushd output
-                latexmk -pdflua RSVOptimization.tex
-                popd
-                python3 paper/export-nature-scirep.py output/RSVOptimization.tex
-                pushd output
-                latexmk -pdflua RSVOptimization.tex
-                latexmk -pdflua nature-scirep-cover.tex
-                popd
-
-        volumes:
-            - "./${KNITR_OUTPUT_DIR:-knitr}:/paper/knitr"
-            - "./${REVIEW_ARTIFACTS_DIR:-rsv-optimization}:/paper/output"
-
-    ############################################################
-    # Commands for generating our PDF
-    paper-pdf:
-        image: paper-tools:dev
-        command: 
-            - |
-                cd output
-                latexmk -pdflua RSVOptimization.tex
-        volumes:
-            - ./${OVERLEAF_ARTIFACTS_DIR:-overleaf}:/paper/output
-
-
+            - "./data/ct rsv time series.csv:/paper/data/rsv.csv" # This is only present for local build

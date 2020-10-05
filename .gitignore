@@ -24,3 +24,7 @@ Analysis/plots/**/*.pdf
 /data/ct rsv time series.csv
 /cache
 /rsv-optimization
+
+# Please output directory and local configuration
+plz-out
+.plzconfig.local
