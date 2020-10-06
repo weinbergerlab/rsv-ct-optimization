@@ -1,14 +1,18 @@
 version: "3.4"
 
 services:
-    paper:
-        image: build-tools:dev
+    tools:
+        image: rsv-optimization-tools:dev
         build:
             context: .
-            target: build-tools
+            target: rsv-optimization-tools
+
+    paper:
+        image: rsv-optimization-tools:dev
         command: 
             - |
-                ~/.please/plz build --show_all_output :paper_pdf
+                ~/.please/plz build --show_all_output :journal-pdf :journal-cover-pdf 
+                ~/.please/plz export --output output outputs :journal-pdf :journal-cover-pdf :journal-tex :tex-ancillary
         environment:
             CI_JOB_TOKEN: "${CI_JOB_TOKEN:-}"
             DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
@@ -17,5 +21,5 @@ services:
         volumes:
             - "${BUILD_DIR:-.}:/paper"
             - "./cache:/knitr_cache"
-            - "${DATA_FETCH_COMMAND:-./data/fetch-dev-data.sh}:/paper/data/fetch-data.sh"
-            - "./data/ct rsv time series.csv:/paper/data/rsv.csv" # This is only present for local build
+            - "${DATA_FETCH_COMMAND:-./data/fetch-dev-data.sh}:/data/fetch-data.sh"
+            - "./data/ct rsv time series.csv:/data/rsv.csv" # This is only present for local build

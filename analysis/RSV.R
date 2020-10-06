@@ -15,7 +15,7 @@ data(zipcode)
 set.seed(0)
 
 if (as.logical(Sys.getenv("KNITR_DRAFT_MODE", "FALSE"))) {
-  simulations = 5
+  simulations = 1
 } else {
   simulations = 2000
 }

@@ -1,16 +1,7 @@
 version: "3.4"
 
 services:
-    build-tools:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/build-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-knit:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/build-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-figures:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/build-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-overleaf:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/build-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-nature-scirep:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/build-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-pdf:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/build-tools-ci:iid-${CI_PIPELINE_IID}
-
+    tools:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/rsv-optimization-tools-ci:iid-${CI_PIPELINE_IID}
+    paper:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/rsv-optimization-tools-ci:iid-${CI_PIPELINE_IID}
