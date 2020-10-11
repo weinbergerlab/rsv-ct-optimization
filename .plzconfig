@@ -1,2 +1,5 @@
 [Parse]
 buildfilename = build.plz
+
+[Build]
+timeout = 144000m
