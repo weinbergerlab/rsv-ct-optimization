@@ -22,4 +22,4 @@ services:
             - "${BUILD_DIR:-.}:/paper"
             - "./cache:/knitr_cache"
             - "${DATA_FETCH_COMMAND:-./data/fetch-dev-data.sh}:/data/fetch-data.sh"
-            - "./data/ct rsv time series.csv:/data/rsv.csv" # This is only present for local build
+            - "./ct rsv time series.csv:/data/rsv.csv" # This is only present for local build

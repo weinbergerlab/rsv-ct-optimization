@@ -45,7 +45,6 @@ knitr(
         'analysis/RSV.R', 
         'paper/paper.R', 
         'paper/figures.Rnw', 
-        'data/ct rsv time series.csv',
         'data/ct counties.csv',
         'data/maps',
     ],
