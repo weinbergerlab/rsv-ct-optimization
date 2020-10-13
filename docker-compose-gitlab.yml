@@ -1,16 +1,7 @@
 version: "3.4"
 
 services:
-    paper-tools:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-knit:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-figures:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-overleaf:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-aap-pediatrics:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
-    paper-pdf:
-        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/paper-tools-ci:iid-${CI_PIPELINE_IID}
-
+    tools:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/rsv-optimization-tools-ci:iid-${CI_PIPELINE_IID}
+    paper:
+        image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/rsv-optimization-tools-ci:iid-${CI_PIPELINE_IID}

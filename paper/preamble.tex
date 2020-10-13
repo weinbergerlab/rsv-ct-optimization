@@ -1,3 +1,5 @@
+\usepackage[T1]{fontenc}
+
 \usepackage{verbatim}
 \usepackage{float}
 \floatplacement{figure}{H}
@@ -10,24 +12,33 @@
 \usepackage{textcomp}
 \usepackage{setspace}
 
-\usepackage[hidelinks]{hyperref}
-\usepackage[svgnames]{xcolor} % Must go before tikz and before structure.tex
 \usepackage{tikz}
 \usepackage{standalone}
-% \usepackage{draftwatermark}
-% \SetWatermarkScale{1}
-% \SetWatermarkAngle{45}
-% \SetWatermarkFontSize{4ex}
-% \SetWatermarkHorCenter{12ex}
-% \SetWatermarkVerCenter{12ex}
-% \SetWatermarkLightness{.5}
-% \SetWatermarkText{DRAFT 3}
 
-\input{paper/structure.tex}
-\usepackage{amssymb}
-\usepackage{wasysym}
+\usepackage[english]{babel} % English language hyphenation
 
-\usepackage[bf,medium,raggedright,compact]{titlesec}
+\usepackage{microtype} % Better typography
+
+\usepackage{amsmath,amsfonts,amsthm} % Math packages for equations
+
+\usepackage[labelfont=bf, textfont=it]{caption} % Custom captions under/above tables and figures
+\usepackage{subcaption}
+\DeclareCaptionType{supplementaryfigure}[Supplementary Figure][List of supplementary figures]
+
+\usepackage{booktabs} % Horizontal rules in tables
+
+\usepackage{graphicx} % Required for adding images
+
+\usepackage{enumitem} % Required for customising lists
+\setlist{noitemsep} % Remove spacing between bullet/numbered list elements
+
+\usepackage{sectsty} % Enables custom section titles
+\allsectionsfont{\usefont{OT1}{phv}{b}{n}} % Change the font of all section commands (Helvetica)
+
+\usepackage{amssymb} % Symbols
+\usepackage{wasysym} % Symbols
+
+% Section heading typesetting and numbering
 \titleformat{\section}{\normalfont\large\bfseries\scshape}{\thesection}{1em}{}
 \titleformat{\subsection}{\normalfont\normalsize\bfseries}{}{0em}{}
 \setcounter{secnumdepth}{3}
@@ -36,15 +47,11 @@
 \usepackage{graphicx}
 \usepackage{indentfirst}
 
-\newcommand{\abstractsection}[2]{\par\vspace{0.5\baselineskip}\noindent\textbf{\textsc{#1:}} #2}
-\newcommand{\titlesection}[2]{\par\vspace{0.5\baselineskip}\noindent\textbf{\textsc{#1:}} #2}
-\newcommand{\frontmattersection}[2]{}
-\newcommand{\corrfull}[2]{}
-\newcommand{\corremail}[2]{\titlesection{#1}{#2}}
-\newcommand{\makefrontmatter}{}
+% Abstract typesetting
+\newcommand{\abstractsection}[2]{\textbf{#1:} #2}%
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
-\renewenvironment{knitrout}{\expandafter\comment}{\expandafter\endcomment}
 
+% Lists of figures
 \renewcommand{\listoffigures}{}
-\renewcommand{\listofsupplementalfigures}{}
+\renewcommand{\listofsupplementaryfigures}{}
