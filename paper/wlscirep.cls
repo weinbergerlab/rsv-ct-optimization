@@ -12,6 +12,7 @@
 \ProvidesClass{wlscirep}[08/08/2020, v1.4]
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[english]{babel}
+\RequirePackage{etoolbox}
 
 \RequirePackage{ifthen}
 \RequirePackage{calc}
@@ -165,6 +166,8 @@ THE ABSTRACT\vskip12pt}\let\go\relax\fi
 {\raggedright\sffamily\bfseries\fontsize{20}{25}\selectfont \@title\par}%
 \vskip10pt
 {\raggedright\sffamily\fontsize{12}{16}\selectfont  \@author\par}
+\ifdef{\noabstract}{}%
+{%
 \vskip18pt%
 {%
 \noindent
@@ -183,6 +186,7 @@ THE ABSTRACT\vskip12pt}\let\go\relax\fi
 % \parbox{\dimexpr\linewidth-2\fboxsep\relax}{%
 % {\color{color1}\keywordname\hspace*{1em}} \@keywords%
 %}%
+}%
 }%
 \vskip25pt%
 }%
