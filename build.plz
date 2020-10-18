@@ -11,7 +11,9 @@ def knitr(name, knitr_in, srcs, deps=[], knitr_out, outs, pass_env):
         pass_env = pass_env,
     )
 
-def tex_to_pdf(name, tex_input, tex_output=None, srcs=[], deps=[], outs=None):
+def tex_to_pdf(name, tex_input, tex_output=None, srcs=[], deps=[], pretex="", outs=None):
+    if pretex:
+        pretex = f"-usepretex='{pretex}'"
     if tex_output is None:
         if outs is None:
             outs = [splitext(tex_input)[0] + ".pdf"]
@@ -21,7 +23,7 @@ def tex_to_pdf(name, tex_input, tex_output=None, srcs=[], deps=[], outs=None):
             deps = deps,
             outs = outs,
             tools = ["latexmk"],
-            cmd = f"latexmk -cd -pdf {tex_input}",
+            cmd = f"latexmk -cd -pdf {pretex} {tex_input}",
         )
     else:
         tex_input_real = splitext(tex_output)[0] + ".tex"
@@ -33,7 +35,7 @@ def tex_to_pdf(name, tex_input, tex_output=None, srcs=[], deps=[], outs=None):
             deps = deps,
             outs = outs,
             tools = ["latexmk"],
-            cmd = f"cp {tex_input} {tex_input_real} && latexmk -cd -pdf {tex_input_real}",
+            cmd = f"cp {tex_input} {tex_input_real} && latexmk -cd -pdf {pretex} {tex_input_real}",
         )
 
 # Knit paper and output figures
