@@ -36,6 +36,8 @@ knitr::read_chunk("paper/paper.R")
 \affil[1]{Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University}
 \affil[*]{ben@artins.org}
 
+\ifundef\skipmain{
+
 \begin{abstract}
 
 \abstractsection{Background and Objectives}{Respiratory syncytial virus (RSV) causes seasonal respiratory infection, with hospitalization rates of up to 50\% in high-risk infants. Palivizumab provides safe and effective, yet costly, immunoprophylaxis. The American Academy of Pediatrics (AAP) recommends palivizumab only for high-risk infants and only during the RSV season. Outside of Florida, the current guidelines do not recommend regional adjustments to the timing of the immunoprophylaxis regimen. Our hypothesis is that adjusting the RSV prophylaxis regimen in Connecticut based on spatial variation in the timing of RSV incidence can reduce the disease burden compared to the current AAP-recommended prophylaxis regimen.}
@@ -45,14 +47,28 @@ knitr::read_chunk("paper/paper.R")
 
 \end{abstract}
 
+}{ 
+% suppress abstract in supplement
+\renewcommand{\@maketitle}{%
+{%
+\thispagestyle{empty}%
+\vskip-36pt%
+{\raggedright\sffamily\bfseries\fontsize{20}{25}\selectfont \@title\par}%
+\vskip10pt
+{\raggedright\sffamily\fontsize{12}{16}\selectfont  \@author\par}
+\vskip10pt%
+}%
+}%
+}
+
 \begin{document}
 
 \maketitle
 
 \thispagestyle{empty}
 
+\ifdef\skipmain{}{
 \clearpage
-
 \section{Introduction}
 
 RSV causes upper respiratory tract infections in people of all ages. In adults, RSV infection is typically asymptomatic or gives rise to mild respiratory illness. However, RSV infection often incites more serious respiratory illness in children, with hospitalization rates as high as 4.4\% in infants with no comorbidities, making RSV a leading cause of hospitalization among infants.\cite{Hall:2009gi,Hall:2013jo,Zhou:2012ho,Boyce:2000gz}
@@ -235,6 +251,10 @@ B.A. implemented and published the R tools used in the analysis, carried out the
 \listoffigures
 
 \cleardoublepage
+} % main
+
+\ifdef\skipsupplement{}{
+
 \begin{appendices}
 \renewcommand\thesection{\arabic{section}}
 \renewcommand\thefigure{S\arabic{figure}}
@@ -323,4 +343,5 @@ Compared to our county-level all-years analysis, the three regimens based on sta
 
 \end{appendices}
 
+} % supplement
 \end{document}

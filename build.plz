@@ -160,6 +160,18 @@ tex_to_pdf(
         ":journal-tex",
         ":tex-ancillary",
     ],
+    pretex = "\def\skipsupplement{}",
+)
+
+tex_to_pdf(
+    name = 'journal-supp-pdf', 
+    tex_input = "paper/RSVOptimization.tex",
+    tex_output = "paper/RSVOptimizationSupplement.pdf",
+    deps = [
+        ":journal-tex",
+        ":tex-ancillary",
+    ],
+    pretex = "\def\skipmain{}",
 )
 
 tex_to_pdf(
