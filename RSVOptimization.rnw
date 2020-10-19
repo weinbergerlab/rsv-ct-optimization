@@ -34,7 +34,7 @@ knitr::read_chunk("paper/paper.R")
 \author[1]{Virginia E. Pitzer, ScD}
 \author[1]{Daniel M. Weinberger, PhD}
 \affil[1]{Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University}
-\affil[*]{ben@artins.org}
+\affil[*]{Correspondence to ben@artins.org}
 
 % No abstract in supplement
 \ifdef\skipmain{\def\noabstract}{
