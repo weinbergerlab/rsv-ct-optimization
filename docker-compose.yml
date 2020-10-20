@@ -11,8 +11,8 @@ services:
         image: rsv-optimization-tools:dev
         command: 
             - |
-                ~/.please/plz build --show_all_output :journal-pdf :journal-cover-pdf 
-                ~/.please/plz export --output output outputs :journal-pdf :journal-cover-pdf :journal-tex :tex-ancillary
+                ~/.please/plz build --show_all_output :journal-pdf :journal-supp-pdf :journal-cover-pdf 
+                ~/.please/plz export --output output outputs :journal-pdf :journal-supp-pdf :journal-cover-pdf :journal-tex :tex-ancillary
         environment:
             CI_JOB_TOKEN: "${CI_JOB_TOKEN:-}"
             DATASET_PASSWORD: "${DATASET_PASSWORD:-}"
