@@ -236,11 +236,11 @@ B.A. implemented and published the R tools used in the analysis, carried out the
 
 \listoffigures
 
-\cleardoublepage
 } % main
 
 \ifdef\skipsupplement{}{
 
+\cleardoublepage
 \begin{appendices}
 \renewcommand\thesection{\arabic{section}}
 \renewcommand\thefigure{S\arabic{figure}}
