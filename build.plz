@@ -1,0 +1,184 @@
+# Build utils
+
+def knitr(name, knitr_in, srcs, deps=[], knitr_out, outs, pass_env):
+    return genrule(
+        name = name,
+        srcs = srcs,
+        deps = deps,
+        outs = [knitr_out] + outs,
+        tools = ["Rscript"],
+        cmd = f"""source /data/fetch-data.sh; ln -s /knitr_cache ./cache; Rscript -e 'renv::load("/renv"); knitr::knit("{knitr_in}", output="{knitr_out}")' """,
+        pass_env = pass_env,
+    )
+
+def tex_to_pdf(name, tex_input, tex_output=None, srcs=[], deps=[], pretex="", outs=None):
+    if pretex:
+        pretex = f"-usepretex='{pretex}'"
+    if tex_output is None:
+        if outs is None:
+            outs = [splitext(tex_input)[0] + ".pdf"]
+        return genrule(
+            name = name,
+            srcs = srcs,
+            deps = deps,
+            outs = outs,
+            tools = ["latexmk"],
+            cmd = f"latexmk -cd -pdf {pretex} {tex_input}",
+        )
+    else:
+        tex_input_real = splitext(tex_output)[0] + ".tex"
+        if outs is None:
+            outs = [splitext(tex_input_real)[0] + ".pdf"]
+        return genrule(
+            name = name,
+            srcs = srcs,
+            deps = deps,
+            outs = outs,
+            tools = ["latexmk"],
+            cmd = f"cp {tex_input} {tex_input_real} && latexmk -cd -pdf {pretex} {tex_input_real}",
+        )
+
+# Knit paper and output figures
+knitr(
+    name = "paper-tex",
+    knitr_in = 'RSVOptimization.rnw',
+    srcs = [
+        'RSVOptimization.rnw', 
+        'analysis/RSV.R', 
+        'paper/paper.R', 
+        'paper/figures.Rnw', 
+        'data/ct counties.csv',
+        'data/maps',
+    ],
+    knitr_out = 'paper/RSVOptimization-knit.tex',
+    outs = [
+        "paper/figures/map.tex",
+        "paper/figures/seasonByRegion.tex",
+        "paper/figures/coverageByRegionAAP.tex",
+        "paper/figures/coverageByRegionAAPInsight.tex",
+        "paper/figures/coverageByRegionAAPInsight-Standalone.tex",
+        "paper/figures/coverageByRegionRegimen.tex",
+        "paper/figures/coverageByRoundingRegimen.tex",
+        "paper/figures/coverageByRegionRegimenWithSliding.tex",
+        "paper/figures/onsetOffsetByYear.tex",
+    ],
+    pass_env = ['TEX_OUTPUT_DIR', 'KNITR_DRAFT_MODE'],
+)
+
+# Figures
+def figures_tex_to_pdf(name, figures):
+    for figure in figures:
+        tex_to_pdf(
+            name=f"{name}.{figure}", 
+            tex_input=f"paper/figures/{figure}.tex", 
+            deps=[":paper-tex"],
+            outs=[f"paper/figures/{figure}.pdf"],
+        )
+    filegroup(
+        name=name, 
+        exported_deps=[f":{name}.{figure}" for figure in figures],
+    )
+
+figures_tex_to_pdf("figures", [
+    "map",
+    "seasonByRegion",
+    "coverageByRegionAAP",
+    "coverageByRegionAAPInsight",
+    "coverageByRegionAAPInsight-Standalone",
+    "coverageByRegionRegimen",
+    "coverageByRoundingRegimen",
+    "coverageByRegionRegimenWithSliding",
+    "onsetOffsetByYear",
+])
+
+# Generate bbl
+filegroup(
+    name = 'tex-ancillary', 
+    srcs = [
+        "paper/wlscirep.cls",
+        "paper/jabbrv.sty",
+        "paper/jabbrv-ltwa-all.ldf",
+        "paper/jabbrv-ltwa-en.ldf",
+        "paper/preamble.tex",
+        "paper/naturemag-doi.bst",
+    ],
+)
+
+filegroup(
+    name = 'tex-bib', 
+    srcs = [
+        "paper/RSVOptimization.bib",
+    ],
+)
+
+tex_to_pdf(
+    name = 'paper-bbl', 
+    tex_input = "paper/RSVOptimization-knit.tex",
+    tex_output = "paper/RSVOptimization.pdf",
+    deps = [
+        ":paper-tex",
+        ":tex-ancillary",
+        ":tex-bib",
+    ],
+    outs = [
+        "paper/RSVOptimization.bbl",
+    ],
+)
+
+# SciRep adjustments to tex and figure files
+genrule(
+    name = "journal-tex",
+    srcs = [
+        "paper/export-nature-scirep.py",
+    ],
+    deps = [
+        ":paper-tex",
+        ":paper-bbl",
+        ":figures",
+    ],
+    outs = [
+        'paper/RSVOptimization.tex',
+        'paper/figures/Fig1.pdf',
+        'paper/figures/Fig2.pdf',
+        'paper/figures/Fig3.pdf',
+        'paper/figures/Fig4.pdf',
+        'paper/figures/Fig5.pdf',
+        'paper/figures/SuppFig1.pdf',
+        'paper/figures/SuppFig2.pdf',
+        'paper/figures/SuppFig3.pdf',
+    ],
+    tools = [
+        "python3",
+    ],
+    cmd = f"python3 paper/export-nature-scirep.py paper/RSVOptimization-knit.tex paper/RSVOptimization.tex",
+)
+
+tex_to_pdf(
+    name = 'journal-pdf', 
+    tex_input = "paper/RSVOptimization.tex",
+    deps = [
+        ":journal-tex",
+        ":tex-ancillary",
+    ],
+    pretex = "\def\skipsupplement{}",
+)
+
+tex_to_pdf(
+    name = 'journal-supp-pdf', 
+    tex_input = "paper/RSVOptimization.tex",
+    tex_output = "paper/RSVOptimizationSupplement.pdf",
+    deps = [
+        ":journal-tex",
+        ":tex-ancillary",
+    ],
+    pretex = "\def\skipmain{}",
+)
+
+tex_to_pdf(
+    name = 'journal-cover-pdf', 
+    tex_input = "paper/nature-scirep-cover.tex",
+    srcs = [
+        "paper/nature-scirep-cover.tex",
+    ],
+)
+

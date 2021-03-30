@@ -1,6 +1,6 @@
 ############################################################
 # R with packages and libraries we need
-FROM rocker/r-ver:4.0.2 AS r
+FROM rocker/r-ver:4.0.2 AS rsv-optimization-tools
 LABEL maintainer="Ben Artin <ben@artins.org>"
 
 ### Setup apt packages needed to build the image
@@ -13,8 +13,12 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
 	libgdal26
 
 ############################################################
-# Tex environment we use to build the paper (it includes R because of knitr)
-FROM r AS tex
+# Please for building
+
+RUN curl https://get.please.build | bash
+
+############################################################
+# Tex packages
 
 RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends \
 	wget \
@@ -39,24 +43,19 @@ RUN tlmgr install ${TEX_PACKAGES} || tlmgr install ${TEX_PACKAGES}
 RUN updmap-user
 RUN luaotfload-tool -u
 
-# Nature citation style from journal
-COPY paper/naturemag-doi.bst /root/texmf/bibtex/bst/
-RUN kpsewhich naturemag-doi.bst
-
-ENTRYPOINT ["/bin/bash", "-c"]
-
 ############################################################
 # R with dependencies for building the paper
-FROM tex AS paper-tools
 
-WORKDIR /paper
+WORKDIR /renv
 
 RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends \
 	gpg \
 	git-lfs \
-	pandoc \
 	poppler-utils \
 	imagemagick
+
+# Need renv globally to make builds work
+RUN install2.r renv
 
 COPY .Rprofile .Rprofile
 COPY renv renv
@@ -65,11 +64,6 @@ RUN Rscript -e "renv::install('devtools')"
 COPY renv.lock renv.lock
 RUN Rscript -e "renv::restore()"
 
-RUN apt-get update -y -qq && apt-get install -y -qq --no-install-recommends \
-	python3-pip
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-RUN pip3 install pandocfilters
-
-COPY . .
+WORKDIR /paper
 
 ENTRYPOINT ["/bin/bash", "-e", "-c"]

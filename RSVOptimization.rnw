@@ -2,7 +2,7 @@
 %%% end knitr preamble
 
 % Packages and options
-\input{paper/preamble.tex}
+\input{preamble.tex}
 
 %%% begin knitr output
 <<options, echo=FALSE>>=
@@ -34,16 +34,18 @@ knitr::read_chunk("paper/paper.R")
 \author[1]{Virginia E. Pitzer, ScD}
 \author[1]{Daniel M. Weinberger, PhD}
 \affil[1]{Department of Epidemiology of Microbial Diseases, Yale School of Public Health, Yale University}
-\affil[*]{ben@artins.org}
+\affil[*]{Correspondence to ben@artins.org}
 
+% No abstract in supplement
+\ifdef\skipmain{\def\noabstract}{
 \begin{abstract}
-
-\abstractsection{Background and Objectives}{RSV causes seasonal respiratory infection, with hospitalization rates of up to 50\% in high-risk infants. Palivizumab provides safe and effective, yet costly, immunoprophylaxis. The AAP recommends palivizumab only for high-risk infants and only during the RSV season. Outside of Florida, the current guidelines do not recommend regional adjustments to the timing of the immunoprophylaxis regimen. Our hypothesis is that adjusting the RSV prophylaxis regimen in Connecticut based on spatial variation in the timing of RSV incidence can reduce the disease burden compared to the current AAP-recommended prophylaxis regimen.}
+\abstractsection{Background and Objectives}{Respiratory syncytial virus (RSV) causes seasonal respiratory infection, with hospitalization rates of up to 50\% in high-risk infants. Palivizumab provides safe and effective, yet costly, immunoprophylaxis. The American Academy of Pediatrics (AAP) recommends palivizumab only for high-risk infants and only during the RSV season. Outside of Florida, the current guidelines do not recommend regional adjustments to the timing of the immunoprophylaxis regimen. Our hypothesis is that adjusting the RSV prophylaxis regimen in Connecticut based on spatial variation in the timing of RSV incidence can reduce the disease burden compared to the current AAP-recommended prophylaxis regimen.}
 \abstractsection{Methods}{We obtained weekly RSV-associated hospital admissions by ZIP-code in Connecticut between \Sexpr{formatMonth(startDate)} and \Sexpr{formatMonth(endDate)}. We estimated the fraction of all Connecticut RSV cases occurring during the period of protection offered by immunoprophylaxis (``preventable fraction'') under the AAP guidelines. We then used the same model to estimate protection conferred by immunoprophylaxis regimens with alternate start dates, but unchanged duration.}
 \abstractsection{Results}{The fraction of RSV hospitalizations preventable by the AAP guidelines varies by county because of variations in epidemic timing. Prophylaxis regimens adjusted for state- or county-level variation in the timing of RSV seasons are modestly superior to the AAP-recommended regimen. The best alternative strategy yielded a preventable fraction of \Sexpr{regionStrategyCoverage("all", "stateMiddle", 1)} (\Sexpr{regionStrategyCoverageCI("all", "stateMiddle", 1, level)}), compared to \Sexpr{regionStrategyCoverage("all", "aap", 0)} (\Sexpr{regionStrategyCoverageCI("all", "aap", 0, level)}) for the AAP recommendation.}
 \abstractsection{Conclusions}{Initiating RSV prophylaxis based on state-level data may improve protection compared with the AAP recommendations. In Connecticut, county-level recommendations would provide only a modest additional benefit while adding complexity.}
 
 \end{abstract}
+}
 
 \begin{document}
 
@@ -51,8 +53,8 @@ knitr::read_chunk("paper/paper.R")
 
 \thispagestyle{empty}
 
+\ifdef\skipmain{}{
 \clearpage
-
 \section{Introduction}
 
 RSV causes upper respiratory tract infections in people of all ages. In adults, RSV infection is typically asymptomatic or gives rise to mild respiratory illness. However, RSV infection often incites more serious respiratory illness in children, with hospitalization rates as high as 4.4\% in infants with no comorbidities, making RSV a leading cause of hospitalization among infants.\cite{Hall:2009gi,Hall:2013jo,Zhou:2012ho,Boyce:2000gz}
@@ -75,7 +77,7 @@ Motivated by the AAP's recognition of the significance of spatial variation in f
 
 \subsection{Source of data}
 
-We obtained data consisting of all hospitalizations among children <2 years old in Connecticut from 1996 to 2013 from the Connecticut State Inpatient Database through the CT DPH. The relevant variables in the data were ZIP code of residence, patient age, ICD-9 defined diagnoses (up to 10 diagnoses per hospital admission), and week and year of hospital admission. The study was approved by the Human Investigation Committees at Yale University and the CT DPH. The authors assume full responsibility for analyses and interpretation of the data obtained from CT DPH.
+We obtained data consisting of all hospitalizations among children <2 years old in Connecticut from 1996 to 2013 from the Connecticut State Inpatient Database through the Connecticut Department of Public Health (CT DPH). The relevant variables in the data were ZIP code of residence, patient age, ICD-9 defined diagnoses (up to 10 diagnoses per hospital admission), and week and year of hospital admission. The study was approved by the Human Investigation Committees at Yale University and the CT DPH. The authors assume full responsibility for analyses and interpretation of the data obtained from CT DPH.
 
 \subsection{Definitions}
 
@@ -234,6 +236,10 @@ B.A. implemented and published the R tools used in the analysis, carried out the
 
 \listoffigures
 
+} % main
+
+\ifdef\skipsupplement{}{
+
 \cleardoublepage
 \begin{appendices}
 \renewcommand\thesection{\arabic{section}}
@@ -323,4 +329,5 @@ Compared to our county-level all-years analysis, the three regimens based on sta
 
 \end{appendices}
 
+} % supplement
 \end{document}

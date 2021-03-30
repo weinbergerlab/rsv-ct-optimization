@@ -6,9 +6,15 @@ import re
 import sys
 import os
 import shutil
+import argparse
 
-# Inline the bibliography
-tex = open(sys.argv[1]).read()
+parser = argparse.ArgumentParser()
+parser.add_argument("input")
+parser.add_argument("output")
+
+args = parser.parse_args()
+
+tex = open(args.input).read()
 
 # Get the figure names (in order) and rename the images
 # Also pull out captions and labels to build list of figures and update references later
@@ -28,7 +34,7 @@ for figM in re.finditer(figRE, tex):
 
 	figIdx = len(captions[figType]) + 1
 	figName = f"Fig{ figIdx }.pdf" if figType == 'figure' else f"SuppFig{ figIdx }.pdf"
-	shutil.copy(f'output/figures/{ m.group(1) }.pdf', f'output/figures/{ figName }')
+	shutil.copy(f'paper/figures/{ m.group(1) }.pdf', f'paper/figures/{ figName }')
 
 	captions[figType].append(re.search(captionRE, figM.group(0)).group(2))
 	labels[figType].append(re.search(labelRE, figM.group(0)).group(1))
@@ -49,6 +55,6 @@ tex = re.sub(r'\\ref\{(fig:.*?)\}', lambda m: str(labels['figure'].index(m.group
 tex = re.sub(r'\\ref\{(suppfig:.*?)\}', lambda m: str(labels['supplementaryfigure'].index(m.group(1)) + 1), tex)
 
 # Inline the bibliography
-tex = re.sub(r'\\bibliography\{(.*)\}', lambda f: open(f'output/{f.group(1)}.bbl').read(), tex)
+tex = re.sub(r'\\bibliography\{(.*)\}', lambda f: open(f'paper/{f.group(1)}.bbl').read(), tex)
 
-open(sys.argv[1], 'w').write(tex)
+open(args.output, 'w').write(tex)

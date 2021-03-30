@@ -11,9 +11,7 @@ if (texOutputDir == "") {
   texOutputDir = ".texpadtmp"
 }
 figuresDir = paste0(texOutputDir, "/figures")
-if (!dir.exists(figuresDir)) {
-  dir.create(figuresDir, recursive=TRUE)
-}
+
 options(
   tikzMetricsDictionary=paste0(texOutputDir, '/tikzDictionary.dat'),
   tikzDocumentDeclaration='\\documentclass[tikz]{standalone}',

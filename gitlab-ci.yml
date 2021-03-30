@@ -1,13 +1,8 @@
 stages:
   - tools
-  - knitr
-  - exports
-  - pdf
+  - journal
   
 variables:
-  KNITR_OUTPUT_DIR: "knitr"
-  OVERLEAF_ARTIFACTS_DIR: "overleaf"
-  REVIEW_ARTIFACTS_DIR: rsv-optimization
   COMPOSE_FILES: --file docker-compose.yml --file docker-compose-gitlab.yml
   
 .docker:
@@ -26,62 +21,23 @@ tools:
   extends: 
     - .docker
   script:
-    - gitlab-docker-compose ${COMPOSE_FILES} --cache-from main paper-tools
+    - gitlab-docker-compose ${COMPOSE_FILES} --cache-from main tools
 
-knitr:
-  stage: knitr
-  extends: 
-    - .docker
+nature-scirep:
+  extends: .docker
   tags:
     - docker-mem:3
+  stage: journal
   variables:
     KNITR_DRAFT_MODE: "FALSE"
-  script:
-    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker-compose ${COMPOSE_FILES} run paper-knit
   cache:
     key: knitr
     paths:
       - cache
-  artifacts:
-    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-knitr"
-    paths:
-      - "${KNITR_OUTPUT_DIR}"
-
-overleaf:
-  extends: .docker
-  stage: exports
   script:
     - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker-compose ${COMPOSE_FILES} run paper-overleaf
+    - docker-compose ${COMPOSE_FILES} run paper
   artifacts:
-    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
+    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-nature-scirep"
     paths:
-      - "${OVERLEAF_ARTIFACTS_DIR}"
-
-nature-scirep:
-  extends: .docker
-  stage: exports
-  script:
-    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker-compose ${COMPOSE_FILES} run paper-figures
-    - docker-compose ${COMPOSE_FILES} run paper-nature-scirep
-  artifacts:
-    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-overleaf"
-    paths:
-      - ${REVIEW_ARTIFACTS_DIR}/*.pdf
-      - ${REVIEW_ARTIFACTS_DIR}/*-cover.pdf
-      - ${REVIEW_ARTIFACTS_DIR}/figures/*Fig*.pdf
-
-pdf:
-  stage: pdf
-  extends: 
-    - .docker
-  script:
-    - docker login --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" "${CI_REGISTRY}"
-    - docker-compose ${COMPOSE_FILES} run paper-pdf
-    - mv "${OVERLEAF_ARTIFACTS_DIR}/RSVOptimization.pdf" .
-  artifacts:
-    name: "${CI_PROJECT_NAME}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-pdf"
-    paths:
-      - "RSVOptimization.pdf"
+      - output
