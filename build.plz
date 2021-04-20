@@ -130,6 +130,7 @@ genrule(
     name = "journal-tex",
     srcs = [
         "paper/export-nature-scirep.py",
+        "paper/preamble.tex",
     ],
     deps = [
         ":paper-tex",

@@ -1,6 +1,7 @@
 # Helper for exporting for Nature Scientific Reports
 # - Inlines bibliography
 # - Renames images to match the text order
+# - Inlines preamble.tex
 
 import re
 import sys
@@ -56,5 +57,12 @@ tex = re.sub(r'\\ref\{(suppfig:.*?)\}', lambda m: str(labels['supplementaryfigur
 
 # Inline the bibliography
 tex = re.sub(r'\\bibliography\{(.*)\}', lambda f: open(f'paper/{f.group(1)}.bbl').read(), tex)
+
+# Inline preamble
+tex = tex.replace('\input{preamble.tex}', open('paper/preamble.tex').read())
+
+# Trim some nonsense
+tex = re.sub(r'%%% (begin|end) knitr output', '', tex)
+tex = re.sub(r'(?s)\n\n+', '\n\n', tex)
 
 open(args.output, 'w').write(tex)

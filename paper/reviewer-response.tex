@@ -1,0 +1,84 @@
+\documentclass{article}
+\usepackage{markdown}
+\usepackage{csquotes}
+
+\setcounter{secnumdepth}{0}
+
+\begin{document}
+\begin{markdown*}{hybrid}
+
+To the Editor,
+
+We are pleased to submit the revision for our manuscript “Assessment and optimization of respiratory syncytial virus prophylaxis in Connecticut, 1996-2013” for consideration in Scientific Reports. We thank the reviewers for their feedback and have edited the manuscript to address their suggestions. Most of these changes are in the introduction, abstract, and discussion. Specific responses to their comments are below.
+
+## Reviewer 1
+
+\begin{displayquote}
+With interest I read the paper by Artin and colleagues describing spatial variation in RSV seasonality may be used to optimize RSV immunoprophylaxis. The authors analyzed the proportion of RSV-related hospitalizations when applying AAP guidelines at a state level or  county level in Connecticut from 1996-2013. They analyzed whether county-specific adjustment of immunoprophylaxis would improve palivizumab use. The results show that there are differences (up to one month) in county-specific RSV epidemiology, but that refinement of immunoprophylaxis only provide little added value over the current AAP guidelines which do not take into account local variation in RSV epidemiology. Apparently, applying the the AAP guidelines already covers 92-97\% (according to figure 5) of the preventable burden. The study is simple and reads well. It is relevant to the large audience of researchers and policy makers in the field of RSV prevention. The methods used are appropriate for the research question.
+\end{displayquote}
+
+Thank you for your positive feedback. 
+
+#### The paper would increase interest from an even broader audience when a paragraph in the discussion would be added in which the authors speculate how and where the results can be applied to have stronger impact than in Connecticut.
+
+We updated the discussion as requested. In particular, we added the following paragraph:
+
+"The method we developed for this analysis can be applied to county-level or state-level analysis of seasonal RSV patterns in other regions, some of which are likely to show a greater relative benefit (due to a greater degree of misalignment between the RSV season and the AAP guidelines' prophylaxis window) as well as a greater absolute benefit (due to population size) than Connecticut. In particular, states of the US Upper Midwest and Pacific Northwest would likely benefit more than Connecticut, due both to their later RSV season and to the greater county-to-county differences in RSV season timing in those states.\cite{Weinberger:2015hj} A similar approach is applicable to other interventions against RSV that are sensitive to timing, including maternal vaccines and novel chemoprophylaxis."
+
+##### 1. Are there US states in which a more impressive effect could be observed?
+
+Based on our prior work on ascertaining state- and county-level seasonality patterns of RSV, we might expect to see a larger benefit of diverging from the CDC recommended start dates in the Upper Midwest and Pacific Northwest\footnote{See https://pubmed.ncbi.nlm.nih.gov/25904370}. It is possible that local/county-level recommendations might be more beneficial in states with more heterogeneous epidemic timing. Unfortunately, we do not have access to local RSV epidemic data for other states. Applying the method introduced by this paper to RSV hospitalization data from other states would be a natural next step in our research. We have added comments about these points to the discussion, as noted above. 
+
+##### 2. Would there be applicability in low and middle income countries with acceptable surveillance? 
+
+Regardless of availability of surveillance, palivizumab is not widely used in LMIC settings due to its high cost. However, the same principles could apply to the use of cheaper or long-lasting prophylaxis and to the use of maternal vaccines, both of which would benefit from appropriate timing of the intervention. We have added a comment to the discussion about the general use of this approach for any intervention against RSV that depends on timing, regardless of context, and about the need for local surveillance data. 
+
+##### 3. Could syndromic surveillance in LMIC be sufficient to apply such local use of RSV immunoprophylaxis?
+
+Syndromic surveillance (e.g., for bronchiolitis) is often a good proxy for RSV activity and could therefore be used in a similar way in LMIC settings (potentially for different interventions, as mentioned in response #2).
+
+##### 4. Do the results have any relevance after upcoming introduction of nirsevimab?
+
+While the specific application discussed in the paper (palivizumab) will likely become less relevant, the principle of this study will still be useful, for example when considering the administration of maternal vaccines and nirsevimab. The guidelines for nirsevimab administration in infants may still include a component of seasonality, since clinical trials of nirsevimab have been limited to 150-day clinical endpoints\footnote{See https://www.nejm.org/doi/full/10.1056/NEJMoa1913556}. Likewise, administration of maternal vaccines might benefit from seasonal timing. Our method (as well as the R package we implemented to facilitate the use of that method in other research) will remain relevant and will likely be applicable to those questions.
+
+
+## Reviewer 2
+
+\begin{displayquote}
+“Artin et al. have examined the timing of the onset and offset dates for the use of palivizumab in the state of Connecticut. Palivizumab is used to treat infants with underlying conditions that predispose them to severe consequences of respiratory syncytial virus (RSV) infection during their first year of life. Current practice is to use the average numbers for the whole state. They found that the onset and offset of RSV season varies, depending on the county, with the larger counties reaching the threshold earlier than the less populous counties. They conclude that “initiating RSV prophylaxis based on state-level data may improve protection compared with the AAP recommendations. In Connecticut, county-level recommendations would provide only a modest additional benefit while adding complexity.”
+\end{displayquote}
+
+Thank you for your review and your feedback. 
+
+##### In the Abstract, a 1\% difference seems to be less than “modest”, as it is described.
+
+We have changed this to “minimal”.
+
+##### Abstract conclusion – Switch the order of the sentences so that the conclusion comes first, and the alternative comes last.
+
+We have reordered this as suggested.
+
+##### Introduction, first paragraph. RSV is also a problem for elders, causing 10,000 to 14,000 deaths/year in the US. It’s not the point of this report, but it is a major source of health problems caused by RSV. Could RSV from elders possibly be the source of the RSV in infants?
+
+The reviewer is correct to point out the burden of disease in the elderly. Also, adults in general, including elders, are a reservoir of RSV and transmission between adults and infants is a likely factor in epidemiology of RSV. However, as you remarked, this is not central to the topic of this paper, and therefore was not discussed. Nevertheless, we added a sentence about the importance of RSV in adults to the introduction. 
+
+##### Because Fairfield, the most populous county starts its RSV season before the less populous counties, the chances of preventing hospitalizations by palivizumab treatment is only 91.9\% effective while the treatment in the least populous county is 96.6\% effective because the state averages the RSV season start times by their initial cases. Using the Fairfield County numbers would seem to be the best idea because it would protect 5\% more infants. This would involve starting and ending the season based on the most populous county, because RSV always arrives a week earlier and ends a week and a half later, there. It should be used as a sentinel county.
+
+An excellent point. Based on this feedback, we performed a post-hoc analysis of our data using RSV season timing in Fairfield county to generate three additional state-wide propxhylaxis schedules: one based on the start of Fairfield county RSV season, one based on the midpoint of the season, and one based on the end of the season. We applied 1-, 2-, and 4-week rounding to each of those schedules, and calculated the protected fraction.
+
+We found that the schedules based on Fairfield county season timing are statistically indistinguishable from the schedules based on statewide season start and season midpoint. This is likely because the most populous Connecticut counties have similar RSV season timing similar to Fairfield county, and therefore schedules based on statewide timing are already similar to schedules based on Fairfield county timing. 
+
+We agree that using a schedule based on Fairfield country season start *and* end would confer a greater increase in protected fraction; however, that would increase the overall cost of prophylaxis because an additional dose would be necessary to cover both Fairfield county season start (1.35 weeks before statewide season start) and Fairfield county season end (1.38 weeks after statewide season end). This approach was therefore excluded from our analysis because we set out to optimize protection without increasing cost. 
+
+We have added a paragraph to the discussion highlighting these points. 
+
+##### Patients from the neighboring state, treated in Connecticut are not included in this analysis but they may well be the earlier harbingers of the RSV wave that enters the state and first appears in the most populous counties. Why wouldn’t they be included in this study? They might be the best sentinels if RSV is entering from even more populous counties in other states.
+
+The practical reason for excluding these cases is that only the ZIP code of residence (not the ZIP code of hospitalization) is present in the data available to us, and therefore attributing an out-of-state RSV case to a specific county in Connecticut is not easily accomplished. (This was significant because county-level analysis was our goal from the outset of this study.) Since only 2\% of RSV cases in our data were from the neighboring states, we elected to exclude those cases. 
+
+Furthermore, in our county-level analysis, we already had to combine low-population counties into one analysis group to obtain adequate statistical power, due to the low incidence of RSV in those counties. Out-of-state cases are even less common (likely because out-of-state cases are typically hospitalized out-of-state, even if they travel to CT during their illness), and therefore aren't captured in our data. Due to the low number of out-of-state cases hospitalized in-state, they would have presented a similar challenge in our analysis. 
+
+That said, we agree that out-of-state cases likely play a role as early indicators of RSV season onset, and — with a different study design — could be a valuable input into RSV immunoprophylaxis policy. 
+
+\end{markdown*}
+\end{document}
