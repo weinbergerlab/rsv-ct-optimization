@@ -45,7 +45,9 @@ tex = re.sub(r'(?s)(\\documentclass[^\\]*)\\[^\n]*\n.*%%% end knitr preamble', r
 
 # Migrate figure captions to end of main/supplementary text
 tex = re.sub(figRE, '', tex)
-lof = r"\section{List of figures}" + '\n\n'.join(fr"\textbf{{Figure {idx + 1}: }}{caption}" for (idx, caption) in enumerate(captions['figure']))
+lof = r"\section{List of figures}" + '\n\n'.join(fr"""\textbf{{Figure {idx + 1}: }}{caption}
+
+\em{{Figure created using \texttt{{ggplot2}} version 3.3.2}} (\url{{https://ggplot2.tidyverse.org}})""" for (idx, caption) in enumerate(captions['figure']))
 tex = re.sub(r'\\listoffigures', lambda m: lof, tex)
 
 supplof = r"\section{List of supplementary figures}" + '\n\n'.join(fr"\textbf{{Supplementary figure {idx + 1}: }}{caption}" for (idx, caption) in enumerate(captions['supplementaryfigure']))
